@@ -1,0 +1,5 @@
+out
+*.user
+*.sdf
+*.suo
+*.opensdf

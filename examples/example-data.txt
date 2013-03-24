@@ -1,0 +1,8 @@
+The examples need extra data not included in the repository.
+
+Download it here:
+http://seveninstall.googlecode.com/files/enwik8.7z
+
+To build the wix-msi example you need to extract enwik8.7z first.
+(This example uses the default CAB compression and was added for
+comparison purposes.)

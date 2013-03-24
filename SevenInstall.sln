@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SevenInstall", "SevenInstall.vcxproj", "{95576CCD-C55D-4444-8149-C85611AA51F5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CACE2A54-F3F7-4FC0-BEF9-26D4F9E17AB4} = {CACE2A54-F3F7-4FC0-BEF9-26D4F9E17AB4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7zip", "7zip.vcxproj", "{CACE2A54-F3F7-4FC0-BEF9-26D4F9E17AB4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95576CCD-C55D-4444-8149-C85611AA51F5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{95576CCD-C55D-4444-8149-C85611AA51F5}.Debug|Win32.Build.0 = Debug|Win32
+		{95576CCD-C55D-4444-8149-C85611AA51F5}.Release|Win32.ActiveCfg = Release|Win32
+		{95576CCD-C55D-4444-8149-C85611AA51F5}.Release|Win32.Build.0 = Release|Win32
+		{CACE2A54-F3F7-4FC0-BEF9-26D4F9E17AB4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CACE2A54-F3F7-4FC0-BEF9-26D4F9E17AB4}.Debug|Win32.Build.0 = Debug|Win32
+		{CACE2A54-F3F7-4FC0-BEF9-26D4F9E17AB4}.Release|Win32.ActiveCfg = Release|Win32
+		{CACE2A54-F3F7-4FC0-BEF9-26D4F9E17AB4}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

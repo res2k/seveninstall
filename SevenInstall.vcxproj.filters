@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\CodecRegister">
+      <UniqueIdentifier>{6936a96c-461d-4f99-9696-440087b75941}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Install.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArgsHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Extract.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtractCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InstalledFiles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Paths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Remove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Error.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Repair.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\Bcj2Register.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\BcjRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\BranchRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\BZip2Register.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\CopyRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\DeflateRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\DeltaFilter.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\Lzma2Register.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\LzmaRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\PpmdRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ArgsHelper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExitCode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Install.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Extract.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtractCallback.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InstalledFiles.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Paths.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Remove.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

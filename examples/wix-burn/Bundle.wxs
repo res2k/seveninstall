@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" 
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
+     xmlns:dep="http://schemas.microsoft.com/wix/DependencyExtension"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<Bundle Name="enwik8 compression test data (Burn)" Version="1.0.0.0" Manufacturer="Frank Richter" UpgradeCode="48d6e81b-b953-460c-bb69-04632114bfba">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense">
+      <bal:WixStandardBootstrapperApplication LicenseUrl="" />
+    </BootstrapperApplicationRef>
+
+    <Variable Name="InstallFolder" Type="string" Value="[ProgramFilesFolder][WixBundleName]" />
+
+    <?define ENWIK8_GUID="SevenInstall.Example.Burn" ?>
+    <!-- SevenInstall stores it's info in the Uninstall key, so it's suitable for a detect check
+         Note: 'Win64="yes"' is mandatory! -->
+    <util:RegistrySearch Id="Path"
+            Variable="enwik8Installed"
+            Root="HKLM"
+            Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(var.ENWIK8_GUID)"
+            Win64="yes"
+            Result="exists" />
+
+    <Chain>
+      <!-- Actually SevenInstall package definition. Notice the quoting on '-o' -->
+      <ExePackage SourceFile="..\..\out\Release\SevenInstall.exe"
+                  Name="packages\SevenInstall.exe"
+                  Id="enwik8"
+                  DetectCondition="enwik8Installed"
+                  InstallCommand="install -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot; packages\enwik8.7z"
+                  UninstallCommand="remove -g$(var.ENWIK8_GUID)"
+                  RepairCommand="repair -g$(var.ENWIK8_GUID) packages\enwik8.7z">
+        <!-- Here go the archives to install -->
+        <Payload SourceFile="../enwik8.7z"
+                 Name="packages\enwik8.7z" />
+        <dep:Provides Key="$(var.ENWIK8_GUID)" Version="1.0.0.0"/>
+      </ExePackage>
+      <!-- Tip: you can share SevenInstall.exe between multiple ExePackages
+           by using the same CacheId for each -->
+    </Chain>
+    <dep:Requires Id="req_enwik8" ProviderKey="$(var.ENWIK8_GUID)"/>
+	</Bundle>
+</Wix>

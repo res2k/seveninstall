@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{95576CCD-C55D-4444-8149-C85611AA51F5}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>SevenInstall</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110_xp</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)out\$(Configuration)\</OutDir>
+    <IntDir>out\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)out\$(Configuration)\</OutDir>
+    <IntDir>out\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_NO_CRYPTO;EXTRACT_ONLY</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>7zip\CPP;7zip\C</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);shlwapi.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_NO_CRYPTO;EXTRACT_ONLY</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>7zip\CPP;7zip\C</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\Bcj2Register.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\BcjRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\BranchRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\BZip2Register.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\CopyRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\DeflateRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\DeltaFilter.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\Lzma2Register.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\LzmaRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\PpmdRegister.cpp" />
+    <ClCompile Include="ArgsHelper.cpp" />
+    <ClCompile Include="Error.cpp" />
+    <ClCompile Include="Extract.cpp" />
+    <ClCompile Include="ExtractCallback.cpp" />
+    <ClCompile Include="Install.cpp" />
+    <ClCompile Include="InstalledFiles.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Paths.cpp" />
+    <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="Remove.cpp" />
+    <ClCompile Include="Repair.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Extract.hpp" />
+    <ClInclude Include="ArgsHelper.hpp" />
+    <ClInclude Include="ExitCode.hpp" />
+    <ClInclude Include="ExtractCallback.hpp" />
+    <ClInclude Include="Error.hpp" />
+    <ClInclude Include="Install.hpp" />
+    <ClInclude Include="InstalledFiles.hpp" />
+    <ClInclude Include="Paths.hpp" />
+    <ClInclude Include="Registry.hpp" />
+    <ClInclude Include="Remove.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="7zip.vcxproj">
+      <Project>{cace2a54-f3f7-4fc0-bef9-26d4f9e17ab4}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
