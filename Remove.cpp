@@ -18,23 +18,8 @@ std::wstring ReadRegistryListFilePath (const wchar_t* guid)
   {
     std::wstring keyPathUninstall (regPathUninstallInfo);
     keyPathUninstall.append (guid);
-    try
-    {
-      RegistryKey key (HKEY_LOCAL_MACHINE, keyPathUninstall.c_str(), key_access);
-      return key.ReadString (regValLogFileName);
-    }
-    catch (const HRESULTException& e)
-    {
-      if ((e.GetHR() == HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED))
-        || (e.GetHR() == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)))
-      {
-        // Try again with HKCU
-        RegistryKey key (HKEY_CURRENT_USER, keyPathUninstall.c_str(), key_access);
-        return key.ReadString (regValLogFileName);
-      }
-      else
-        throw;
-    }
+    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access);
+    return key.ReadString (regValLogFileName);
   }
 }
 
@@ -130,23 +115,8 @@ static size_t HasDependents (const wchar_t* regPath)
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
   try
   {
-    try
-    {
-      RegistryKey key (HKEY_LOCAL_MACHINE, regPath, key_access);
-      return key.NumSubkeys();
-    }
-    catch (const HRESULTException& e)
-    {
-      if ((e.GetHR() == HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED))
-        || (e.GetHR() == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)))
-      {
-        // Try again with HKCU
-        RegistryKey key (HKEY_CURRENT_USER, regPath, key_access);
-        return key.NumSubkeys();
-      }
-      else
-        throw;
-    }
+    AutoRootRegistryKey key (regPath, key_access);
+    return key.NumSubkeys();
   }
   catch (const HRESULTException& e)
   {

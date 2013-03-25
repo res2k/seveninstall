@@ -8,13 +8,6 @@
 #include "Paths.hpp"
 #include "Registry.hpp"
 
-static void WriteToRegistry (RegistryKey& key, const InstalledFilesWriter& list, const wchar_t* directory)
-{
-  key.WriteString (regValLogFileName, list.GetLogFileName());
-  key.WriteString (regValInstallDir, directory);
-  key.WriteDWORD (L"SystemComponent", 1);
-}
-
 // TODO: Move somewhere else...
 void WriteToRegistry (const wchar_t* guid, const InstalledFilesWriter& list, const wchar_t* directory)
 {
@@ -22,42 +15,17 @@ void WriteToRegistry (const wchar_t* guid, const InstalledFilesWriter& list, con
   {
     std::wstring keyPathUninstall (regPathUninstallInfo);
     keyPathUninstall.append (guid);
-    try
-    {
-      RegistryKey key (HKEY_LOCAL_MACHINE, keyPathUninstall.c_str(), key_access, RegistryKey::Create);
-      WriteToRegistry (key, list, directory);
-    }
-    catch (const HRESULTException& e)
-    {
-      if (e.GetHR() == HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED))
-      {
-        // Try again with HKCU
-        RegistryKey key (HKEY_CURRENT_USER, keyPathUninstall.c_str(), key_access, RegistryKey::Create);
-        WriteToRegistry (key, list, directory);
-      }
-      else
-        throw;
-    }
+    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access, RegistryKey::Create);
+    key.WriteString (regValLogFileName, list.GetLogFileName());
+    key.WriteString (regValInstallDir, directory);
+    key.WriteDWORD (L"SystemComponent", 1);
   }
   {
     std::wstring keyPathDependencies (regPathDependencyInfo);
     keyPathDependencies.append (guid);
-    try
-    {
-      RegistryKey key (HKEY_LOCAL_MACHINE, keyPathDependencies.c_str(), key_access, RegistryKey::Create);
-      // DisplayName?
-      // Version?
-    }
-    catch (const HRESULTException& e)
-    {
-      if (e.GetHR() == HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED))
-      {
-        // Try again with HKCU
-        RegistryKey key (HKEY_CURRENT_USER, keyPathDependencies.c_str(), key_access, RegistryKey::Create);
-      }
-      else
-        throw;
-    }
+    AutoRootRegistryKey key (keyPathDependencies.c_str(), key_access, RegistryKey::Create);
+    // DisplayName?
+    // Version?
   }
 }
 

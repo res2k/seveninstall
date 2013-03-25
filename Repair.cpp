@@ -18,23 +18,8 @@ static std::wstring ReadRegistryOutputDir (const wchar_t* guid)
   {
     std::wstring keyPathUninstall (regPathUninstallInfo);
     keyPathUninstall.append (guid);
-    try
-    {
-      RegistryKey key (HKEY_LOCAL_MACHINE, keyPathUninstall.c_str(), key_access);
-      return key.ReadString (regValInstallDir);
-    }
-    catch (const HRESULTException& e)
-    {
-      if ((e.GetHR() == HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED))
-        || (e.GetHR() == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)))
-      {
-        // Try again with HKCU
-        RegistryKey key (HKEY_CURRENT_USER, keyPathUninstall.c_str(), key_access);
-        return key.ReadString (regValInstallDir);
-      }
-      else
-        throw;
-    }
+    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access);
+    return key.ReadString (regValInstallDir);
   }
 }
 
