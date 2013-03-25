@@ -71,3 +71,42 @@ size_t RegistryKey::NumSubkeys ()
   CHECK_HR(HRESULT_FROM_WIN32(err));
   return numSubKeys;
 }
+
+//---------------------------------------------------------------------------
+
+AutoRootRegistryKey::AutoRootRegistryKey (const wchar_t* key, REGSAM access)
+{
+  try
+  {
+    new (&wrappedKey) RegistryKey (HKEY_LOCAL_MACHINE, key, access);
+  }
+  catch (const HRESULTException& e)
+  {
+    if ((e.GetHR() == HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED))
+        || (e.GetHR() == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)))
+    {
+      // Try again with HKCU
+      new (&wrappedKey) RegistryKey (HKEY_CURRENT_USER, key, access);
+    }
+    else
+      throw;
+  }
+}
+
+AutoRootRegistryKey::AutoRootRegistryKey (const wchar_t* key, REGSAM access, CreateTag& tag)
+{
+  try
+  {
+    new (&wrappedKey) RegistryKey (HKEY_LOCAL_MACHINE, key, access, RegistryKey::Create);
+  }
+  catch (const HRESULTException& e)
+  {
+    if (e.GetHR() == HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED))
+    {
+      // Try again with HKCU
+      new (&wrappedKey) RegistryKey (HKEY_CURRENT_USER, key, access, RegistryKey::Create);
+    }
+    else
+      throw;
+  }
+}
