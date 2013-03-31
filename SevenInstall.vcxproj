@@ -99,6 +99,7 @@
     <ClCompile Include="7zip\CPP\7zip\Compress\LzmaRegister.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\PpmdRegister.cpp" />
     <ClCompile Include="ArgsHelper.cpp" />
+    <ClCompile Include="CommonArgs.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Extract.cpp" />
     <ClCompile Include="ExtractCallback.cpp" />
@@ -111,6 +112,7 @@
     <ClCompile Include="Repair.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommonArgs.hpp" />
     <ClInclude Include="Extract.hpp" />
     <ClInclude Include="ArgsHelper.hpp" />
     <ClInclude Include="ExitCode.hpp" />
