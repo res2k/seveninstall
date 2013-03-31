@@ -39,21 +39,21 @@ static void EnsureDirectoriesExist (const wchar_t* fullPath)
 /// Enable file system compression on the given path
 static void SetCompression (const wchar_t* path)
 {
-	HANDLE hFile (CreateFileW (path,  GENERIC_READ | GENERIC_WRITE,
-							   FILE_SHARE_READ | FILE_SHARE_WRITE,
-							   nullptr, OPEN_EXISTING,
-							   FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
-	if (hFile == INVALID_HANDLE_VALUE)
-	{
-		// Ignore errors
-		return;
-	}
-	USHORT compressionState (COMPRESSION_FORMAT_DEFAULT);
-	DWORD bytesReturned;
-	DeviceIoControl (hFile, FSCTL_SET_COMPRESSION, &compressionState, sizeof (compressionState),
-					 nullptr, 0, &bytesReturned, nullptr);
-	// Again, don't really care if it succeeded or not.
-	CloseHandle (hFile);
+  HANDLE hFile (CreateFileW (path,  GENERIC_READ | GENERIC_WRITE,
+			      FILE_SHARE_READ | FILE_SHARE_WRITE,
+			      nullptr, OPEN_EXISTING,
+			      FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
+  if (hFile == INVALID_HANDLE_VALUE)
+  {
+    // Ignore errors
+    return;
+  }
+  USHORT compressionState (COMPRESSION_FORMAT_DEFAULT);
+  DWORD bytesReturned;
+  DeviceIoControl (hFile, FSCTL_SET_COMPRESSION, &compressionState, sizeof (compressionState),
+		    nullptr, 0, &bytesReturned, nullptr);
+  // Again, don't really care if it succeeded or not.
+  CloseHandle (hFile);
 }
 
 std::wstring InstallLogFile (const wchar_t* guid)
