@@ -1,6 +1,7 @@
 #include "Remove.hpp"
 
 #include "ArgsHelper.hpp"
+#include "CommonArgs.hpp"
 #include "ExitCode.hpp"
 #include "Error.hpp"
 #include "InstalledFiles.hpp"
@@ -133,10 +134,12 @@ int DoRemove (int argc, const wchar_t* const argv[])
   const wchar_t* guid (nullptr);
 
   ArgsHelper args (argc, argv);
-  if (!args.GetOption (L"-g", guid) || (wcslen (guid) == 0))
   {
-    wprintf (L"'-g<GUID>' argument is required\n");
-    return ecArgsError;
+    CommonArgs commonArgs (args);
+    if (!commonArgs.GetGUID (guid))
+    {
+      return ecArgsError;
+    }
   }
 
   try

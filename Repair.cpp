@@ -1,6 +1,7 @@
 #include "Repair.hpp"
 
 #include "ArgsHelper.hpp"
+#include "CommonArgs.hpp"
 #include "Error.hpp"
 #include "ExitCode.hpp"
 #include "Extract.hpp"
@@ -30,10 +31,12 @@ int DoRepair (int argc, const wchar_t* const argv[])
   std::vector<const wchar_t*> archives;
 
   ArgsHelper args (argc, argv);
-  if (!args.GetOption (L"-g", guid) || (wcslen (guid) == 0))
   {
-    wprintf (L"'-g<GUID>' argument is required\n");
-    return ecArgsError;
+    CommonArgs commonArgs (args);
+    if (!commonArgs.GetGUID (guid))
+    {
+      return ecArgsError;
+    }
   }
   args.GetFreeArgs (archives);
   if (archives.empty())
