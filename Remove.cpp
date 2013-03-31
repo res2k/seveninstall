@@ -6,6 +6,7 @@
 #include "InstalledFiles.hpp"
 #include "Paths.hpp"
 #include "Registry.hpp"
+#include "Repair.hpp"
 
 #include <algorithm>
 
@@ -180,6 +181,15 @@ int DoRemove (int argc, const wchar_t* const argv[])
         {
           removeHelper.ScheduleRemove (installedFile.c_str());
         }
+      }
+
+      // Handle request for output dir removal
+      if (args.GetOption (L"-r"))
+      {
+        // Grab previously used output directory
+        std::wstring outputDir (ReadRegistryOutputDir (guid));
+        // Schedule for removal
+        removeHelper.ScheduleRemove (outputDir.c_str());
       }
       removeHelper.FlushDelayed();
     }

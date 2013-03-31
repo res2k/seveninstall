@@ -66,8 +66,6 @@ int DoInstall (int argc, const wchar_t* const argv[])
       std::vector<std::wstring> extractedFiles;
       // Extract archives
       Extract (archives, out_dir, extractedFiles);
-      // Add output dir to list so it'll get deleted on uninstall
-      extractedFiles.push_back (out_dir);
       // Actually write list
       listWriter.AddEntries (extractedFiles);
       // Record install in registry

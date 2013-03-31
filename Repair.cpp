@@ -12,7 +12,8 @@
 
 #include <unordered_set>
 
-static std::wstring ReadRegistryOutputDir (const wchar_t* guid)
+// TODO: Move somewhere else...
+std::wstring ReadRegistryOutputDir (const wchar_t* guid)
 {
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
   {

@@ -50,6 +50,7 @@ int wmain (int argc, const wchar_t* const argv[])
         remove -g<GUID> [--ignore-dependents]
          - Uninstall previously installed files
          - --ignore-dependents - ignore registry dependency infos
+         - -r - Remove output directory used at install time
 
      TODO: extract
          - no logging
