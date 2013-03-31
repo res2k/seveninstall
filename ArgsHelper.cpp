@@ -26,7 +26,7 @@ ArgsHelper::ArgsHelper (int argc, const wchar_t* const argv[])
     }
 }
 
-bool ArgsHelper::GetOption (const wchar_t* prefix, const wchar_t*& value)
+bool ArgsHelper::GetOption (const wchar_t* prefix, const wchar_t*& value) const
 {
     OptionsMapType::const_iterator opt (options.find (prefix));
     if (opt == options.end()) return false;
@@ -34,13 +34,13 @@ bool ArgsHelper::GetOption (const wchar_t* prefix, const wchar_t*& value)
     return true;
 }
 
-bool ArgsHelper::GetOption (const wchar_t* option)
+bool ArgsHelper::GetOption (const wchar_t* option) const
 {
     OptionsMapType::const_iterator opt (options.find (option));
     return opt != options.end();
 }
 
-void ArgsHelper::GetFreeArgs (std::vector<const wchar_t*>& args)
+void ArgsHelper::GetFreeArgs (std::vector<const wchar_t*>& args) const
 {
     args = freeArgs;
 }
