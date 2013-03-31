@@ -63,7 +63,7 @@ std::wstring InstallLogFile (const wchar_t* guid)
   EnsureDirectoriesExist (logFilePath.c_str());
   SetCompression (logFilePath.c_str());
   logFilePath.append (L"\\");
-  // FIXME: This is probably too much trust in the GUID string.
+  // We trust the GUID string since it has supposedly passed VerifyGUID() earlier.
   logFilePath.append (guid);
   logFilePath.append (L".txt");
   return logFilePath;

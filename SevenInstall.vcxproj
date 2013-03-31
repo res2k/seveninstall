@@ -103,6 +103,7 @@
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Extract.cpp" />
     <ClCompile Include="ExtractCallback.cpp" />
+    <ClCompile Include="GUID.cpp" />
     <ClCompile Include="Install.cpp" />
     <ClCompile Include="InstalledFiles.cpp" />
     <ClCompile Include="main.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="ExitCode.hpp" />
     <ClInclude Include="ExtractCallback.hpp" />
     <ClInclude Include="Error.hpp" />
+    <ClInclude Include="GUID.hpp" />
     <ClInclude Include="Install.hpp" />
     <ClInclude Include="InstalledFiles.hpp" />
     <ClInclude Include="Paths.hpp" />
