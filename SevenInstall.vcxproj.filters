@@ -116,5 +116,8 @@
     <ClInclude Include="Error.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Repair.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -121,6 +121,7 @@
     <ClInclude Include="Paths.hpp" />
     <ClInclude Include="Registry.hpp" />
     <ClInclude Include="Remove.hpp" />
+    <ClInclude Include="Repair.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="7zip.vcxproj">
