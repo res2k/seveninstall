@@ -13,8 +13,7 @@ bool VerifyGUID (const wchar_t* guid)
   while ((ch = *guid++) != 0)
   {
     if (ch >= 128) return false;
-    if (!IsCharAlphaNumericW (ch)) return false;
-    if (!wcschr (guidAllowedSpecial, ch)) return false;
+    if (!IsCharAlphaNumericW (ch) && !wcschr (guidAllowedSpecial, ch)) return false;
   }
   return true;
 }
