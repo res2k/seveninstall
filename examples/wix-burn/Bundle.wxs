@@ -34,8 +34,6 @@
                  Name="packages\enwik8.7z" />
         <dep:Provides Key="$(var.ENWIK8_GUID)" Version="1.0.0.0"/>
       </ExePackage>
-      <!-- Tip: you can share SevenInstall.exe between multiple ExePackages
-           by using the same CacheId for each -->
     </Chain>
     <dep:Requires Id="req_enwik8" ProviderKey="$(var.ENWIK8_GUID)"/>
 	</Bundle>
