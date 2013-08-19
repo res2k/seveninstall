@@ -11,6 +11,7 @@
 #include "Registry.hpp"
 #include "Remove.hpp"
 
+#include <memory>
 #include <unordered_set>
 
 // TODO: Move somewhere else...
@@ -58,9 +59,18 @@ int DoRepair (int argc, const wchar_t* const argv[])
 
     // Get list of previously installed files
     std::wstring listFilePath (ReadRegistryListFilePath (guid));
-    InstalledFilesReader listReader (listFilePath.c_str());
+    std::unique_ptr<InstalledFilesReader> listReader;
+    try
+    {
+      listReader.reset (new InstalledFilesReader (listFilePath.c_str()));
+    }
+    catch(...)
+    {
+      // Ignore any errors; just means no 'old' files can be removed
+    }
 
     // Remove all files that were in the old set, but have not been extracted this time
+    if (listReader)
     {
       std::unordered_set<std::wstring> extractedFilesSet;
       extractedFilesSet.insert (extractedFiles.begin(), extractedFiles.end());
@@ -68,7 +78,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
         RemoveHelper removeHelper;
 
         std::wstring installedFile;
-        while (!(installedFile = listReader.GetFileName()).empty())
+        while (!(installedFile = listReader->GetFileName()).empty())
         {
           // TODO: Should canonicalize file name
           if (extractedFilesSet.find (installedFile) == extractedFilesSet.end())
