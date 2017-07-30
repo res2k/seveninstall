@@ -1,3 +1,4 @@
+/*** This file is based on code from 7zip ***/
 // ExtractCallback.cpp
 
 #include "ExtractCallback.hpp"

@@ -1,3 +1,5 @@
+/*** This file is based on code from 7zip ***/
+
 #include "Extract.hpp"
 #include "Common/MyInitGuid.h" // Must be placed before any header originating from 7zip 
 
