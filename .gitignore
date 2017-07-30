@@ -3,3 +3,4 @@ out
 *.sdf
 *.suo
 *.opensdf
+/.vs
