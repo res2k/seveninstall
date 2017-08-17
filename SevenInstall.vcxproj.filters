@@ -94,6 +94,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="support\downlevel_locale.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\printf.cpp">
       <Filter>support</Filter>
     </ClCompile>
   </ItemGroup>

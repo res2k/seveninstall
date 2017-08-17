@@ -117,6 +117,7 @@
     <ClCompile Include="Remove.cpp" />
     <ClCompile Include="Repair.cpp" />
     <ClCompile Include="support\downlevel_locale.cpp" />
+    <ClCompile Include="support\printf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonArgs.hpp" />

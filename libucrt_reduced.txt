@@ -8,3 +8,5 @@ locale_initializer.obj
 ___acrt_locale_terminator
 -x
 lcidtoname_downlevel.obj
+-x
+output.obj
