@@ -16,6 +16,9 @@
     <Filter Include="Source Files\CodecRegister">
       <UniqueIdentifier>{6936a96c-461d-4f99-9696-440087b75941}</UniqueIdentifier>
     </Filter>
+    <Filter Include="support">
+      <UniqueIdentifier>{3f8ef7d6-0b4c-4735-ba3e-5a21abf58669}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -90,6 +93,9 @@
     <ClCompile Include="GUID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="support\downlevel_locale.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -131,5 +137,9 @@
     <ClInclude Include="GUID.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="out\Release\libucrt_reduced.lib" />
+    <CustomBuild Include="out\Debug\libucrtd_reduced.lib" />
   </ItemGroup>
 </Project>

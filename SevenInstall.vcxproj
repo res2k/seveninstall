@@ -64,6 +64,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);shlwapi.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
+      <IgnoreSpecificDefaultLibraries>libucrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -87,6 +88,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
+      <IgnoreSpecificDefaultLibraries>libucrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -114,6 +116,7 @@
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="Remove.cpp" />
     <ClCompile Include="Repair.cpp" />
+    <ClCompile Include="support\downlevel_locale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonArgs.hpp" />
@@ -134,6 +137,24 @@
     <ProjectReference Include="7zip.vcxproj">
       <Project>{cace2a54-f3f7-4fc0-bef9-26d4f9e17ab4}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="out\Release\libucrt_reduced.lib">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">set UCRT_VERSION=10.0.15063.0
+python build\reassemble-lib.py "$(UniversalCRTSdkDir)Lib\%UCRT_VERSION%\ucrt\x86\libucrt.lib" -o "$(OutDir)libucrt_reduced.lib" -X ___acrt_multibyte_initializer -x multibyte_initializer.obj -x locale_initializer.obj -X ___acrt_locale_terminator -x lcidtoname_downlevel.obj</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating reduced libucrt</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)libucrt_reduced.lib</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86\libucrt.lib</AdditionalInputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="out\Debug\libucrtd_reduced.lib">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">set UCRT_VERSION=10.0.15063.0
+python build\reassemble-lib.py "$(UniversalCRTSdkDir)Lib\%UCRT_VERSION%\ucrt\x86\libucrtd.lib" -o "$(OutDir)libucrtd_reduced.lib" -X ___acrt_multibyte_initializer -x multibyte_initializer.obj -x locale_initializer.obj -X ___acrt_locale_terminator -x lcidtoname_downlevel.obj</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating reduced libucrtd</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)libucrtd_reduced.lib</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86\libucrtd.lib</AdditionalInputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
