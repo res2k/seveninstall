@@ -4,3 +4,4 @@ out
 *.suo
 *.opensdf
 /.vs
+/.vscode
