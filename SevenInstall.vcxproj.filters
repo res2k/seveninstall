@@ -63,19 +63,7 @@
     <ClCompile Include="7zip\CPP\7zip\Compress\BcjRegister.cpp">
       <Filter>Source Files\CodecRegister</Filter>
     </ClCompile>
-    <ClCompile Include="7zip\CPP\7zip\Compress\BranchRegister.cpp">
-      <Filter>Source Files\CodecRegister</Filter>
-    </ClCompile>
-    <ClCompile Include="7zip\CPP\7zip\Compress\BZip2Register.cpp">
-      <Filter>Source Files\CodecRegister</Filter>
-    </ClCompile>
     <ClCompile Include="7zip\CPP\7zip\Compress\CopyRegister.cpp">
-      <Filter>Source Files\CodecRegister</Filter>
-    </ClCompile>
-    <ClCompile Include="7zip\CPP\7zip\Compress\DeflateRegister.cpp">
-      <Filter>Source Files\CodecRegister</Filter>
-    </ClCompile>
-    <ClCompile Include="7zip\CPP\7zip\Compress\DeltaFilter.cpp">
       <Filter>Source Files\CodecRegister</Filter>
     </ClCompile>
     <ClCompile Include="7zip\CPP\7zip\Compress\Lzma2Register.cpp">
