@@ -38,7 +38,6 @@
 #include "printf.hpp"
 
 #include "printf_impl/CharBufferSink.hpp"
-#include "printf_impl/FileSink.hpp"
 #include "printf_impl/HandleSink.hpp"
 #include "printf_impl/WCharBufferSink.hpp"
 #include "printf_impl/parsers.hpp"
@@ -76,18 +75,34 @@ extern "C" int __stdio_common_vfprintf (uint64_t options, FILE* file, const char
 {
     CHECK_PARAM(file, EINVAL, -1);
     CHECK_PARAM(format, EINVAL, -1);
+    CHECK_PARAM((file == stdout) || (file == stderr), EINVAL, -1);
 
-    printf_impl::FileSink sink (file);
-    return printf_impl::print (sink, format, args);
+    if ((file == stdout) || (file == stderr))
+    {
+        HANDLE h = GetStdHandle ((file == stdout) ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
+        CHECK_PARAM(h != INVALID_HANDLE_VALUE, EBADF, -1);
+        printf_impl::HandleSink sink (h);
+        return printf_impl::print (sink, format, args);
+    }
+
+    return -1;
 }
 
 extern "C" int __stdio_common_vfwprintf (uint64_t options, FILE* file, const wchar_t* format, _locale_t locale, va_list args)
 {
     CHECK_PARAM(file, EINVAL, -1);
     CHECK_PARAM(format, EINVAL, -1);
+    CHECK_PARAM((file == stdout) || (file == stderr), EINVAL, -1);
 
-    printf_impl::FileSink sink (file);
-    return printf_impl::print (sink, format, args);
+    if ((file == stdout) || (file == stderr))
+    {
+        HANDLE h = GetStdHandle ((file == stdout) ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
+        CHECK_PARAM(h != INVALID_HANDLE_VALUE, EBADF, -1);
+        printf_impl::HandleSink sink (h);
+        return printf_impl::print (sink, format, args);
+    }
+
+    return -1;
 }
 
 extern "C" int __stdio_common_vsprintf_s (uint64_t options, char* buffer, size_t bufferCount, const char* format, _locale_t locale, va_list argptr)
