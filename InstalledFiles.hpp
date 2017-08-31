@@ -45,7 +45,7 @@
 class InstalledFilesWriter
 {
   std::wstring logFileName;
-  FILE* file;
+  HANDLE file;
 public:
   InstalledFilesWriter (const wchar_t* guid);
   ~InstalledFilesWriter ();
@@ -60,7 +60,11 @@ public:
 /// Read an installed files list.
 class InstalledFilesReader
 {
-  FILE* file;
+  HANDLE file;
+  bool eof = false;
+  char buf[256];
+  char* buf_p = nullptr;
+  char* buf_end = nullptr;
 
   std::wstring GetLine();
 public:

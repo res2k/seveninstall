@@ -34,96 +34,137 @@
 #include "Error.hpp"
 #include "Paths.hpp"
 
+#include "support/printf.hpp"
+
 static const wchar_t logHeader[] = L"; SevenInstall";
 
-InstalledFilesWriter::InstalledFilesWriter (const wchar_t* guid) : file (nullptr)
+InstalledFilesWriter::InstalledFilesWriter (const wchar_t* guid) : file (INVALID_HANDLE_VALUE)
 {
   logFileName = InstallLogFile (guid);
-  file = _wfopen (logFileName.c_str(), L"w, ccs=UTF-8");
-  if (!file)
+  file = CreateFileW (logFileName.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+  if (file == INVALID_HANDLE_VALUE)
   {
     THROW_HR(HRESULT_FROM_WIN32(GetLastError()));
   }
   else
   {
-    fwprintf (file, L"%ls\n", logHeader);
+    Hwprintf (file, L"%ls\n", logHeader);
   }
 }
 
 InstalledFilesWriter::~InstalledFilesWriter ()
 {
-  if (file) fclose (file);
+  if (file != INVALID_HANDLE_VALUE) CloseHandle (file);
 }
 
 void InstalledFilesWriter::AddEntries (const std::vector<std::wstring>& fullPaths)
 {
-  if (file)
+  if (file != INVALID_HANDLE_VALUE)
   {
     for (const std::wstring& fullPath : fullPaths)
-      fwprintf (file, L"%ls\n", fullPath.c_str());
+      Hwprintf (file, L"%ls\n", fullPath.c_str());
   }
 }
 
 void InstalledFilesWriter::Discard ()
 {
-  if (file)
+  if (file != INVALID_HANDLE_VALUE)
   {
-    fclose (file);
-    file = nullptr;
+    CloseHandle (file);
+    file = INVALID_HANDLE_VALUE;
   }
-  struct _stat64 stat_buf;
-  if (_wstat64 (logFileName.c_str(), &stat_buf) == 0)
-    _wunlink (logFileName.c_str());
+  DeleteFileW (logFileName.c_str());
 }
 
 //---------------------------------------------------------------------------
 
-InstalledFilesReader::InstalledFilesReader (const wchar_t* filename) : file (nullptr)
+InstalledFilesReader::InstalledFilesReader (const wchar_t* filename) : file (INVALID_HANDLE_VALUE)
 {
-  file = _wfopen (filename, L"r, ccs=UTF-8");
-  if (!file)
+  file = CreateFileW (filename, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+  if (file == INVALID_HANDLE_VALUE)
   {
     THROW_HR(HRESULT_FROM_WIN32(GetLastError()));
+  }
+  // Skip BOM, if present
+  char bom_buf[3];
+  DWORD bytes_read = 0;
+  if (!ReadFile (file, bom_buf, sizeof (bom_buf), &bytes_read, nullptr)
+      || (bytes_read != 3)
+      || (bom_buf[0] != 0xef)
+      || (bom_buf[1] != 0xbb)
+      || (bom_buf[2] != 0xbf))
+  {
+    SetFilePointer (file, 0, nullptr, FILE_BEGIN);
   }
 }
 
 InstalledFilesReader::~InstalledFilesReader ()
 {
-  if (file) fclose (file);
+  if (file != INVALID_HANDLE_VALUE) CloseHandle (file);
 }
 
 std::wstring InstalledFilesReader::GetLine()
 {
-  if (!file)
+  if (file == INVALID_HANDLE_VALUE)
     THROW_HR(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
-  std::wstring line;
-  wchar_t buf[256];
+
+  std::string utf8_line;
 
   bool eol (false);
   while (!eol)
   {
-    if (!fgetws (buf, sizeof(buf)/sizeof(buf[0]), file))
+    if ((buf_p >= buf_end) && !eof)
     {
-      if (feof (file)) return line;
-      THROW_HR(HRESULT_FROM_WIN32(GetLastError()));
+      DWORD bytes_read = 0;
+      if (ReadFile (file, buf, sizeof (buf), &bytes_read, nullptr))
+      {
+        buf_p = buf;
+        buf_end = buf_p + bytes_read;
+        if (bytes_read == 0)
+        {
+          // EOF.
+          eof = true;
+          buf_p = buf_end = nullptr;
+        }
+      }
     }
-    size_t n (wcslen (buf));
-    if (n == 0) break;
-    if (buf[n-1] == '\n')
+    if (eof) break;
+
+    auto newline_pos = reinterpret_cast<char*> (memchr (buf_p, '\n', buf_end - buf_p));
+    if (newline_pos)
     {
-      buf[--n] = 0;
+      *newline_pos = 0;
+      utf8_line.append (buf_p);
+      buf_p = newline_pos + 1;
       eol = true;
     }
-    line.append (buf);
+    else
+    {
+      utf8_line.append (buf, buf_end - buf_p);
+      buf_p = buf_end;
+    }
   }
+
+  // Remove trailing CR
+  if ((utf8_line.size() > 0) && (utf8_line[utf8_line.size()-1] == '\r')) utf8_line.resize (utf8_line.size() - 1);
+
+  std::wstring line;
+  // Convert line from UTF-8 to wide char
+  int buf_req = MultiByteToWideChar (CP_UTF8, 0, utf8_line.data(), utf8_line.size(), nullptr, 0);
+  if (buf_req == 0) return std::wstring();
+  line.resize (buf_req, 0);
+  int ret = -1;
+  MultiByteToWideChar (CP_UTF8, 0, utf8_line.data (), utf8_line.size (),
+                       const_cast<wchar_t*> (line.data()), line.size());
+
   return line;
 }
 
 std::wstring InstalledFilesReader::GetFileName()
 {
-  if (!file) return std::wstring();
+  if (file == INVALID_HANDLE_VALUE) return std::wstring();
 
-  while (!feof (file))
+  while (!eof)
   {
     std::wstring line (GetLine());
     if (line.empty() || (line[0] == ';')) continue;
