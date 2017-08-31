@@ -35,8 +35,11 @@
  * - no positional argument support
  */
 
+#include "printf.hpp"
+
 #include "printf_impl/CharBufferSink.hpp"
 #include "printf_impl/FileSink.hpp"
+#include "printf_impl/HandleSink.hpp"
 #include "printf_impl/WCharBufferSink.hpp"
 #include "printf_impl/parsers.hpp"
 #include "printf_impl/print.hpp"
@@ -174,4 +177,36 @@ extern "C" int __stdio_common_vsnwprintf_s (uint64_t options, wchar_t* buffer, s
         CHECK_PARAM(buffer_too_small && (count != _TRUNCATE), ERANGE, -1);
     }
     return ret;
+}
+
+int Hwprintf (HANDLE handle, const wchar_t* format, ...)
+{
+    CHECK_PARAM(handle != INVALID_HANDLE_VALUE, EINVAL, -1);
+    CHECK_PARAM(format, EINVAL, -1);
+
+    printf_impl::HandleSink sink (handle);
+    va_list args;
+    va_start (args, format);
+    int ret = printf_impl::print (sink, format, args);
+    va_end (args);
+
+    return ret;
+}
+
+int vHprintf (HANDLE handle, const wchar_t* format, va_list args)
+{
+    CHECK_PARAM(handle != INVALID_HANDLE_VALUE, EINVAL, -1);
+    CHECK_PARAM(format, EINVAL, -1);
+
+    printf_impl::HandleSink sink (handle);
+    return printf_impl::print (sink, format, args);
+}
+
+int vHwprintf (HANDLE handle, const wchar_t* format, va_list args)
+{
+    CHECK_PARAM(handle != INVALID_HANDLE_VALUE, EINVAL, -1);
+    CHECK_PARAM(format, EINVAL, -1);
+
+    printf_impl::HandleSink sink (handle);
+    return printf_impl::print (sink, format, args);
 }

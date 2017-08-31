@@ -152,6 +152,9 @@
     <ClInclude Include="support\printf_impl\WCharBufferSink.hpp">
       <Filter>support\printf_impl</Filter>
     </ClInclude>
+    <ClInclude Include="support\printf_impl\HandleSink.hpp">
+      <Filter>support\printf_impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="out\Release\libucrt_reduced.lib" />

@@ -131,6 +131,7 @@
     <ClInclude Include="Repair.hpp" />
     <ClInclude Include="support\printf_impl\CharBufferSink.hpp" />
     <ClInclude Include="support\printf_impl\FileSink.hpp" />
+    <ClInclude Include="support\printf_impl\HandleSink.hpp" />
     <ClInclude Include="support\printf_impl\parsers.hpp" />
     <ClInclude Include="support\printf_impl\print.hpp" />
     <ClInclude Include="support\printf_impl\printer.hpp" />
