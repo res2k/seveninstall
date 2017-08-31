@@ -51,34 +51,16 @@ namespace printf_impl
 
         int operator()(const wchar_t* s, int n) override
         {
-            const wchar_t* input = s;
-            const wchar_t* input_end = s + n;
-            mbstate_t mbs = mbstate_t ();
-            int num_written = 0;
-
-            while ((input < input_end) && (buf_p + 1 < buf_end))
+            int buf_req = WideCharToMultiByte  (CP_ACP, 0, s, n, nullptr, 0, nullptr, nullptr);
+            if (buf_req == 0) return -1;
+            auto buf = static_cast<char*> (_malloca (buf_req));
+            int ret = -1;
+            if (WideCharToMultiByte (CP_ACP, 0, s, n, buf, buf_req, nullptr, nullptr) != 0)
             {
-                size_t conv_res;
-                wcrtomb_s (&conv_res, buf_p, buf_end - (buf_p + 1), *input, &mbs);
-                if (conv_res == (size_t)-1)
-                {
-                    // Encoding error
-                    *buf_p++ = '?';
-                    input++;
-                    mbs = mbstate_t ();
-                    num_written++;
-                }
-                else
-                {
-                    // Input was consumed, output generated
-                    buf_p += conv_res;
-                    input++;
-                    num_written += conv_res;
-                }
+                ret = operator()(buf, buf_req);
             }
-            overflow |= (buf_p + 1 == buf_end);
-            auto num_converted = input - s;
-            return (num_converted >= n) ? num_written : -1;
+            _freea (buf);
+            return ret;
         }
 
         int operator()(const char* s, int n) override

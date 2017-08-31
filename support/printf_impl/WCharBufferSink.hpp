@@ -64,49 +64,16 @@ namespace printf_impl
 
         int operator()(const char* s, int n) override
         {
-            const char* input = s;
-            const char* input_end = s + n;
-            mbstate_t mbs = mbstate_t ();
-            int num_written = 0;
-
-            while ((input < input_end) && (buf_p + 1 < buf_end))
+            int buf_req = MultiByteToWideChar (CP_ACP, 0, s, n, nullptr, 0);
+            if (buf_req == 0) return -1;
+            auto buf = static_cast<wchar_t*> (_malloca (buf_req * sizeof(wchar_t)));
+            int ret = -1;
+            if (MultiByteToWideChar (CP_ACP, 0, s, n, buf, buf_req) != 0)
             {
-                size_t conv_res = mbrtowc (buf_p, input, input_end - input, &mbs);
-                switch (conv_res)
-                {
-                default:
-                    // Input was consumed, output generated
-                    buf_p++;
-                    input += conv_res;
-                    num_written++;
-                    break;
-                case 0:
-                    // Null terminator encountered
-                    input = input_end;
-                    break;
-                case (size_t)-1:
-                    // Encoding error
-                    *buf_p++ = '?';
-                    input++;
-                    mbs = mbstate_t ();
-                    num_written++;
-                    break;
-                case (size_t)-2:
-                    // Input incomplete
-                    *buf_p++ = '?';
-                    input = input_end;
-                    num_written++;
-                    break;
-                case (size_t)-3:
-                    // No input consumed, but output generated
-                    buf_p++;
-                    num_written++;
-                    break;
-                }
+                ret = operator()(buf, buf_req);
             }
-            overflow |= (buf_p + 1 == buf_end);
-            auto num_converted = input - s;
-            return (num_converted >= n) ? num_written : -1;
+            _freea (buf);
+            return ret;
         }
 
         int ascii (const char* s, int n) override
