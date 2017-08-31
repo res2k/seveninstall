@@ -19,6 +19,9 @@
     <Filter Include="support">
       <UniqueIdentifier>{3f8ef7d6-0b4c-4735-ba3e-5a21abf58669}</UniqueIdentifier>
     </Filter>
+    <Filter Include="support\printf_impl">
+      <UniqueIdentifier>{2a4dc7a4-779a-468d-ae26-1da561c916c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -127,6 +130,27 @@
     </ClInclude>
     <ClInclude Include="GUID.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\printf_impl\Sink.hpp">
+      <Filter>support\printf_impl</Filter>
+    </ClInclude>
+    <ClInclude Include="support\printf_impl\parsers.hpp">
+      <Filter>support\printf_impl</Filter>
+    </ClInclude>
+    <ClInclude Include="support\printf_impl\CharBufferSink.hpp">
+      <Filter>support\printf_impl</Filter>
+    </ClInclude>
+    <ClInclude Include="support\printf_impl\FileSink.hpp">
+      <Filter>support\printf_impl</Filter>
+    </ClInclude>
+    <ClInclude Include="support\printf_impl\print.hpp">
+      <Filter>support\printf_impl</Filter>
+    </ClInclude>
+    <ClInclude Include="support\printf_impl\printer.hpp">
+      <Filter>support\printf_impl</Filter>
+    </ClInclude>
+    <ClInclude Include="support\printf_impl\WCharBufferSink.hpp">
+      <Filter>support\printf_impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

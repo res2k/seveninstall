@@ -129,6 +129,13 @@
     <ClInclude Include="Registry.hpp" />
     <ClInclude Include="Remove.hpp" />
     <ClInclude Include="Repair.hpp" />
+    <ClInclude Include="support\printf_impl\CharBufferSink.hpp" />
+    <ClInclude Include="support\printf_impl\FileSink.hpp" />
+    <ClInclude Include="support\printf_impl\parsers.hpp" />
+    <ClInclude Include="support\printf_impl\print.hpp" />
+    <ClInclude Include="support\printf_impl\printer.hpp" />
+    <ClInclude Include="support\printf_impl\Sink.hpp" />
+    <ClInclude Include="support\printf_impl\WCharBufferSink.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="7zip.vcxproj">
