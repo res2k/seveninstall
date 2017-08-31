@@ -80,11 +80,11 @@ namespace printf_impl
             }
 
             // Convert to wide char
-            int buf_req = MultiByteToWideChar (GetACP(), 0, s, n, nullptr, 0);
+            int buf_req = MultiByteToWideChar (CP_ACP, 0, s, n, nullptr, 0);
             if (buf_req == 0) return -1;
             auto buf = static_cast<wchar_t*> (_malloca (buf_req * sizeof(wchar_t)));
             int ret = -1;
-            if (MultiByteToWideChar (GetACP(), 0, s, n, buf, buf_req) != 0)
+            if (MultiByteToWideChar (CP_ACP, 0, s, n, buf, buf_req) != 0)
             {
                 ret = operator()(buf, buf_req);
             }
