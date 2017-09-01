@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tempfile
 
-parser = argparse.ArgumentParser(description='Reassemble a static library')
+parser = argparse.ArgumentParser(description='Reassemble a static library', fromfile_prefix_chars='@')
 parser.add_argument('input_lib', metavar='LIB', help='input library')
 parser.add_argument('-x', '--exclude', dest='excludes', metavar='OBJ', action='append', help='object files to exclude from library')
 parser.add_argument('-X', '--no-include', dest='no_include', metavar='SYMBOL', action='append', help='symbols to remove from \'/include\' directives')

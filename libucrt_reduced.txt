@@ -1,0 +1,10 @@
+-X
+___acrt_multibyte_initializer
+-x
+multibyte_initializer.obj
+-x
+locale_initializer.obj
+-X
+___acrt_locale_terminator
+-x
+lcidtoname_downlevel.obj
