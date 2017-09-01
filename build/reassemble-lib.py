@@ -1,22 +1,11 @@
 #!env python
 
 import argparse
+import multiprocessing
 import os
 import shutil
 import subprocess
 import tempfile
-
-parser = argparse.ArgumentParser(description='Reassemble a static library', fromfile_prefix_chars='@')
-parser.add_argument('input_lib', metavar='LIB', help='input library')
-parser.add_argument('-x', '--exclude', dest='excludes', metavar='OBJ', action='append', help='object files to exclude from library')
-parser.add_argument('-X', '--no-include', dest='no_include', metavar='SYMBOL', action='append', help='symbols to remove from \'/include\' directives')
-parser.add_argument('-o', '--out', dest='out_file', metavar='OUT-LIB', required=True, help='Output library name')
-args = parser.parse_args()
-
-if args.no_include:
-  no_include_set = set(args.no_include)
-else:
-  no_include_set = set()
 
 # Extract .drectve sections from object_file. Returns list of (position, size) tuple
 def _extract_drectve(object_file):
@@ -48,7 +37,7 @@ def _extract_drectve(object_file):
         parsed_drectve_pos = None
   return all_drectves
 
-def _filter_drectve(drectve_bytes):
+def _filter_drectve(drectve_bytes, no_include_set):
   drectve_string = drectve_bytes.decode()
   drectve_string_lower = drectve_string.lower()
   search_pos = 0
@@ -67,7 +56,7 @@ def _filter_drectve(drectve_bytes):
       search_pos = include_end
   return drectve_string.encode().ljust(len(drectve_bytes))
 
-def handle_no_include(object_file):
+def handle_no_include(object_file, no_include_set):
   any_changes = False
   drectves = _extract_drectve(object_file)
   if len(drectves) == 0: return
@@ -75,7 +64,7 @@ def handle_no_include(object_file):
     for drectve_pos, drectve_size in drectves:
       obj_file.seek(drectve_pos, os.SEEK_SET)
       drectve_data = obj_file.read(drectve_size)
-      filtered_drectve = _filter_drectve(drectve_data)
+      filtered_drectve = _filter_drectve(drectve_data, no_include_set)
       if filtered_drectve != drectve_data:
         print(object_file, filtered_drectve)
         assert(len(filtered_drectve) <= len(drectve_data))
@@ -84,33 +73,53 @@ def handle_no_include(object_file):
         any_changes = True
   return any_changes
 
-if args.excludes:
-  excluded_set = set(args.excludes)
-else:
-  excluded_set = set()
+def _extract_lib_member(no_include_set, lib, member, out_name):
+  subprocess.check_call(["lib", "/nologo", lib, "/extract:" + member, "/out:" + out_name], shell=True)
+  if not handle_no_include(out_name, no_include_set):
+    shutil.copystat(lib, out_name)
 
-library_list = subprocess.check_output(["lib", "/nologo", "/list", args.input_lib], shell=True, universal_newlines=True).split('\n')
-temp_dir = tempfile.mkdtemp()
-all_members = []
-try:
-  for member in library_list:
-    if len(member) == 0: continue
-    member_base = os.path.basename(member)
-    if member_base in excluded_set: continue
-    out_name = os.path.join(temp_dir, member_base)
-    subprocess.check_call(["lib", "/nologo", args.input_lib, "/extract:" + member, "/out:" + out_name], shell=True)
-    if not handle_no_include(out_name):
-      shutil.copystat(args.input_lib, out_name)
-    all_members.append(out_name)
-  if os.path.exists(args.out_file):
-    os.remove(args.out_file)
-  response_file_name = os.path.join(temp_dir, "response.txt")
-  with open(response_file_name, "w") as response_file:
-    for member in all_members:
-      response_file.write(member + '\n')
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser(description='Reassemble a static library', fromfile_prefix_chars='@')
+  parser.add_argument('input_lib', metavar='LIB', help='input library')
+  parser.add_argument('-x', '--exclude', dest='excludes', metavar='OBJ', action='append', help='object files to exclude from library')
+  parser.add_argument('-X', '--no-include', dest='no_include', metavar='SYMBOL', action='append', help='symbols to remove from \'/include\' directives')
+  parser.add_argument('-o', '--out', dest='out_file', metavar='OUT-LIB', required=True, help='Output library name')
+  args = parser.parse_args()
+
+  if args.no_include:
+    no_include_set = set(args.no_include)
+  else:
+    no_include_set = set()
+
+  if args.excludes:
+    excluded_set = set(args.excludes)
+  else:
+    excluded_set = set()
+
+  library_list = subprocess.check_output(["lib", "/nologo", "/list", args.input_lib], shell=True, universal_newlines=True).split('\n')
+  temp_dir = tempfile.mkdtemp()
+  all_members = []
   try:
-    subprocess.check_call(["lib", "/nologo", "/out:" + args.out_file, "@" + response_file_name], shell=True)
+    extract_pool = multiprocessing.Pool()
+    for member in library_list:
+      if len(member) == 0: continue
+      member_base = os.path.basename(member)
+      if member_base in excluded_set: continue
+      out_name = os.path.join(temp_dir, member_base)
+      extract_pool.apply_async (_extract_lib_member, [no_include_set, args.input_lib, member, out_name])
+      all_members.append(out_name)
+    if os.path.exists(args.out_file):
+      os.remove(args.out_file)
+    response_file_name = os.path.join(temp_dir, "response.txt")
+    with open(response_file_name, "w") as response_file:
+      for member in all_members:
+        response_file.write(member + '\n')
+    # Make sure all tasks are processed before merging
+    extract_pool.close()
+    extract_pool.join()
+    try:
+      subprocess.check_call(["lib", "/nologo", "/out:" + args.out_file, "@" + response_file_name], shell=True)
+    finally:
+      os.remove(response_file_name)
   finally:
-    os.remove(response_file_name)
-finally:
-  shutil.rmtree(temp_dir)
+    shutil.rmtree(temp_dir)
