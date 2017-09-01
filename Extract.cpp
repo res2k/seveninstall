@@ -25,7 +25,6 @@ using namespace NWindows;
 using namespace NFile;
 
 int g_CodePage = CP_ACP;
-CStdOutStream *g_StdStream = 0;
 
 const char extractCopyright[] = "Portions " MY_VERSION_COPYRIGHT_DATE;
 
@@ -151,8 +150,6 @@ void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* target
   CrcGenerateTable();
   NConsoleClose::CCtrlHandlerSetter handle_control;
 
-  g_StdStream = &g_StdOut;
-
   UString outputDir;
   outputDir = targetDir;
   NName::NormalizeDirPathPrefix(outputDir);
@@ -165,7 +162,7 @@ void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* target
   CMyComPtr<IFolderArchiveExtractCallback> extractCallback = ecs;
 
   COpenCallbackConsole openCallback;
-  openCallback.OutStream = g_StdStream;
+  openCallback.OutStream = nullptr; // Doesn't seem to be used if NO_CRYPTO is defined, anyway
 
   CExtractOptions eo;
   eo.StdOutMode = false;

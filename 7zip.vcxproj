@@ -65,8 +65,6 @@
     <ClCompile Include="7zip\CPP\Common\IntToString.cpp" />
     <ClCompile Include="7zip\CPP\Common\MyString.cpp" />
     <ClCompile Include="7zip\CPP\Common\MyVector.cpp" />
-    <ClCompile Include="7zip\CPP\Common\StdInStream.cpp" />
-    <ClCompile Include="7zip\CPP\Common\StdOutStream.cpp" />
     <ClCompile Include="7zip\CPP\Common\StringConvert.cpp" />
     <ClCompile Include="7zip\CPP\Common\StringToInt.cpp" />
     <ClCompile Include="7zip\CPP\Common\UTFConvert.cpp" />

@@ -27,16 +27,10 @@
     <ClCompile Include="7zip\CPP\7zip\UI\Console\OpenCallbackConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="7zip\CPP\Common\StdOutStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="7zip\CPP\Common\StringConvert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="7zip\CPP\7zip\UI\Console\UserInputUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="7zip\CPP\Common\StdInStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="7zip\CPP\Windows\FileName.cpp">
