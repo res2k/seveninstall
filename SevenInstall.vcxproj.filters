@@ -90,6 +90,9 @@
     <ClCompile Include="support\printf.cpp">
       <Filter>support</Filter>
     </ClCompile>
+    <ClCompile Include="support\stdio_dummies.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">

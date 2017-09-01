@@ -114,6 +114,7 @@
     <ClCompile Include="Repair.cpp" />
     <ClCompile Include="support\downlevel_locale.cpp" />
     <ClCompile Include="support\printf.cpp" />
+    <ClCompile Include="support\stdio_dummies.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonArgs.hpp" />
