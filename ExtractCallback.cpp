@@ -83,7 +83,7 @@ STDMETHODIMP CExtractCallback::PrepareOperation(const wchar_t *name, bool /* isF
   case NArchive::NExtract::NAskMode::kSkip:    wprintf (kSkipString); break;
   };
   wprintf (L"%ls", name);
-  fflush (stdout);
+  //fflush (stdout); // Not needed since our wprintf() implementation bypasses stdio
   return S_OK;
 }
 
