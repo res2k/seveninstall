@@ -261,5 +261,8 @@
     <ClCompile Include="7zip\CPP\Windows\Error.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Common\MethodProps.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

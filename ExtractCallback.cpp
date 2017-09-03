@@ -147,7 +147,7 @@ HRESULT CExtractCallback::OpenResult(const wchar_t * /* name */, HRESULT result,
       if (result == E_OUTOFMEMORY)
         wprintf (kMemoryExceptionMessage);
       else
-        wprintf (L"%s", (const wchar_t*)(NError::MyFormatMessage(result)));
+        wprintf (L"%s", (const wchar_t*)(NError::MyFormatMessageW(result)));
     }
     wprintf (L"\n");
   }
@@ -181,8 +181,7 @@ HRESULT CExtractCallback::ExtractResult(HRESULT result)
     wprintf (kMemoryExceptionMessage);
   else
   {
-    UString message;
-    NError::MyFormatMessage(result, message);
+    UString message = NError::MyFormatMessageW(result);
     wprintf (L"%s", (const wchar_t*)(message));
   }
   wprintf (L"\n");

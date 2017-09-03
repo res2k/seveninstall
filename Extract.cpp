@@ -5,9 +5,12 @@
 
 #include "Windows/DLL.h"
 #include "Windows/FileDir.h"
+#include "Windows/FileName.h"
 
 #include "7zip/UI/Common/ExitCode.h"
 #include "7zip/UI/Common/Extract.h"
+#include "7zip/UI/Common/ExtractingFilePath.h"
+#include "7zip/UI/Common/SetProperties.h"
 
 #include "7zip/UI/Console/ConsoleClose.h"
 #include "7zip/UI/Console/OpenCallbackConsole.h"
@@ -40,7 +43,7 @@ static HRESULT DecompressArchive(
   CRecordVector<UInt32> realIndices;
   UInt32 numItems;
   CHECK_HR(archive->GetNumberOfItems(&numItems));
-      
+
   for (UInt32 i = 0; i < numItems; i++)
   {
     UString filePath;
@@ -57,7 +60,13 @@ static HRESULT DecompressArchive(
 
   UStringVector removePathParts;
 
-  UString outDir = options.OutputDir;
+  FString outDir = options.OutputDir;
+  outDir.Replace(FSTRING_ANY_MASK, us2fs(GetCorrectFsPath(arc.DefaultName)));
+  #ifdef _WIN32
+  // GetCorrectFullFsPath doesn't like "..".
+  // outDir.TrimRight();
+  // outDir = GetCorrectFullFsPath(outDir);
+  #endif
 
   if (!outDir.IsEmpty())
     if (!NFile::NDirectory::CreateComplexDirectory(outDir))
@@ -65,7 +74,7 @@ static HRESULT DecompressArchive(
       HRESULT res = ::GetLastError();
       if (res == S_OK)
         res = E_FAIL;
-      errorMessage = ((UString)L"Can not create output directory ") + outDir;
+      errorMessage = ((UString)L"Can not create output directory ") + fs2us(outDir);
       return res;
     }
 
@@ -77,6 +86,10 @@ static HRESULT DecompressArchive(
       outDir,
       removePathParts,
       packSize);
+
+  #if !defined(_7ZIP_ST) && !defined(_SFX)
+  CHECK_HR(SetProperties(archive, options.Properties));
+  #endif
 
   HRESULT result;
   Int32 testMode = (options.TestMode && !options.CalcCrc) ? 1: 0;
@@ -95,11 +108,13 @@ static void ExtractOneArchive (
 {
   UInt64 totalPackSize = 0;
 
-  NFile::NFind::CFileInfoW fi;
+  NFile::NFind::CFileInfo fi;
   fi.Size = 0;
-  if (!fi.Find(arcPath)) THROW_HR(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
+  const FString &arcPath_f = us2fs(arcPath);
+  if (!fi.Find(arcPath_f)) THROW_HR(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
   if (fi.IsDir()) THROW_HR(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND/*ERROR_DIRECTORY_NOT_SUPPORTED - doc'ed but not defined*/));
   totalPackSize = fi.Size;
+  UInt64 archiveSize = fi.Size;
 
   CArchiveExtractCallback *extractCallbackSpec = new CArchiveExtractCallback;
   CMyComPtr<IArchiveExtractCallback> ec(extractCallbackSpec);
@@ -109,17 +124,17 @@ static void ExtractOneArchive (
   
   CArchiveLink archiveLink;
 
-  HRESULT result = archiveLink.Open2(codecs, CIntVector(), options.StdInMode, NULL, arcPath, openCallback);
+  HRESULT result = archiveLink.Open2(codecs, CIntVector(), false, NULL, arcPath, openCallback);
   if (!SUCCEEDED(result))
   {
-    extractCallback->OpenResult(arcPath, result, false);
+    CHECK_HR(extractCallback->OpenResult(arcPath, result, false));
     // return: below
   }
 
   if (archiveLink.VolumePaths.Size() != 0)
   {
     totalPackSize += archiveLink.VolumesSize;
-    extractCallback->SetTotal(totalPackSize);
+    CHECK_HR(extractCallback->SetTotal(totalPackSize));
   }
 
   for (int v = 0; v < archiveLink.Arcs.Size(); v++)
@@ -143,6 +158,7 @@ static void ExtractOneArchive (
       options, extractCallback, extractCallbackSpec, errorMessage);
   extractCallbackSpec->LocalProgressSpec->InSize += fi.Size + archiveLink.VolumesSize;
   extractCallbackSpec->LocalProgressSpec->OutSize = extractCallbackSpec->UnpackSize;
+  CHECK_HR (result);
 }
 
 void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* targetDir, std::vector<std::wstring>& extractedFiles)
