@@ -63,9 +63,6 @@
     <ClCompile Include="7zip\CPP\Windows\PropVariant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="7zip\CPP\Windows\PropVariantConversions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="7zip\CPP\Windows\FileFind.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -258,11 +255,23 @@
     <ClCompile Include="7zip\CPP\7zip\UI\Console\ConsoleClose.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="7zip\CPP\Windows\Error.cpp">
-      <Filter>Source Files\Common</Filter>
-    </ClCompile>
     <ClCompile Include="7zip\CPP\7zip\Common\MethodProps.cpp">
       <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\Windows\ErrorMsg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Common\PropId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\Windows\FileLink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\UI\Common\PropIDUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\Windows\PropVariantConv.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

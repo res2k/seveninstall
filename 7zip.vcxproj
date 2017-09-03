@@ -35,6 +35,7 @@
     <ClCompile Include="7zip\CPP\7zip\Common\MethodProps.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Common\OutBuffer.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Common\ProgressUtils.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Common\PropId.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Common\StreamBinder.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Common\StreamObjects.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Common\StreamUtils.cpp" />
@@ -59,6 +60,7 @@
     <ClCompile Include="7zip\CPP\7zip\UI\Common\ExtractingFilePath.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Common\LoadCodecs.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Common\OpenArchive.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\UI\Common\PropIDUtils.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Common\SetProperties.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Console\ConsoleClose.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Console\OpenCallbackConsole.cpp" />
@@ -70,13 +72,14 @@
     <ClCompile Include="7zip\CPP\Common\StringToInt.cpp" />
     <ClCompile Include="7zip\CPP\Common\UTFConvert.cpp" />
     <ClCompile Include="7zip\CPP\Common\Wildcard.cpp" />
-    <ClCompile Include="7zip\CPP\Windows\Error.cpp" />
+    <ClCompile Include="7zip\CPP\Windows\ErrorMsg.cpp" />
     <ClCompile Include="7zip\CPP\Windows\FileDir.cpp" />
     <ClCompile Include="7zip\CPP\Windows\FileFind.cpp" />
     <ClCompile Include="7zip\CPP\Windows\FileIO.cpp" />
+    <ClCompile Include="7zip\CPP\Windows\FileLink.cpp" />
     <ClCompile Include="7zip\CPP\Windows\FileName.cpp" />
     <ClCompile Include="7zip\CPP\Windows\PropVariant.cpp" />
-    <ClCompile Include="7zip\CPP\Windows\PropVariantConversions.cpp" />
+    <ClCompile Include="7zip\CPP\Windows\PropVariantConv.cpp" />
     <ClCompile Include="7zip\CPP\Windows\System.cpp" />
     <ClCompile Include="7zip\C\7zCrc.c" />
     <ClCompile Include="7zip\C\7zCrcOpt.c" />

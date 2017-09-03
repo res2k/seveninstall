@@ -26,50 +26,67 @@
 
 using namespace NWindows;
 using namespace NFile;
+using namespace NDir;
 
 int g_CodePage = CP_ACP;
 
 const char extractCopyright[] = "Portions " MY_VERSION_COPYRIGHT_DATE;
 
 static HRESULT DecompressArchive(
-    const CArc &arc,
+    CCodecs *codecs,
+    const CArchiveLink &arcLink,
     UInt64 packSize,
     const CExtractOptions &options,
+    bool calcCrc,
     IExtractCallbackUI *callback,
-    CArchiveExtractCallback *extractCallbackSpec,
+    CArchiveExtractCallback *ecs,
     UString &errorMessage)
 {
+  const CArc &arc = arcLink.Arcs.Back();
   IInArchive *archive = arc.Archive;
   CRecordVector<UInt32> realIndices;
-  UInt32 numItems;
-  CHECK_HR(archive->GetNumberOfItems(&numItems));
-
-  for (UInt32 i = 0; i < numItems; i++)
-  {
-    UString filePath;
-    CHECK_HR(arc.GetItemPath(i, filePath));
-    bool isFolder;
-    CHECK_HR(IsArchiveItemFolder(archive, i, isFolder));
-    realIndices.Add(i);
-  }
-  if (realIndices.Size() == 0)
-  {
-    callback->ThereAreNoFiles();
-    return S_OK;
-  }
 
   UStringVector removePathParts;
 
   FString outDir = options.OutputDir;
-  outDir.Replace(FSTRING_ANY_MASK, us2fs(GetCorrectFsPath(arc.DefaultName)));
+  UString replaceName = arc.DefaultName;
+
+  outDir.Replace(FSTRING_ANY_MASK, us2fs(GetCorrectFsPath(replaceName)));
+
+  UInt32 numItems;
+  RINOK(archive->GetNumberOfItems(&numItems));
+
+  UString filePath;
+
+  for (UInt32 i = 0; i < numItems; i++)
+  {
+    RINOK(arc.GetItemPath(i, filePath));
+
+    bool isFolder;
+    RINOK(Archive_IsItem_Folder(archive, i, isFolder));
+    bool isAltStream;
+    RINOK(Archive_IsItem_AltStream(archive, i, isAltStream));
+    if (!options.NtOptions.AltStreams.Val && isAltStream)
+      continue;
+    realIndices.Add(i);
+  }
+
+  if (realIndices.Size() == 0)
+  {
+    callback->ThereAreNoFiles();
+    return callback->ExtractResult(S_OK);
+  }
+
   #ifdef _WIN32
   // GetCorrectFullFsPath doesn't like "..".
   // outDir.TrimRight();
   // outDir = GetCorrectFullFsPath(outDir);
   #endif
 
-  if (!outDir.IsEmpty())
-    if (!NFile::NDirectory::CreateComplexDirectory(outDir))
+  if (outDir.IsEmpty())
+    outDir = FString(FTEXT(".")) + FString(FSTRING_PATH_SEPARATOR);
+  else
+    if (!CreateComplexDir(outDir))
     {
       HRESULT res = ::GetLastError();
       if (res == S_OK)
@@ -78,32 +95,44 @@ static HRESULT DecompressArchive(
       return res;
     }
 
-  extractCallbackSpec->Init(
+  ecs->Init(
+      options.NtOptions,
       NULL,
       &arc,
       callback,
-      options.StdOutMode, options.TestMode, options.CalcCrc,
+      options.StdOutMode, options.TestMode,
       outDir,
       removePathParts,
       packSize);
 
-  #if !defined(_7ZIP_ST) && !defined(_SFX)
-  CHECK_HR(SetProperties(archive, options.Properties));
+  #ifdef SUPPORT_LINKS
+
+  if (!options.TestMode &&
+      options.NtOptions.HardLinks.Val)
+  {
+    RINOK(ecs->PrepareHardLinks(&realIndices));
+  }
+
   #endif
 
   HRESULT result;
-  Int32 testMode = (options.TestMode && !options.CalcCrc) ? 1: 0;
-  result = archive->Extract(&realIndices.Front(), realIndices.Size(), testMode, extractCallbackSpec);
-
+  Int32 testMode = (options.TestMode && !calcCrc) ? 1: 0;
+  result = archive->Extract(&realIndices.Front(), realIndices.Size(), testMode, ecs);
+  if (result == S_OK)
+    result = ecs->SetDirsTimes();
   return callback->ExtractResult(result);
 }
 
 static void ExtractOneArchive (
     CCodecs *codecs,
+    const CObjectVector<COpenType> &types,
     const UString& arcPath,
     const CExtractOptions &options,
     IOpenCallbackUI *openCallback,
     IExtractCallbackUI *extractCallback,
+    #ifndef _SFX
+    IHashCalc *hash,
+    #endif
     UString &errorMessage)
 {
   UInt64 totalPackSize = 0;
@@ -116,48 +145,96 @@ static void ExtractOneArchive (
   totalPackSize = fi.Size;
   UInt64 archiveSize = fi.Size;
 
-  CArchiveExtractCallback *extractCallbackSpec = new CArchiveExtractCallback;
-  CMyComPtr<IArchiveExtractCallback> ec(extractCallbackSpec);
-  extractCallbackSpec->InitForMulti(false, options.PathMode, options.OverwriteMode);
+  CArchiveExtractCallback *ecs = new CArchiveExtractCallback;
+  CMyComPtr<IArchiveExtractCallback> ec(ecs);
+  ecs->InitForMulti(false, options.PathMode, options.OverwriteMode);
+  #ifndef _SFX
+  ecs->SetHashMethods(hash);
+  #endif
 
   CHECK_HR(extractCallback->BeforeOpen(arcPath));
   
-  CArchiveLink archiveLink;
+  CArchiveLink arcLink;
 
-  HRESULT result = archiveLink.Open2(codecs, CIntVector(), false, NULL, arcPath, openCallback);
-  if (!SUCCEEDED(result))
+  CIntVector excludedFormats;
+  COpenOptions op;
+  #ifndef _SFX
+  op.props = &options.Properties;
+  #endif
+  op.codecs = codecs;
+  op.types = &types;
+  op.excludedFormats = &excludedFormats;
+  op.stdInMode = false;
+  op.stream = NULL;
+  op.filePath = arcPath;
+  HRESULT result = arcLink.Open2(op, openCallback);
+  if (result == E_ABORT)
+    CHECK_HR(result);
+
+  if (arcLink.NonOpen_ErrorInfo.ErrorFormatIndex >= 0)
+    result = S_FALSE;
+
+  CHECK_HR(extractCallback->OpenResult(arcPath, result, false));
+
   {
-    CHECK_HR(extractCallback->OpenResult(arcPath, result, false));
-    // return: below
+    FOR_VECTOR (r, arcLink.Arcs)
+    {
+      const CArc &arc = arcLink.Arcs[r];
+      const CArcErrorInfo &er = arc.ErrorInfo;
+      if (er.IsThereErrorOrWarning())
+      {
+        CHECK_HR(extractCallback->SetError(r, arc.Path,
+            er.GetErrorFlags(), er.ErrorMessage,
+            er.GetWarningFlags(), er.WarningMessage));
+      }
+    }
   }
 
-  if (archiveLink.VolumePaths.Size() != 0)
+  if (arcLink.VolumePaths.Size() != 0)
   {
-    totalPackSize += archiveLink.VolumesSize;
+    totalPackSize += arcLink.VolumesSize;
     CHECK_HR(extractCallback->SetTotal(totalPackSize));
   }
 
-  for (int v = 0; v < archiveLink.Arcs.Size(); v++)
+  for (unsigned int v = 0; v < arcLink.Arcs.Size(); v++)
   {
-    const UString &s = archiveLink.Arcs[v].ErrorMessage;
-    if (!s.IsEmpty())
+    const CArc &arc = arcLink.Arcs[v];
+    const CArcErrorInfo &er = arc.ErrorInfo;
+
+    if (er.ErrorFormatIndex >= 0)
     {
-      extractCallback->MessageError(s);
-      if (!FAILED(result)) result = E_FAIL;
+      CHECK_HR(extractCallback->OpenTypeWarning(arc.Path,
+          codecs->GetFormatNamePtr(arc.FormatIndex),
+          codecs->GetFormatNamePtr(er.ErrorFormatIndex)))
+    }
+    {
+      const UString &s = er.ErrorMessage;
+      if (!s.IsEmpty())
+      {
+        CHECK_HR(extractCallback->MessageError(s));
+      }
     }
   }
 
   CHECK_HR(result);
 
-  CArc &arc = archiveLink.Arcs.Back();
+  CArc &arc = arcLink.Arcs.Back();
   arc.MTimeDefined = !fi.IsDevice;
   arc.MTime = fi.MTime;
 
-  result = DecompressArchive(arc,
-      fi.Size + archiveLink.VolumesSize,
-      options, extractCallback, extractCallbackSpec, errorMessage);
-  extractCallbackSpec->LocalProgressSpec->InSize += fi.Size + archiveLink.VolumesSize;
-  extractCallbackSpec->LocalProgressSpec->OutSize = extractCallbackSpec->UnpackSize;
+  bool calcCrc =
+      #ifndef _SFX
+        (hash != NULL);
+      #else
+        false;
+      #endif
+
+  result = DecompressArchive(codecs, arcLink,
+      fi.Size + arcLink.VolumesSize,
+      options, calcCrc, extractCallback, ecs, errorMessage);
+  ecs->LocalProgressSpec->InSize += fi.Size + arcLink.VolumesSize;
+  ecs->LocalProgressSpec->OutSize = ecs->UnpackSize;
+
   CHECK_HR (result);
 }
 
@@ -174,6 +251,8 @@ void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* target
   CMyComPtr<IUnknown> compressCodecsInfo = codecs;
   CHECK_HR(codecs->Load());
 
+  CObjectVector<COpenType> types;
+
   CExtractCallback* ecs = new CExtractCallback (extractedFiles, outputDir);
   CMyComPtr<IFolderArchiveExtractCallback> extractCallback = ecs;
 
@@ -182,9 +261,9 @@ void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* target
 
   CExtractOptions eo;
   eo.StdOutMode = false;
-  eo.PathMode = NExtract::NPathMode::kFullPathnames;
+  eo.PathMode = NExtract::NPathMode::kFullPaths;
   eo.TestMode = false;
-  eo.OverwriteMode = NExtract::NOverwriteMode::kAskBefore;
+  eo.OverwriteMode = NExtract::NOverwriteMode::kAsk;
   eo.OutputDir = outputDir;
   eo.YesToAll = false;
 
@@ -194,8 +273,13 @@ void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* target
 
     ExtractOneArchive(
         codecs,
+        types,
         archivePath,
-        eo, &openCallback, ecs, errorMessage);
+        eo, &openCallback, ecs,
+        #ifndef _SFX
+        nullptr,
+        #endif
+        errorMessage);
     if (!errorMessage.IsEmpty())
     {
       ecs->MessageError (errorMessage);

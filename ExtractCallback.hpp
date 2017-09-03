@@ -4,6 +4,8 @@
 #ifndef __7I_EXTRACTCALLBACK_HPP__
 #define __7I_EXTRACTCALLBACK_HPP__
 
+#include <Windows.h>
+
 #include "Common/MyString.h"
 #include "7zip/Common/FileStreams.h"
 #include "7zip/Archive/IArchive.h"
@@ -40,13 +42,26 @@ public:
 
   HRESULT BeforeOpen(const wchar_t *name);
   HRESULT OpenResult(const wchar_t *name, HRESULT result, bool encrypted);
+  HRESULT SetError(int level, const wchar_t *name,
+    UInt32 errorFlags, const wchar_t *errors,
+    UInt32 warningFlags, const wchar_t *warnings);
   HRESULT ThereAreNoFiles();
   HRESULT ExtractResult(HRESULT result);
+  HRESULT OpenTypeWarning(const wchar_t *name, const wchar_t *okType, const wchar_t *errorType);
 
  
   std::vector<std::wstring>& extractedFiles;
-  UInt64 NumArchiveErrors;
-  UInt64 NumFileErrorsInCurrentArchive;
+  UInt64 NumTryArcs = 0;
+  bool ThereIsErrorInCurrent;
+  bool ThereIsWarningInCurrent;
+  UInt64 NumCantOpenArcs = 0;
+  UInt64 NumOkArcs = 0;
+  UInt64 NumArcsWithError = 0;
+  UInt64 NumArcsWithWarnings = 0;
+  UInt64 NumOpenArcErrors = 0;
+  UInt64 NumOpenArcWarnings = 0;
+  UInt64 NumFileErrors = 0;
+  UInt64 NumFileErrorsInCurrent = 0;
   std::wstring currentFile;
   UString outputDir;
 };
