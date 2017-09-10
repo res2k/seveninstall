@@ -43,6 +43,29 @@ namespace
       if (p) LocalFree (p);
     }
   };
+
+  template<typename Ch>
+  static void to_hex_impl (Ch* buf, long value)
+  {
+    *buf++ = '0';
+    *buf++ = 'x';
+    Ch* insert_pos = buf + 8;
+    *insert_pos-- = 0;
+    while (insert_pos >= buf)
+    {
+      auto val = value & 0xf;
+      *insert_pos = static_cast<Ch> ((val >= 10) ? ('a' + val - 10) : ('0' + val));
+      --insert_pos;
+      value >>= 4;
+    }
+  }
+}
+
+template<typename Ch, size_t N>
+static void to_hex (Ch (&buf)[N], long value)
+{
+  static_assert (N >= 11, "buffer too small"); // 0x + 8 hex digits + null terminator
+  to_hex_impl (buf, value);
 }
 
 std::wstring GetErrorString (DWORD error)
@@ -65,7 +88,7 @@ std::wstring GetErrorString (DWORD error)
     }
   }
   if (n == 0)
-    _snwprintf_s (buf, _TRUNCATE, L"0x%lx", long (error));
+    to_hex (buf, error);
   return buf;
 }
 
@@ -74,6 +97,6 @@ std::wstring GetHRESULTString (HRESULT hr)
   if (HRESULT_FACILITY(hr) == FACILITY_WIN32)
     return GetErrorString (HRESULT_CODE(hr));
   wchar_t buf[16];
-  _snwprintf_s (buf, _TRUNCATE, L"0x%lx", long (hr));
+  to_hex (buf, hr);
   return buf;
 }
