@@ -28,8 +28,6 @@ using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
 
-int g_CodePage = CP_ACP;
-
 const char extractCopyright[] = "Portions " MY_VERSION_COPYRIGHT_DATE;
 
 static HRESULT DecompressArchive(
