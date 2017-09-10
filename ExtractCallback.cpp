@@ -317,6 +317,7 @@ static AString GetOpenArcErrorMessage(UInt32 errorFlags)
   return s;
 }
 
+#if 0
 static const char * const kPropIdToName[] =
 {
   "0"
@@ -415,14 +416,17 @@ static const char * const kPropIdToName[] =
   , "Read-only"
   , "Out Name"
 };
+#endif
 
 static void PrintPropName_and_Eq(FILE* f, PROPID propID)
 {
   const char *s;
   char temp[16];
+#if 0
   if (propID < sizeof(kPropIdToName)/sizeof(kPropIdToName[0]))
     s = kPropIdToName[propID];
   else
+#endif
   {
     ConvertUInt32ToString(propID, temp);
     s = temp;
@@ -449,11 +453,13 @@ static void PrintPropPair(FILE* f, const char *name, const wchar_t *val)
 
 static void GetPropName(PROPID propID, const wchar_t *name, AString &nameA, UString &nameU)
 {
+#if 0
   if (propID < sizeof(kPropIdToName)/sizeof(kPropIdToName[0]))
   {
     nameA = kPropIdToName[propID];
     return;
   }
+#endif
   if (name)
     nameU = name;
   else
