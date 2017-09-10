@@ -126,9 +126,6 @@
     <ClCompile Include="7zip\CPP\7zip\Common\StreamBinder.cpp">
       <Filter>Source Files\Codecs</Filter>
     </ClCompile>
-    <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zFolderOutStream.cpp">
-      <Filter>Source Files\Codecs</Filter>
-    </ClCompile>
     <ClCompile Include="7zip\C\Threads.c">
       <Filter>Source Files\Common</Filter>
     </ClCompile>

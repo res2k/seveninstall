@@ -13,7 +13,6 @@
   <ItemGroup>
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zDecode.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zExtract.cpp" />
-    <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zFolderOutStream.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zHandler.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zHeader.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zIn.cpp" />
