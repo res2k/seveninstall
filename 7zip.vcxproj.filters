@@ -24,9 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="7zip\CPP\7zip\UI\Console\OpenCallbackConsole.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="7zip\CPP\Common\StringConvert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,9 +123,6 @@
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zDecode.cpp">
       <Filter>Source Files\Codecs</Filter>
     </ClCompile>
-    <ClCompile Include="7zip\CPP\7zip\Archive\Common\CoderMixer2MT.cpp">
-      <Filter>Source Files\Codecs</Filter>
-    </ClCompile>
     <ClCompile Include="7zip\CPP\7zip\Common\StreamBinder.cpp">
       <Filter>Source Files\Codecs</Filter>
     </ClCompile>
@@ -193,9 +187,6 @@
       <Filter>Source Files\Codecs</Filter>
     </ClCompile>
     <ClCompile Include="7zip\CPP\7zip\Compress\BcjCoder.cpp">
-      <Filter>Source Files\Codecs</Filter>
-    </ClCompile>
-    <ClCompile Include="7zip\CPP\7zip\Compress\BranchCoder.cpp">
       <Filter>Source Files\Codecs</Filter>
     </ClCompile>
     <ClCompile Include="7zip\C\Delta.c">
@@ -272,6 +263,12 @@
     </ClCompile>
     <ClCompile Include="7zip\CPP\Windows\PropVariantConv.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\C\Bcj2.c">
+      <Filter>Source Files\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\UI\Console\ConsoleClose.cpp">
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -93,6 +93,15 @@
     <ClCompile Include="support\stdio_dummies.cpp">
       <Filter>support</Filter>
     </ClCompile>
+    <ClCompile Include="OpenCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\BranchRegister.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\CPP\7zip\Compress\DeltaFilter.cpp">
+      <Filter>Source Files\CodecRegister</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">

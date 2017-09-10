@@ -19,7 +19,6 @@
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zIn.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zProperties.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\Common\CoderMixer2.cpp" />
-    <ClCompile Include="7zip\CPP\7zip\Archive\Common\CoderMixer2MT.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\Common\ItemNameUtils.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\Common\OutStreamWithCRC.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\Common\ParseProperties.cpp" />
@@ -43,7 +42,6 @@
     <ClCompile Include="7zip\CPP\7zip\Compress\Bcj2Coder.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\BcjCoder.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\BitlDecoder.cpp" />
-    <ClCompile Include="7zip\CPP\7zip\Compress\BranchCoder.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\BranchMisc.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\BZip2Crc.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\BZip2Decoder.cpp" />
@@ -63,7 +61,6 @@
     <ClCompile Include="7zip\CPP\7zip\UI\Common\PropIDUtils.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Common\SetProperties.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Console\ConsoleClose.cpp" />
-    <ClCompile Include="7zip\CPP\7zip\UI\Console\OpenCallbackConsole.cpp" />
     <ClCompile Include="7zip\CPP\7zip\UI\Console\UserInputUtils.cpp" />
     <ClCompile Include="7zip\CPP\Common\IntToString.cpp" />
     <ClCompile Include="7zip\CPP\Common\MyString.cpp" />
@@ -84,6 +81,7 @@
     <ClCompile Include="7zip\C\7zCrc.c" />
     <ClCompile Include="7zip\C\7zCrcOpt.c" />
     <ClCompile Include="7zip\C\Alloc.c" />
+    <ClCompile Include="7zip\C\Bcj2.c" />
     <ClCompile Include="7zip\C\Bra.c" />
     <ClCompile Include="7zip\C\Bra86.c" />
     <ClCompile Include="7zip\C\BraIA64.c" />

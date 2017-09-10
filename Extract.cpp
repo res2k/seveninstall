@@ -7,13 +7,13 @@
 #include "Windows/FileDir.h"
 #include "Windows/FileName.h"
 
+#include "7zip/ICoder.h"
 #include "7zip/UI/Common/ExitCode.h"
 #include "7zip/UI/Common/Extract.h"
 #include "7zip/UI/Common/ExtractingFilePath.h"
 #include "7zip/UI/Common/SetProperties.h"
 
 #include "7zip/UI/Console/ConsoleClose.h"
-#include "7zip/UI/Console/OpenCallbackConsole.h"
 
 #include "7zip/MyVersion.h"
 
@@ -23,6 +23,7 @@
 
 #include "Error.hpp"
 #include "ExtractCallback.hpp"
+#include "OpenCallback.hpp"
 
 using namespace NWindows;
 using namespace NFile;
@@ -49,23 +50,27 @@ static HRESULT DecompressArchive(
   FString outDir = options.OutputDir;
   UString replaceName = arc.DefaultName;
 
-  outDir.Replace(FSTRING_ANY_MASK, us2fs(GetCorrectFsPath(replaceName)));
+  outDir.Replace(FSTRING_ANY_MASK, us2fs(Get_Correct_FsFile_Name(replaceName)));
 
   UInt32 numItems;
   RINOK(archive->GetNumberOfItems(&numItems));
 
-  UString filePath;
+  #ifdef SUPPORT_ALT_STREAMS
+  CReadArcItem item;
+  #endif
 
   for (UInt32 i = 0; i < numItems; i++)
   {
-    RINOK(arc.GetItemPath(i, filePath));
-
-    bool isFolder;
-    RINOK(Archive_IsItem_Folder(archive, i, isFolder));
-    bool isAltStream;
-    RINOK(Archive_IsItem_AltStream(archive, i, isAltStream));
-    if (!options.NtOptions.AltStreams.Val && isAltStream)
+    #ifdef SUPPORT_ALT_STREAMS
+    item.IsAltStream = false;
+    if (!options.NtOptions.AltStreams.Val && arc.Ask_AltStream)
+    {
+      RINOK(Archive_IsItem_AltStream(arc.Archive, i, item.IsAltStream));
+    }
+    if (!options.NtOptions.AltStreams.Val && item.IsAltStream)
       continue;
+    #endif
+
     realIndices.Add(i);
   }
 
@@ -100,7 +105,7 @@ static HRESULT DecompressArchive(
       callback,
       options.StdOutMode, options.TestMode,
       outDir,
-      removePathParts,
+      removePathParts, false,
       packSize);
 
   #ifdef SUPPORT_LINKS
@@ -150,7 +155,7 @@ static void ExtractOneArchive (
   ecs->SetHashMethods(hash);
   #endif
 
-  CHECK_HR(extractCallback->BeforeOpen(arcPath));
+  CHECK_HR(extractCallback->BeforeOpen(arcPath, options.TestMode));
   
   CArchiveLink arcLink;
 
@@ -165,53 +170,19 @@ static void ExtractOneArchive (
   op.stdInMode = false;
   op.stream = NULL;
   op.filePath = arcPath;
-  HRESULT result = arcLink.Open2(op, openCallback);
+  HRESULT result = arcLink.Open3(op, openCallback);
   if (result == E_ABORT)
     CHECK_HR(result);
 
   if (arcLink.NonOpen_ErrorInfo.ErrorFormatIndex >= 0)
     result = S_FALSE;
 
-  CHECK_HR(extractCallback->OpenResult(arcPath, result, false));
-
-  {
-    FOR_VECTOR (r, arcLink.Arcs)
-    {
-      const CArc &arc = arcLink.Arcs[r];
-      const CArcErrorInfo &er = arc.ErrorInfo;
-      if (er.IsThereErrorOrWarning())
-      {
-        CHECK_HR(extractCallback->SetError(r, arc.Path,
-            er.GetErrorFlags(), er.ErrorMessage,
-            er.GetWarningFlags(), er.WarningMessage));
-      }
-    }
-  }
+  CHECK_HR(extractCallback->OpenResult(codecs, arcLink, arcPath, result));
 
   if (arcLink.VolumePaths.Size() != 0)
   {
     totalPackSize += arcLink.VolumesSize;
     CHECK_HR(extractCallback->SetTotal(totalPackSize));
-  }
-
-  for (unsigned int v = 0; v < arcLink.Arcs.Size(); v++)
-  {
-    const CArc &arc = arcLink.Arcs[v];
-    const CArcErrorInfo &er = arc.ErrorInfo;
-
-    if (er.ErrorFormatIndex >= 0)
-    {
-      CHECK_HR(extractCallback->OpenTypeWarning(arc.Path,
-          codecs->GetFormatNamePtr(arc.FormatIndex),
-          codecs->GetFormatNamePtr(er.ErrorFormatIndex)))
-    }
-    {
-      const UString &s = er.ErrorMessage;
-      if (!s.IsEmpty())
-      {
-        CHECK_HR(extractCallback->MessageError(s));
-      }
-    }
   }
 
   CHECK_HR(result);
@@ -254,8 +225,7 @@ void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* target
   CExtractCallback* ecs = new CExtractCallback (extractedFiles, outputDir);
   CMyComPtr<IFolderArchiveExtractCallback> extractCallback = ecs;
 
-  COpenCallbackConsole openCallback;
-  openCallback.OutStream = nullptr; // Doesn't seem to be used if NO_CRYPTO is defined, anyway
+  COpenCallback openCallback;
 
   CExtractOptions eo;
   eo.StdOutMode = false;

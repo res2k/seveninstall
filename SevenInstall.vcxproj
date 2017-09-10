@@ -95,7 +95,9 @@
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zRegister.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\Bcj2Register.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\BcjRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\BranchRegister.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\CopyRegister.cpp" />
+    <ClCompile Include="7zip\CPP\7zip\Compress\DeltaFilter.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\Lzma2Register.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\LzmaRegister.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\PpmdRegister.cpp" />
@@ -108,6 +110,7 @@
     <ClCompile Include="Install.cpp" />
     <ClCompile Include="InstalledFiles.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OpenCallback.cpp" />
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="Remove.cpp" />

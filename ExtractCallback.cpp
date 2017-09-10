@@ -2,10 +2,7 @@
 // ExtractCallback.cpp
 
 // #undef sprintf
-
 #include "ExtractCallback.hpp"
-
-#include "7zip/UI/Console/ConsoleClose.h"
 
 #include "Common/IntToString.h"
 #include "Common/Wildcard.h"
@@ -14,27 +11,54 @@
 #include "Windows/FileFind.h"
 #include "Windows/TimeUtils.h"
 #include "Windows/ErrorMsg.h"
+#include "Windows/PropVariant.h"
 #include "Windows/PropVariantConv.h"
+
+#ifndef _7ZIP_ST
+#include "Windows/Synchronization.h"
+#endif
 
 #include "7zip/Common/FilePathAutoRename.h"
 
 #include "7zip/UI/Common/ExtractingFilePath.h"
+#include "7zip/UI/Common/PropIDUtils.h"
+
+#include "7zip/UI/Console/ConsoleClose.h"
+#include "7zip/UI/Console/UserInputUtils.h"
 
 using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
+using namespace NCOM;
 
-static const char *kTestString    =  "Testing     ";
-static const char *kExtractString =  "Extracting  ";
-static const char *kSkipString    =  "Skipping    ";
+static HRESULT CheckBreak2()
+{
+  return NConsoleClose::TestBreakSignal() ? E_ABORT : S_OK;
+}
+
+static const char *kError = "ERROR: ";
+
+#ifndef _7ZIP_ST
+static NSynchronization::CCriticalSection g_CriticalSection;
+#define MT_LOCK NSynchronization::CCriticalSectionLock lock(g_CriticalSection);
+#else
+#define MT_LOCK
+#endif
+
+
+static const char *kTestString    =  "T";
+static const char *kExtractString =  "-";
+static const char *kSkipString    =  ".";
 
 // static const char *kCantAutoRename = "can not create file with auto name\n";
 // static const char *kCantRenameFile = "can not rename existing file\n";
 // static const char *kCantDeleteOutputFile = "can not delete output file ";
-static const char *kError = "ERROR: ";
+
 static const char *kMemoryExceptionMessage = "Can't allocate required memory!";
 
-static const char *kProcessing = "Processing archive: ";
+static const char *kExtracting = "Extracting archive: ";
+static const char *kTesting = "Testing archive: ";
+
 static const char *kEverythingIsOk = "Everything is Ok";
 static const char *kNoFiles = "No files to process";
 
@@ -48,8 +72,9 @@ static const char *kUnexpectedEnd = "Unexpected end of data";
 static const char *kDataAfterEnd = "There are some data after the end of the payload data";
 static const char *kIsNotArc = "Is not archive";
 static const char *kHeadersError = "Headers Error";
+static const char *kWrongPassword = "Wrong password";
 
-static const char *k_ErrorFlagsMessages[] =
+static const char * const k_ErrorFlagsMessages[] =
 {
     "Is not archive"
   , "Headers Error"
@@ -67,146 +92,205 @@ static const char *k_ErrorFlagsMessages[] =
 CExtractCallback::CExtractCallback (std::vector<std::wstring>& extractedFiles, const UString& outputDir)
   : extractedFiles (extractedFiles), outputDir (outputDir) {}
 
-STDMETHODIMP CExtractCallback::SetTotal(UInt64)
+STDMETHODIMP CExtractCallback::SetTotal(UInt64 /*size*/)
 {
-  if (NConsoleClose::TestBreakSignal())
-    return E_ABORT;
-  return S_OK;
+  MT_LOCK
+
+  return CheckBreak2();
 }
 
-STDMETHODIMP CExtractCallback::SetCompleted(const UInt64 *)
+STDMETHODIMP CExtractCallback::SetCompleted(const UInt64 * /*completeValue*/)
 {
-  if (NConsoleClose::TestBreakSignal())
-    return E_ABORT;
-  return S_OK;
+  MT_LOCK
+
+  return CheckBreak2();
 }
 
 STDMETHODIMP CExtractCallback::AskOverwrite(
-    const wchar_t *existName, const FILETIME *, const UInt64 *,
-    const wchar_t *newName, const FILETIME *, const UInt64 *,
+    const wchar_t *existName, const FILETIME *existTime, const UInt64 *existSize,
+    const wchar_t *newName, const FILETIME *newTime, const UInt64 *newSize,
     Int32 *answer)
 {
   /* FIXME: If we'd do some sort of 'rollback' support (ability to
    * 'undo' an extraction of some file), this would be the place */
   *answer = NOverwriteAnswer::kYes;
-  return S_OK;
+  return CheckBreak2();
 }
 
-STDMETHODIMP CExtractCallback::PrepareOperation(const wchar_t *name, bool /* isFolder */, Int32 askExtractMode, const UInt64 *position)
+STDMETHODIMP CExtractCallback::PrepareOperation(const wchar_t *name, Int32 /* isFolder */, Int32 askExtractMode, const UInt64 *position)
 {
+  MT_LOCK
+  
+  _currentName = name;
+  
   const char *s;
+  unsigned requiredLevel = 1;
+
   switch (askExtractMode)
   {
     case NArchive::NExtract::NAskMode::kExtract: s = kExtractString; break;
     case NArchive::NExtract::NAskMode::kTest:    s = kTestString; break;
-    case NArchive::NExtract::NAskMode::kSkip:    s = kSkipString; break;
-    default: s = ""; // return E_FAIL;
+    case NArchive::NExtract::NAskMode::kSkip:    s = kSkipString; requiredLevel = 2; break;
+    default: s = "???"; requiredLevel = 2;
   };
-  wprintf (L"%hs %ls", s, name);
-  if (position != 0)
-    wprintf (L" <%lld>", *position);
-  return S_OK;
+
+  bool show2 = (LogLevel >= requiredLevel);
+
+  if (show2)
+  {
+    _tempA = s;
+    if (name)
+      _tempA.Add_Space();
+    printf ("%s", _tempA.Ptr ());
+
+    _tempU.Empty();
+    if (name)
+      _tempU = name;
+    wprintf (L"%s", _tempU.Ptr ());
+    if (position)
+      wprintf (L" <%llu>", *position);
+    wprintf (L"\n");
+  }
+
+  return CheckBreak2();
 }
 
 STDMETHODIMP CExtractCallback::MessageError(const wchar_t *message)
 {
-  wprintf (L"%ls\n", message);
-  NumFileErrorsInCurrent++;
+  MT_LOCK
+  
+  RINOK(CheckBreak2());
+
+  NumFileErrors_in_Current++;
   NumFileErrors++;
-  return S_OK;
+
+  fwprintf (stderr, L"%hs%s\n", kError, message);
+
+  return CheckBreak2();
 }
 
-STDMETHODIMP CExtractCallback::SetOperationResult(Int32 operationResult, bool encrypted)
+void SetExtractErrorMessage(Int32 opRes, Int32 encrypted, AString &dest)
 {
-  switch (operationResult)
-  {
-    case NArchive::NExtract::NOperationResult::kOK:
-      extractedFiles.push_back (currentFile);
-      break;
-    default:
+  dest.Empty();
+    const char *s = NULL;
+    
+    switch (opRes)
     {
-      NumFileErrorsInCurrent++;
-      NumFileErrors++;
-      wprintf (L"  :  ");
-      const char *s = NULL;
-      switch (operationResult)
-      {
-        case NArchive::NExtract::NOperationResult::kUnsupportedMethod:
-          s = kUnsupportedMethod;
-          break;
-        case NArchive::NExtract::NOperationResult::kCRCError:
-          s = (encrypted ? kCrcFailedEncrypted : kCrcFailed);
-          break;
-        case NArchive::NExtract::NOperationResult::kDataError:
-          s = (encrypted ? kDataErrorEncrypted : kDataError);
-          break;
-        case NArchive::NExtract::NOperationResult::kUnavailable:
-          s = kUnavailableData;
-          break;
-        case NArchive::NExtract::NOperationResult::kUnexpectedEnd:
-          s = kUnexpectedEnd;
-          break;
-        case NArchive::NExtract::NOperationResult::kDataAfterEnd:
-          s = kDataAfterEnd;
-          break;
-        case NArchive::NExtract::NOperationResult::kIsNotArc:
-          s = kIsNotArc;
-          break;
-        case NArchive::NExtract::NOperationResult::kHeadersError:
-          s = kHeadersError;
-          break;
-      }
-      if (s)
-        wprintf (L"Error : %hs", s);
-      else
-      {
-        wprintf (L"Error #%d", operationResult);
-      }
+      case NArchive::NExtract::NOperationResult::kUnsupportedMethod:
+        s = kUnsupportedMethod;
+        break;
+      case NArchive::NExtract::NOperationResult::kCRCError:
+        s = (encrypted ? kCrcFailedEncrypted : kCrcFailed);
+        break;
+      case NArchive::NExtract::NOperationResult::kDataError:
+        s = (encrypted ? kDataErrorEncrypted : kDataError);
+        break;
+      case NArchive::NExtract::NOperationResult::kUnavailable:
+        s = kUnavailableData;
+        break;
+      case NArchive::NExtract::NOperationResult::kUnexpectedEnd:
+        s = kUnexpectedEnd;
+        break;
+      case NArchive::NExtract::NOperationResult::kDataAfterEnd:
+        s = kDataAfterEnd;
+        break;
+      case NArchive::NExtract::NOperationResult::kIsNotArc:
+        s = kIsNotArc;
+        break;
+      case NArchive::NExtract::NOperationResult::kHeadersError:
+        s = kHeadersError;
+        break;
+      case NArchive::NExtract::NOperationResult::kWrongPassword:
+        s = kWrongPassword;
+        break;
     }
-  }
-  wprintf (L"\n");
-  return S_OK;
-}
-
-HRESULT CExtractCallback::BeforeOpen(const wchar_t *name)
-{
-  NumTryArcs++;
-  ThereIsErrorInCurrent = false;
-  ThereIsWarningInCurrent = false;
-  NumFileErrorsInCurrent = 0;
-  wprintf (L"%hs%ls\n", kProcessing, name);
-  return S_OK;
-}
-
-HRESULT CExtractCallback::OpenResult(const wchar_t * /* name */, HRESULT result, bool encrypted)
-{
-  wprintf (L"\n");
-  if (result != S_OK)
-  {
-    wprintf (L"Error: ");
-    if (result == S_FALSE)
-    {
-      wprintf (encrypted ?
-        L"Can not open encrypted archive" :
-        L"Can not open file as archive");
-    }
+    
+    dest += kError;
+    if (s)
+      dest += s;
     else
     {
-      if (result == E_OUTOFMEMORY)
-        wprintf (L"Can't allocate required memory");
-      else
-        wprintf (L"%s", (const wchar_t*)NError::MyFormatMessage(result));
+      char temp[16];
+      ConvertUInt32ToString(opRes, temp);
+      dest += "Error #";
+      dest += temp;
     }
-    wprintf (L"\n");
-    NumCantOpenArcs++;
-    ThereIsErrorInCurrent = true;
+}
+
+STDMETHODIMP CExtractCallback::SetOperationResult(Int32 opRes, Int32 encrypted)
+{
+  MT_LOCK
+  
+  if (opRes == NArchive::NExtract::NOperationResult::kOK)
+  {
   }
+  else
+  {
+    NumFileErrors_in_Current++;
+    NumFileErrors++;
+    
+    AString s;
+    SetExtractErrorMessage(opRes, encrypted, s);
+
+    fwprintf (stderr, L"%hs", s.Ptr());
+    if (!_currentName.IsEmpty ())
+      fwprintf (stderr, L" : %s", _currentName.Ptr ());
+    fwprintf (stderr, L"\n");
+  }
+  
+  return CheckBreak2();
+}
+
+STDMETHODIMP CExtractCallback::ReportExtractResult(Int32 opRes, Int32 encrypted, const wchar_t *name)
+{
+  if (opRes != NArchive::NExtract::NOperationResult::kOK)
+  {
+    _currentName = name;
+    return SetOperationResult(opRes, encrypted);
+  }
+
+  return CheckBreak2();
+}
+
+
+
+#ifndef _NO_CRYPTO
+
+HRESULT CExtractCallback::SetPassword(const UString &password)
+{
+  PasswordIsDefined = true;
+  Password = password;
   return S_OK;
 }
 
-AString GetOpenArcErrorMessage(UInt32 errorFlags)
+STDMETHODIMP CExtractCallback::CryptoGetTextPassword(BSTR *password)
+{
+  COM_TRY_BEGIN
+  MT_LOCK
+  return Open_CryptoGetTextPassword(password);
+  COM_TRY_END
+}
+
+#endif
+
+HRESULT CExtractCallback::BeforeOpen(const wchar_t *name, bool testMode)
+{
+  RINOK(CheckBreak2());
+
+  NumTryArcs++;
+  ThereIsError_in_Current = false;
+  ThereIsWarning_in_Current = false;
+  NumFileErrors_in_Current = 0;
+
+  wprintf (L"\n%hs%s", (testMode ? kTesting : kExtracting), name);
+
+  return S_OK;
+}
+
+static AString GetOpenArcErrorMessage(UInt32 errorFlags)
 {
   AString s;
+
   for (unsigned i = 0; i < sizeof(k_ErrorFlagsMessages)/sizeof(k_ErrorFlagsMessages[0]); i++)
   {
     UInt32 f = (1 << i);
@@ -214,10 +298,11 @@ AString GetOpenArcErrorMessage(UInt32 errorFlags)
       continue;
     const char *m = k_ErrorFlagsMessages[i];
     if (!s.IsEmpty())
-      s += '\n';
+      s.Add_LF();
     s += m;
     errorFlags &= ~f;
   }
+
   if (errorFlags != 0)
   {
     char sz[16];
@@ -225,113 +310,460 @@ AString GetOpenArcErrorMessage(UInt32 errorFlags)
     sz[1] = 'x';
     ConvertUInt32ToHex(errorFlags, sz + 2);
     if (!s.IsEmpty())
-      s += '\n';
+      s.Add_LF();
     s += sz;
   }
+
   return s;
 }
 
-
-HRESULT CExtractCallback::SetError(int level, const wchar_t *name,
-    UInt32 errorFlags, const wchar_t *errors,
-    UInt32 warningFlags, const wchar_t *warnings)
+static const char * const kPropIdToName[] =
 {
-  if (level != 0)
-  {
-    wprintf (L"%s", name);
-  }
+  "0"
+  , "1"
+  , "2"
+  , "Path"
+  , "Name"
+  , "Extension"
+  , "Folder"
+  , "Size"
+  , "Packed Size"
+  , "Attributes"
+  , "Created"
+  , "Accessed"
+  , "Modified"
+  , "Solid"
+  , "Commented"
+  , "Encrypted"
+  , "Split Before"
+  , "Split After"
+  , "Dictionary Size"
+  , "CRC"
+  , "Type"
+  , "Anti"
+  , "Method"
+  , "Host OS"
+  , "File System"
+  , "User"
+  , "Group"
+  , "Block"
+  , "Comment"
+  , "Position"
+  , "Path Prefix"
+  , "Folders"
+  , "Files"
+  , "Version"
+  , "Volume"
+  , "Multivolume"
+  , "Offset"
+  , "Links"
+  , "Blocks"
+  , "Volumes"
+  , "Time Type"
+  , "64-bit"
+  , "Big-endian"
+  , "CPU"
+  , "Physical Size"
+  , "Headers Size"
+  , "Checksum"
+  , "Characteristics"
+  , "Virtual Address"
+  , "ID"
+  , "Short Name"
+  , "Creator Application"
+  , "Sector Size"
+  , "Mode"
+  , "Symbolic Link"
+  , "Error"
+  , "Total Size"
+  , "Free Space"
+  , "Cluster Size"
+  , "Label"
+  , "Local Name"
+  , "Provider"
+  , "NT Security"
+  , "Alternate Stream"
+  , "Aux"
+  , "Deleted"
+  , "Tree"
+  , "SHA-1"
+  , "SHA-256"
+  , "Error Type"
+  , "Errors"
+  , "Errors"
+  , "Warnings"
+  , "Warning"
+  , "Streams"
+  , "Alternate Streams"
+  , "Alternate Streams Size"
+  , "Virtual Size"
+  , "Unpack Size"
+  , "Total Physical Size"
+  , "Volume Index"
+  , "SubType"
+  , "Short Comment"
+  , "Code Page"
+  , "Is not archive type"
+  , "Physical Size can't be detected"
+  , "Zeros Tail Is Allowed"
+  , "Tail Size"
+  , "Embedded Stub Size"
+  , "Link"
+  , "Hard Link"
+  , "iNode"
+  , "Stream ID"
+  , "Read-only"
+  , "Out Name"
+};
 
-  if (errorFlags != 0)
+static void PrintPropName_and_Eq(FILE* f, PROPID propID)
+{
+  const char *s;
+  char temp[16];
+  if (propID < sizeof(kPropIdToName)/sizeof(kPropIdToName[0]))
+    s = kPropIdToName[propID];
+  else
   {
-    wprintf (L"Errors: \n%hs\n", (const char*)GetOpenArcErrorMessage(errorFlags));
-    NumOpenArcErrors++;
-    ThereIsErrorInCurrent = true;
+    ConvertUInt32ToString(propID, temp);
+    s = temp;
   }
+  fwprintf (f, L"%hs = ", s);
+}
 
-  if (errors && wcslen(errors) != 0)
+static void PrintPropNameAndNumber(FILE* f, PROPID propID, UInt64 val)
+{
+  PrintPropName_and_Eq(f, propID);
+  fwprintf (f, L"%llu\n", val);
+}
+
+static void PrintPropNameAndNumber_Signed(FILE* f, PROPID propID, Int64 val)
+{
+  PrintPropName_and_Eq(f, propID);
+  fwprintf (f, L"%lld\n", val);
+}
+
+static void PrintPropPair(FILE* f, const char *name, const wchar_t *val)
+{
+  fwprintf (f, L"%hs = %s\n", name, val);
+}
+
+static void GetPropName(PROPID propID, const wchar_t *name, AString &nameA, UString &nameU)
+{
+  if (propID < sizeof(kPropIdToName)/sizeof(kPropIdToName[0]))
   {
-    wprintf (L"Errors: \n%s\n", errors);
-    NumOpenArcErrors++;
-    ThereIsErrorInCurrent = true;
+    nameA = kPropIdToName[propID];
+    return;
   }
-
-  if (warningFlags != 0)
+  if (name)
+    nameU = name;
+  else
   {
-    wprintf (L"Warnings: \n%hs\n", (const char*)GetOpenArcErrorMessage(warningFlags));
-    NumOpenArcWarnings++;
-    ThereIsWarningInCurrent = true;
+    char s[16];
+    ConvertUInt32ToString(propID, s);
+    nameA = s;
   }
+}
 
-  if (warnings && wcslen(warnings) != 0)
+static void PrintPropertyPair2(FILE* f, PROPID propID, const wchar_t *name, const CPropVariant &prop)
+{
+  UString s;
+  ConvertPropertyToString(s, prop, propID);
+  if (!s.IsEmpty())
   {
-    wprintf (L"Warnings: \n%s\n", warnings);
-    NumOpenArcWarnings++;
-    ThereIsWarningInCurrent = true;
+    AString nameA;
+    UString nameU;
+    GetPropName(propID, name, nameA, nameU);
+    if (!nameA.IsEmpty())
+      PrintPropPair(f, nameA, s);
+    else
+      fwprintf (f, L"%s = %s\n", nameU.Ptr (), s.Ptr ());
   }
+}
 
-  wprintf (L"\n");
+static HRESULT PrintArcProp(FILE* f, IInArchive *archive, PROPID propID, const wchar_t *name)
+{
+  CPropVariant prop;
+  RINOK(archive->GetArchiveProperty(propID, &prop));
+  PrintPropertyPair2(f, propID, name, prop);
   return S_OK;
+}
+
+static void PrintArcTypeError(FILE* f, const UString &type, bool isWarning)
+{
+  fwprintf (f, L"Open %s: : Can not open the file as [%s] archive\n",
+    (isWarning ? L"WARNING" : L"ERROR"), type.Ptr ());
+}
+
+static void PrintErrorFlags(FILE* f, const char *s, UInt32 errorFlags)
+{
+  if (errorFlags == 0)
+    return;
+  fwprintf (f, L"%hs\n%hs\n", s, GetOpenArcErrorMessage (errorFlags).Ptr());
+}
+
+static void ErrorInfo_Print(FILE* f, const CArcErrorInfo &er)
+{
+  PrintErrorFlags(f, "ERRORS:", er.GetErrorFlags());
+  if (!er.ErrorMessage.IsEmpty())
+    PrintPropPair(f, "ERROR", er.ErrorMessage);
+
+  PrintErrorFlags(f, "WARNINGS:", er.GetWarningFlags());
+  if (!er.WarningMessage.IsEmpty())
+    PrintPropPair(f, "WARNING", er.WarningMessage);
+}
+
+static HRESULT Print_OpenArchive_Props(FILE* f, const CCodecs *codecs, const CArchiveLink &arcLink)
+{
+  FOR_VECTOR (r, arcLink.Arcs)
+  {
+    const CArc &arc = arcLink.Arcs[r];
+    const CArcErrorInfo &er = arc.ErrorInfo;
+    
+    fwprintf (f, L"--\n");
+    PrintPropPair(f, "Path", arc.Path);
+    if (er.ErrorFormatIndex >= 0)
+    {
+      if (er.ErrorFormatIndex == arc.FormatIndex)
+        fwprintf (f, L"Warning: The archive is open with offset\n");
+      else
+        PrintArcTypeError(f, codecs->GetFormatNamePtr(er.ErrorFormatIndex), true);
+    }
+    PrintPropPair(f, "Type", codecs->GetFormatNamePtr(arc.FormatIndex));
+    
+    ErrorInfo_Print(f, er);
+    
+    Int64 offset = arc.GetGlobalOffset();
+    if (offset != 0)
+      PrintPropNameAndNumber_Signed(f, kpidOffset, offset);
+    IInArchive *archive = arc.Archive;
+    RINOK(PrintArcProp(f, archive, kpidPhySize, NULL));
+    if (er.TailSize != 0)
+      PrintPropNameAndNumber(f, kpidTailSize, er.TailSize);
+    UInt32 numProps;
+    RINOK(archive->GetNumberOfArchiveProperties(&numProps));
+    
+    {
+      for (UInt32 j = 0; j < numProps; j++)
+      {
+        CMyComBSTR name;
+        PROPID propID;
+        VARTYPE vt;
+        RINOK(archive->GetArchivePropertyInfo(j, &name, &propID, &vt));
+        RINOK(PrintArcProp(f, archive, propID, name));
+      }
+    }
+    
+    if (r != arcLink.Arcs.Size() - 1)
+    {
+      UInt32 numProps;
+      fwprintf (f, L"----\n");
+      if (archive->GetNumberOfProperties(&numProps) == S_OK)
+      {
+        UInt32 mainIndex = arcLink.Arcs[r + 1].SubfileIndex;
+        for (UInt32 j = 0; j < numProps; j++)
+        {
+          CMyComBSTR name;
+          PROPID propID;
+          VARTYPE vt;
+          RINOK(archive->GetPropertyInfo(j, &name, &propID, &vt));
+          CPropVariant prop;
+          RINOK(archive->GetProperty(mainIndex, propID, &prop));
+          PrintPropertyPair2(f, propID, name, prop);
+        }
+      }
+    }
+  }
+  return S_OK;
+}
+
+static HRESULT Print_OpenArchive_Error(FILE* f, const CCodecs *codecs, const CArchiveLink &arcLink)
+{
+  #ifndef _NO_CRYPTO
+  if (arcLink.PasswordWasAsked)
+    fwprintf (f, L"Can not open encrypted archive. Wrong password?");
+  else
+  #endif
+  {
+    if (arcLink.NonOpen_ErrorInfo.ErrorFormatIndex >= 0)
+    {
+      fwprintf (f, L"%s\n", arcLink.NonOpen_ArcPath.Ptr());
+      PrintArcTypeError(f, codecs->Formats[arcLink.NonOpen_ErrorInfo.ErrorFormatIndex].Name, false);
+    }
+    else
+    fwprintf (f, L"Can not open the file as archive");
+  }
+
+  fwprintf (f, L"\n\n");
+  ErrorInfo_Print(f, arcLink.NonOpen_ErrorInfo);
+
+  return S_OK;
+}
+
+void Add_Messsage_Pre_ArcType(UString &s, const char *pre, const wchar_t *arcType)
+{
+  s.Add_LF();
+  s.AddAscii(pre);
+  s.AddAscii(" as [");
+  s += arcType;
+  s.AddAscii("] archive");
+}
+
+void Print_ErrorFormatIndex_Warning(FILE* f, const CCodecs *codecs, const CArc &arc)
+{
+  const CArcErrorInfo &er = arc.ErrorInfo;
+  
+  UString s = L"WARNING:\n";
+  s += arc.Path;
+  if (arc.FormatIndex == er.ErrorFormatIndex)
+  {
+    s.Add_LF();
+    s.AddAscii("The archive is open with offset");
+  }
+  else
+  {
+    Add_Messsage_Pre_ArcType(s, "Can not open the file", codecs->GetFormatNamePtr(er.ErrorFormatIndex));
+    Add_Messsage_Pre_ArcType(s, "The file is open", codecs->GetFormatNamePtr(arc.FormatIndex));
+  }
+
+  fwprintf (f, L"%s\n\n", s.Ptr ());
+}
+
+HRESULT CExtractCallback::OpenResult(
+    const CCodecs *codecs, const CArchiveLink &arcLink,
+    const wchar_t *name, HRESULT result)
+{
+  FOR_VECTOR (level, arcLink.Arcs)
+  {
+    const CArc &arc = arcLink.Arcs[level];
+    const CArcErrorInfo &er = arc.ErrorInfo;
+    
+    UInt32 errorFlags = er.GetErrorFlags();
+
+    if (errorFlags != 0 || !er.ErrorMessage.IsEmpty())
+    {
+      fwprintf (stderr, L"\n");
+      if (level != 0)
+        fwprintf (stderr, L"%s", arc.Path.Ptr());
+      
+      if (errorFlags != 0)
+      {
+        PrintErrorFlags(stderr, "ERRORS:", errorFlags);
+        NumOpenArcErrors++;
+        ThereIsError_in_Current = true;
+      }
+      
+      if (!er.ErrorMessage.IsEmpty())
+      {
+        fwprintf (stderr, L"ERRORS:\n%s\n", er.ErrorMessage.Ptr ());
+        NumOpenArcErrors++;
+        ThereIsError_in_Current = true;
+      }
+      
+      fwprintf (stderr, L"\n");
+    }
+    
+    UInt32 warningFlags = er.GetWarningFlags();
+
+    if (warningFlags != 0 || !er.WarningMessage.IsEmpty())
+    {
+      fwprintf (stdout, L"\n");
+      if (level != 0)
+        fwprintf (stdout, L"%s", arc.Path.Ptr());
+      
+      if (warningFlags != 0)
+      {
+        PrintErrorFlags(stdout, "WARNINGS:", warningFlags);
+        NumOpenArcWarnings++;
+        ThereIsWarning_in_Current = true;
+      }
+      
+      if (!er.WarningMessage.IsEmpty())
+      {
+        fwprintf (stdout, L"WARNINGS:\n%s\n", er.WarningMessage.Ptr ());
+        NumOpenArcWarnings++;
+        ThereIsWarning_in_Current = true;
+      }
+      
+      fwprintf (stdout, L"\n");
+    }
+
+  
+    if (er.ErrorFormatIndex >= 0)
+    {
+      Print_ErrorFormatIndex_Warning(stdout, codecs, arc);
+      ThereIsWarning_in_Current = true;
+    }
+  }
+      
+  if (result == S_OK)
+  {
+    RINOK(Print_OpenArchive_Props(stdout, codecs, arcLink));
+    fwprintf (stdout, L"\n");
+  }
+  else
+  {
+    NumCantOpenArcs++;
+    fwprintf (stderr, L"%hs%s\n", kError, name);
+    HRESULT res = Print_OpenArchive_Error(stderr, codecs, arcLink);
+    RINOK(res);
+    if (result == S_FALSE)
+    {
+    }
+    else
+    {
+      if (result == E_OUTOFMEMORY)
+        fwprintf (stderr, L"Can't allocate required memory");
+      else
+        fwprintf (stderr, L"%s", NError::MyFormatMessage(result).Ptr());
+      fwprintf (stderr, L"\n");
+    }
+  }
+  
+  
+  return CheckBreak2();
 }
   
 HRESULT CExtractCallback::ThereAreNoFiles()
 {
-  wprintf (L"\n%hs\n", kNoFiles);
-  return S_OK;
+  fwprintf (stdout, L"\n%hs\n", kNoFiles);
+  return CheckBreak2();
 }
 
 HRESULT CExtractCallback::ExtractResult(HRESULT result)
 {
+  MT_LOCK
+  
   if (result == S_OK)
   {
-    wprintf (L"\n");
-
-    if (NumFileErrorsInCurrent == 0 && !ThereIsErrorInCurrent)
+    if (NumFileErrors_in_Current == 0 && !ThereIsError_in_Current)
     {
-      if (ThereIsWarningInCurrent)
+      if (ThereIsWarning_in_Current)
         NumArcsWithWarnings++;
       else
         NumOkArcs++;
-      wprintf (L"%hs\n", kEverythingIsOk);
+      fwprintf (stdout, L"%hs\n", kEverythingIsOk);
     }
     else
     {
       NumArcsWithError++;
-      if (NumFileErrorsInCurrent != 0)
-        wprintf (L"Sub items Errors: %llu\n", NumFileErrorsInCurrent);
+      fwprintf (stdout, L"\n");
+      if (NumFileErrors_in_Current != 0)
+        fwprintf (stdout, L"Sub items Errors: %llu\n", NumFileErrors_in_Current);
     }
-    return S_OK;
   }
-  
-  NumArcsWithError++;
-  if (result == E_ABORT || result == ERROR_DISK_FULL)
-    return result;
-  wprintf (L"\n%hs", kError);
-  if (result == E_OUTOFMEMORY)
-    wprintf (L"%hs", kMemoryExceptionMessage);
   else
-    wprintf (L"%s", (const wchar_t*)NError::MyFormatMessage(result));
-  wprintf (L"\n");
-  return S_OK;
-}
+  {
+    NumArcsWithError++;
+    if (result == E_ABORT || result == ERROR_DISK_FULL)
+      return result;
+    
+    fwprintf (stderr, L"\n%hs", kError);
+    if (result == E_OUTOFMEMORY)
+      fwprintf (stderr, L"%hs", kMemoryExceptionMessage);
+    else
+      fwprintf (stderr, L"%s", NError::MyFormatMessage(result).Ptr());
+    fwprintf (stderr, L"\n");
+  }
 
-HRESULT CExtractCallback::OpenTypeWarning(const wchar_t *name, const wchar_t *okType, const wchar_t *errorType)
-{
-  UString s = L"Warning:\n";
-  if (wcscmp(okType, errorType) == 0)
-  {
-    s += L"The archive is open with offset";
-  }
-  else
-  {
-    s += name;
-    s += L"\nCan not open the file as [";
-    s += errorType;
-    s += L"] archive\n";
-    s += L"The file is open as [";
-    s += okType;
-    s += L"] archive";
-  }
-  wprintf (L"%s\n\n", (const wchar_t*)s);
- ThereIsWarningInCurrent = true;
-  return S_OK;
+  return CheckBreak2();
 }
