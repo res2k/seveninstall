@@ -194,6 +194,20 @@ extern "C" int __stdio_common_vsnwprintf_s (uint64_t options, wchar_t* buffer, s
     return ret;
 }
 
+int Hprintf (HANDLE handle, const char* format, ...)
+{
+    CHECK_PARAM(handle != INVALID_HANDLE_VALUE, EINVAL, -1);
+    CHECK_PARAM(format, EINVAL, -1);
+
+    printf_impl::HandleSink sink (handle);
+    va_list args;
+    va_start (args, format);
+    int ret = printf_impl::print (sink, format, args);
+    va_end (args);
+
+    return ret;
+}
+
 int Hwprintf (HANDLE handle, const wchar_t* format, ...)
 {
     CHECK_PARAM(handle != INVALID_HANDLE_VALUE, EINVAL, -1);

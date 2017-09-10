@@ -39,6 +39,7 @@
 
 //@{
 /// Print to a Windows file handle
+int Hprintf (HANDLE handle, const char* format, ...);
 int Hwprintf (HANDLE handle, const wchar_t* format, ...);
 int vHprintf (HANDLE handle, const wchar_t* format, va_list args);
 int vHwprintf (HANDLE handle, const wchar_t* format, va_list args);
