@@ -85,6 +85,7 @@ static void InsertToHead(CRecordVector<UInt64> &dest, UInt32 item)
 
 #define COPY_ONE_ITEM(id) CopyOneItem(fileInfoPopIDs, _fileInfoPopIDs, NID::id);
 
+#ifndef _SFX
 void CHandler::FillPopIDs()
 {
   _fileInfoPopIDs.Clear();
@@ -170,5 +171,6 @@ STDMETHODIMP CHandler::GetPropertyInfo(UInt32 index, BSTR *name, PROPID *propID,
   }
   return E_INVALIDARG;
 }
+#endif
 
 }}
