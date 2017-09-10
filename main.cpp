@@ -45,17 +45,17 @@
 
 static void PrintBanner ()
 {
-    wprintf (L"7z installer\n"
-             L"%hs\n"
-             L"\n", extractCopyright);
+    printf ("7z installer\n"
+            "%s\n"
+            "\n", extractCopyright);
 }
 
 static void PrintHelp (const wchar_t* exe)
 {
-    wprintf (L"Syntax:\n");
-    wprintf (L"\t%ls install -g<GUID> -o<DIR> <archive.7z>...\n", exe);
-    wprintf (L"\t%ls change -g<GUID> <archive.7z>...\n", exe);
-    wprintf (L"\t%ls remove -g<GUID> [--ignore-dependents]\n", exe);
+    printf ("Syntax:\n");
+    printf ("\t%ls install -g<GUID> -o<DIR> <archive.7z>...\n", exe);
+    printf ("\t%ls change -g<GUID> <archive.7z>...\n", exe);
+    printf ("\t%ls remove -g<GUID> [--ignore-dependents]\n", exe);
 }
 
 enum ECommand
@@ -88,7 +88,7 @@ int wmain (int argc, const wchar_t* const argv[])
 
     if (argc < 2)
     {
-        wprintf (L"Too few arguments, expected command\n\n");
+        printf ("Too few arguments, expected command\n\n");
         PrintHelp (argv[0]);
         return ecArgsError;
     }
@@ -108,7 +108,7 @@ int wmain (int argc, const wchar_t* const argv[])
     }
     else
     {
-      wprintf (L"Unknown command %ls\n", argv[1]);
+      printf ("Unknown command %ls\n", argv[1]);
       return ecArgsError;
     }
 

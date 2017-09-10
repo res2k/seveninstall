@@ -67,16 +67,16 @@ static void TryDelete (DWORD fileAttr, const wchar_t* file)
     if (!SetFileAttributesW (file, fileAttr & ~FILE_ATTRIBUTE_READONLY))
     {
       DWORD result (GetLastError());
-      wprintf (L"Error clearing 'read-only' attribute of %ls: %ls\n", file,
-                GetErrorString (result).c_str());
+      printf ("Error clearing 'read-only' attribute of %ls: %ls\n", file,
+              GetErrorString (result).c_str());
       return;
     }
   }
   if (!DeleteFileW (file))
   {
     DWORD result (GetLastError());
-    wprintf (L"Error deleting %ls: %ls\n", file,
-              GetErrorString (result).c_str());
+    printf ("Error deleting %ls: %ls\n", file,
+            GetErrorString (result).c_str());
   }
 }
 
@@ -85,8 +85,8 @@ static void TryDeleteDir (const wchar_t* path)
   if (!RemoveDirectoryW (path))
   {
     DWORD result (GetLastError());
-    wprintf (L"Error deleting %ls: %ls\n", path,
-              GetErrorString (result).c_str());
+    printf ("Error deleting %ls: %ls\n", path,
+            GetErrorString (result).c_str());
   }
 }
 
@@ -102,8 +102,8 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   {
     // File does not exist (probably)...
     DWORD result (GetLastError());
-    wprintf (L"Error obtaining attributes for %ls: %ls\n", path,
-              GetErrorString (result).c_str());
+    printf ("Error obtaining attributes for %ls: %ls\n", path,
+            GetErrorString (result).c_str());
   }
   else if ((fileAttr & FILE_ATTRIBUTE_DIRECTORY) != 0)
   {
@@ -138,7 +138,7 @@ static void RegistryDelete (const wchar_t* regPath)
   }
   if (err != ERROR_SUCCESS)
   {
-    wprintf (L"Error deleting %ls from registry: %ls\n", regPath, GetErrorString (err).c_str());
+    printf ("Error deleting %ls from registry: %ls\n", regPath, GetErrorString (err).c_str());
   }
 }
 
@@ -189,11 +189,11 @@ int DoRemove (int argc, const wchar_t* const argv[])
         }
         catch (const HRESULTException& e)
         {
-          wprintf (L"Error checking for dependents: %ls\n", GetHRESULTString (e.GetHR()).c_str());
+          printf ("Error checking for dependents: %ls\n", GetHRESULTString (e.GetHR()).c_str());
         }
         if (has_dep > 0)
         {
-          wprintf (L"Aborting due to %ld dependents being present.\n", (long)has_dep);
+          printf ("Aborting due to %ld dependents being present.\n", (long)has_dep);
           return ecHasDependencies;
         }
       }
@@ -233,8 +233,8 @@ int DoRemove (int argc, const wchar_t* const argv[])
       {
         // Weird.
         DWORD result (GetLastError());
-        wprintf (L"Huh. Error obtaining attributes for %ls: %ls\n", listFilePath.c_str(),
-                  GetErrorString (result).c_str());
+        printf ("Huh. Error obtaining attributes for %ls: %ls\n", listFilePath.c_str(),
+                GetErrorString (result).c_str());
       }
       else
       {

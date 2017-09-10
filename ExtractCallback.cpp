@@ -146,10 +146,10 @@ STDMETHODIMP CExtractCallback::PrepareOperation(const wchar_t *name, Int32 /* is
     _tempU.Empty();
     if (name)
       _tempU = name;
-    wprintf (L"%s", _tempU.Ptr ());
+    printf ("%ls", _tempU.Ptr ());
     if (position)
-      wprintf (L" <%llu>", *position);
-    wprintf (L"\n");
+      printf (" <%llu>", *position);
+    printf ("\n");
   }
 
   return CheckBreak2();
@@ -164,7 +164,7 @@ STDMETHODIMP CExtractCallback::MessageError(const wchar_t *message)
   NumFileErrors_in_Current++;
   NumFileErrors++;
 
-  fwprintf (stderr, L"%hs%s\n", kError, message);
+  fprintf (stderr, "%s%ls\n", kError, message);
 
   return CheckBreak2();
 }
@@ -232,10 +232,10 @@ STDMETHODIMP CExtractCallback::SetOperationResult(Int32 opRes, Int32 encrypted)
     AString s;
     SetExtractErrorMessage(opRes, encrypted, s);
 
-    fwprintf (stderr, L"%hs", s.Ptr());
+    fprintf (stderr, "%s", s.Ptr());
     if (!_currentName.IsEmpty ())
-      fwprintf (stderr, L" : %s", _currentName.Ptr ());
-    fwprintf (stderr, L"\n");
+      fprintf (stderr, " : %ls", _currentName.Ptr ());
+    fprintf (stderr, "\n");
   }
   
   return CheckBreak2();
@@ -282,7 +282,7 @@ HRESULT CExtractCallback::BeforeOpen(const wchar_t *name, bool testMode)
   ThereIsWarning_in_Current = false;
   NumFileErrors_in_Current = 0;
 
-  wprintf (L"\n%hs%s", (testMode ? kTesting : kExtracting), name);
+  printf ("\n%s%ls", (testMode ? kTesting : kExtracting), name);
 
   return S_OK;
 }
@@ -431,24 +431,24 @@ static void PrintPropName_and_Eq(FILE* f, PROPID propID)
     ConvertUInt32ToString(propID, temp);
     s = temp;
   }
-  fwprintf (f, L"%hs = ", s);
+  fprintf (f, "%s = ", s);
 }
 
 static void PrintPropNameAndNumber(FILE* f, PROPID propID, UInt64 val)
 {
   PrintPropName_and_Eq(f, propID);
-  fwprintf (f, L"%llu\n", val);
+  fprintf (f, "%llu\n", val);
 }
 
 static void PrintPropNameAndNumber_Signed(FILE* f, PROPID propID, Int64 val)
 {
   PrintPropName_and_Eq(f, propID);
-  fwprintf (f, L"%lld\n", val);
+  fprintf (f, "%lld\n", val);
 }
 
 static void PrintPropPair(FILE* f, const char *name, const wchar_t *val)
 {
-  fwprintf (f, L"%hs = %s\n", name, val);
+  fprintf (f, "%s = %ls\n", name, val);
 }
 
 static void GetPropName(PROPID propID, const wchar_t *name, AString &nameA, UString &nameU)
@@ -482,7 +482,7 @@ static void PrintPropertyPair2(FILE* f, PROPID propID, const wchar_t *name, cons
     if (!nameA.IsEmpty())
       PrintPropPair(f, nameA, s);
     else
-      fwprintf (f, L"%s = %s\n", nameU.Ptr (), s.Ptr ());
+      fprintf (f, "%ls = %ls\n", nameU.Ptr (), s.Ptr ());
   }
 }
 
@@ -496,15 +496,15 @@ static HRESULT PrintArcProp(FILE* f, IInArchive *archive, PROPID propID, const w
 
 static void PrintArcTypeError(FILE* f, const UString &type, bool isWarning)
 {
-  fwprintf (f, L"Open %s: : Can not open the file as [%s] archive\n",
-    (isWarning ? L"WARNING" : L"ERROR"), type.Ptr ());
+  fprintf (f, "Open %s: : Can not open the file as [%ls] archive\n",
+    (isWarning ? "WARNING" : "ERROR"), type.Ptr ());
 }
 
 static void PrintErrorFlags(FILE* f, const char *s, UInt32 errorFlags)
 {
   if (errorFlags == 0)
     return;
-  fwprintf (f, L"%hs\n%hs\n", s, GetOpenArcErrorMessage (errorFlags).Ptr());
+  fprintf (f, "%s\n%s\n", s, GetOpenArcErrorMessage (errorFlags).Ptr());
 }
 
 static void ErrorInfo_Print(FILE* f, const CArcErrorInfo &er)
@@ -525,12 +525,12 @@ static HRESULT Print_OpenArchive_Props(FILE* f, const CCodecs *codecs, const CAr
     const CArc &arc = arcLink.Arcs[r];
     const CArcErrorInfo &er = arc.ErrorInfo;
     
-    fwprintf (f, L"--\n");
+    fprintf (f, "--\n");
     PrintPropPair(f, "Path", arc.Path);
     if (er.ErrorFormatIndex >= 0)
     {
       if (er.ErrorFormatIndex == arc.FormatIndex)
-        fwprintf (f, L"Warning: The archive is open with offset\n");
+        fprintf (f, "Warning: The archive is open with offset\n");
       else
         PrintArcTypeError(f, codecs->GetFormatNamePtr(er.ErrorFormatIndex), true);
     }
@@ -562,7 +562,7 @@ static HRESULT Print_OpenArchive_Props(FILE* f, const CCodecs *codecs, const CAr
     if (r != arcLink.Arcs.Size() - 1)
     {
       UInt32 numProps;
-      fwprintf (f, L"----\n");
+      fprintf (f, "----\n");
       if (archive->GetNumberOfProperties(&numProps) == S_OK)
       {
         UInt32 mainIndex = arcLink.Arcs[r + 1].SubfileIndex;
@@ -586,20 +586,20 @@ static HRESULT Print_OpenArchive_Error(FILE* f, const CCodecs *codecs, const CAr
 {
   #ifndef _NO_CRYPTO
   if (arcLink.PasswordWasAsked)
-    fwprintf (f, L"Can not open encrypted archive. Wrong password?");
+    fprintf (f, L"Can not open encrypted archive. Wrong password?");
   else
   #endif
   {
     if (arcLink.NonOpen_ErrorInfo.ErrorFormatIndex >= 0)
     {
-      fwprintf (f, L"%s\n", arcLink.NonOpen_ArcPath.Ptr());
+      fprintf (f, "%ls\n", arcLink.NonOpen_ArcPath.Ptr());
       PrintArcTypeError(f, codecs->Formats[arcLink.NonOpen_ErrorInfo.ErrorFormatIndex].Name, false);
     }
     else
-    fwprintf (f, L"Can not open the file as archive");
+    fprintf (f, "Can not open the file as archive");
   }
 
-  fwprintf (f, L"\n\n");
+  fprintf (f, "\n\n");
   ErrorInfo_Print(f, arcLink.NonOpen_ErrorInfo);
 
   return S_OK;
@@ -631,7 +631,7 @@ void Print_ErrorFormatIndex_Warning(FILE* f, const CCodecs *codecs, const CArc &
     Add_Messsage_Pre_ArcType(s, "The file is open", codecs->GetFormatNamePtr(arc.FormatIndex));
   }
 
-  fwprintf (f, L"%s\n\n", s.Ptr ());
+  fprintf (f, "%ls\n\n", s.Ptr ());
 }
 
 HRESULT CExtractCallback::OpenResult(
@@ -647,9 +647,9 @@ HRESULT CExtractCallback::OpenResult(
 
     if (errorFlags != 0 || !er.ErrorMessage.IsEmpty())
     {
-      fwprintf (stderr, L"\n");
+      fprintf (stderr, "\n");
       if (level != 0)
-        fwprintf (stderr, L"%s", arc.Path.Ptr());
+        fprintf (stderr, "%ls", arc.Path.Ptr());
       
       if (errorFlags != 0)
       {
@@ -660,21 +660,21 @@ HRESULT CExtractCallback::OpenResult(
       
       if (!er.ErrorMessage.IsEmpty())
       {
-        fwprintf (stderr, L"ERRORS:\n%s\n", er.ErrorMessage.Ptr ());
+        fprintf (stderr, "ERRORS:\n%ls\n", er.ErrorMessage.Ptr ());
         NumOpenArcErrors++;
         ThereIsError_in_Current = true;
       }
       
-      fwprintf (stderr, L"\n");
+      fprintf (stderr, "\n");
     }
     
     UInt32 warningFlags = er.GetWarningFlags();
 
     if (warningFlags != 0 || !er.WarningMessage.IsEmpty())
     {
-      fwprintf (stdout, L"\n");
+      fprintf (stdout, "\n");
       if (level != 0)
-        fwprintf (stdout, L"%s", arc.Path.Ptr());
+        fprintf (stdout, "%ls", arc.Path.Ptr());
       
       if (warningFlags != 0)
       {
@@ -685,12 +685,12 @@ HRESULT CExtractCallback::OpenResult(
       
       if (!er.WarningMessage.IsEmpty())
       {
-        fwprintf (stdout, L"WARNINGS:\n%s\n", er.WarningMessage.Ptr ());
+        fprintf (stdout, "WARNINGS:\n%ls\n", er.WarningMessage.Ptr ());
         NumOpenArcWarnings++;
         ThereIsWarning_in_Current = true;
       }
       
-      fwprintf (stdout, L"\n");
+      fprintf (stdout, "\n");
     }
 
   
@@ -704,12 +704,12 @@ HRESULT CExtractCallback::OpenResult(
   if (result == S_OK)
   {
     RINOK(Print_OpenArchive_Props(stdout, codecs, arcLink));
-    fwprintf (stdout, L"\n");
+    fprintf (stdout, "\n");
   }
   else
   {
     NumCantOpenArcs++;
-    fwprintf (stderr, L"%hs%s\n", kError, name);
+    fprintf (stderr, "%s%ls\n", kError, name);
     HRESULT res = Print_OpenArchive_Error(stderr, codecs, arcLink);
     RINOK(res);
     if (result == S_FALSE)
@@ -718,10 +718,10 @@ HRESULT CExtractCallback::OpenResult(
     else
     {
       if (result == E_OUTOFMEMORY)
-        fwprintf (stderr, L"Can't allocate required memory");
+        fprintf (stderr, "Can't allocate required memory");
       else
-        fwprintf (stderr, L"%s", NError::MyFormatMessage(result).Ptr());
-      fwprintf (stderr, L"\n");
+        fprintf (stderr, "%ls", NError::MyFormatMessage(result).Ptr());
+      fprintf (stderr, "\n");
     }
   }
   
@@ -731,7 +731,7 @@ HRESULT CExtractCallback::OpenResult(
   
 HRESULT CExtractCallback::ThereAreNoFiles()
 {
-  fwprintf (stdout, L"\n%hs\n", kNoFiles);
+  fprintf (stdout, "\n%s\n", kNoFiles);
   return CheckBreak2();
 }
 
@@ -747,14 +747,14 @@ HRESULT CExtractCallback::ExtractResult(HRESULT result)
         NumArcsWithWarnings++;
       else
         NumOkArcs++;
-      fwprintf (stdout, L"%hs\n", kEverythingIsOk);
+      fprintf (stdout, "%s\n", kEverythingIsOk);
     }
     else
     {
       NumArcsWithError++;
-      fwprintf (stdout, L"\n");
+      fprintf (stdout, "\n");
       if (NumFileErrors_in_Current != 0)
-        fwprintf (stdout, L"Sub items Errors: %llu\n", NumFileErrors_in_Current);
+        fprintf (stdout, "Sub items Errors: %llu\n", NumFileErrors_in_Current);
     }
   }
   else
@@ -763,12 +763,12 @@ HRESULT CExtractCallback::ExtractResult(HRESULT result)
     if (result == E_ABORT || result == ERROR_DISK_FULL)
       return result;
     
-    fwprintf (stderr, L"\n%hs", kError);
+    fprintf (stderr, "\n%s", kError);
     if (result == E_OUTOFMEMORY)
-      fwprintf (stderr, L"%hs", kMemoryExceptionMessage);
+      fprintf (stderr, "%s", kMemoryExceptionMessage);
     else
-      fwprintf (stderr, L"%s", NError::MyFormatMessage(result).Ptr());
-    fwprintf (stderr, L"\n");
+      fprintf (stderr, "%ls", NError::MyFormatMessage(result).Ptr());
+    fprintf (stderr, "\n");
   }
 
   return CheckBreak2();

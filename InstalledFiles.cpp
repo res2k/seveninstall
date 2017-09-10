@@ -48,7 +48,7 @@ InstalledFilesWriter::InstalledFilesWriter (const wchar_t* guid) : file (INVALID
   }
   else
   {
-    Hwprintf (file, L"%ls\n", logHeader);
+    Hprintf (file, "%ls\n", logHeader);
   }
 }
 
@@ -62,7 +62,7 @@ void InstalledFilesWriter::AddEntries (const std::vector<std::wstring>& fullPath
   if (file != INVALID_HANDLE_VALUE)
   {
     for (const std::wstring& fullPath : fullPaths)
-      Hwprintf (file, L"%ls\n", fullPath.c_str());
+      Hprintf (file, "%ls\n", fullPath.c_str());
   }
 }
 

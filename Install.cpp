@@ -76,13 +76,13 @@ int DoInstall (int argc, const wchar_t* const argv[])
   }
   if (!args.GetOption (L"-o", out_dir))
   {
-    wprintf (L"'-o<DIR>' argument is required\n");
+    printf ("'-o<DIR>' argument is required\n");
     return ecArgsError;
   }
   args.GetFreeArgs (archives);
   if (archives.empty())
   {
-    wprintf (L"No archive files provided\n");
+    printf ("No archive files provided\n");
     return ecArgsError;
   }
 

@@ -72,7 +72,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
   args.GetFreeArgs (archives);
   if (archives.empty())
   {
-    wprintf (L"No archive files provided\n");
+    printf ("No archive files provided\n");
     return ecArgsError;
   }
 
