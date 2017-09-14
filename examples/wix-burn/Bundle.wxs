@@ -26,9 +26,9 @@
                   Name="packages\SevenInstall.exe"
                   Id="enwik8"
                   DetectCondition="enwik8Installed"
-                  InstallCommand="install -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot; packages\enwik8.7z"
-                  UninstallCommand="remove -g$(var.ENWIK8_GUID) -r"
-                  RepairCommand="repair -g$(var.ENWIK8_GUID) packages\enwik8.7z">
+                  InstallCommand="install -M -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot; packages\enwik8.7z"
+                  UninstallCommand="remove -M -g$(var.ENWIK8_GUID) -r"
+                  RepairCommand="repair -M -g$(var.ENWIK8_GUID) packages\enwik8.7z">
         <!-- Here go the archives to install -->
         <Payload SourceFile="../enwik8.7z"
                  Name="packages\enwik8.7z" />
