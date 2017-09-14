@@ -29,7 +29,7 @@ using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
 
-const char extractCopyright[] = "Portions " MY_VERSION_COPYRIGHT_DATE;
+const char extractCopyright[] = "Based on 7zip " MY_VERSION " : Portions " MY_COPYRIGHT " : " MY_DATE;
 
 static HRESULT DecompressArchive(
     CCodecs *codecs,
