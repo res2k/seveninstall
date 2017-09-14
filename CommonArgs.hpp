@@ -34,6 +34,10 @@
 #ifndef __7I_COMMONARGS_HPP__
 #define __7I_COMMONARGS_HPP__
 
+#include "InstallScope.hpp"
+
+#include <optional>
+
 class ArgsHelper;
 
 /**
@@ -52,6 +56,10 @@ public:
    * \returns Whether a GUID (\c -g) argument was given.
    */
   bool GetGUID (const wchar_t*& guid, bool reportMissing = true);
+  /**
+   * Get InstallScope (\c -U or \c -M) argument.
+   */
+  std::optional<InstallScope> GetInstallScope ();
 };
 
 #endif // __7I_COMMONARGS_HPP__

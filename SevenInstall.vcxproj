@@ -132,6 +132,7 @@
     <ClInclude Include="GUID.hpp" />
     <ClInclude Include="Install.hpp" />
     <ClInclude Include="InstalledFiles.hpp" />
+    <ClInclude Include="InstallScope.hpp" />
     <ClInclude Include="Paths.hpp" />
     <ClInclude Include="Registry.hpp" />
     <ClInclude Include="RegistryLocations.hpp" />

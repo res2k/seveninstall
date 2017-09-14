@@ -173,6 +173,9 @@
     <ClInclude Include="RegistryLocations.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InstallScope.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="out\Release\libucrt_reduced.lib" />

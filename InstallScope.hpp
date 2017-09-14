@@ -28,32 +28,27 @@
     For more information, please refer to <http://unlicense.org>
  */
 
-#include "CommonArgs.hpp"
+/**\file
+ * Install scope helper
+ */
+#ifndef __7I_INSTALLSCOPE_HPP__
+#define __7I_INSTALLSCOPE_HPP__
 
-#include "ArgsHelper.hpp"
-#include "GUID.hpp"
+#include <Windows.h>
 
-bool CommonArgs::GetGUID (const wchar_t*& guid, bool reportMissing)
+/// Installations scope option
+enum struct InstallScope
 {
-  bool result (args.GetOption (L"-g", guid) && (wcslen (guid) != 0));
-  if (!result && reportMissing)
-  {
-    printf ("'-g<GUID>' argument is required\n");
-  }
-  if (result && !VerifyGUID (guid))
-  {
-    printf ("Not an allowed GUID: '%ls'\n", guid);
-    return false;
-  }
-  return result;
+  /// Install per user
+  User,
+  /// Install per machine
+  Machine
+};
+
+/// Obtain registry root key for install scope
+static inline HKEY RegistryParent (InstallScope installScope)
+{
+  return (installScope == InstallScope::Machine) ? HKEY_LOCAL_MACHINE : HKEY_CURRENT_USER;
 }
 
-std::optional<InstallScope> CommonArgs::GetInstallScope ()
-{
-  if (args.GetOption (L"-U"))
-    return InstallScope::User;
-  else if (args.GetOption (L"-M"))
-    return InstallScope::Machine;
-  else
-    return std::nullopt;
-}
+#endif // __7I_INSTALLSCOPE_HPP__
