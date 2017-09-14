@@ -102,6 +102,9 @@
     <ClCompile Include="7zip\CPP\7zip\Compress\DeltaFilter.cpp">
       <Filter>Source Files\CodecRegister</Filter>
     </ClCompile>
+    <ClCompile Include="RegistryLocations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -166,6 +169,9 @@
     </ClInclude>
     <ClInclude Include="support\printf_impl\HandleSink.hpp">
       <Filter>support\printf_impl</Filter>
+    </ClInclude>
+    <ClInclude Include="RegistryLocations.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

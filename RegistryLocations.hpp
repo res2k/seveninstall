@@ -29,13 +29,21 @@
  */
 
 /**\file
- * "repair" action
+ * Helper functions to access common registry locations
  */
-#ifndef __7I_REPAIR_HPP__
-#define __7I_REPAIR_HPP__
+#ifndef __7I_REGISTRYLOCATIONS_HPP__
+#define __7I_REGISTRYLOCATIONS_HPP__
 
 #include <string>
 
-int DoRepair (int argc, const wchar_t* const argv[]);
+class InstalledFilesWriter;
 
-#endif // __7I_REPAIR_HPP__
+/// Read list file location stored for given GUID
+std::wstring ReadRegistryListFilePath (const wchar_t* guid);
+/// Read destination dir stored for given GUID
+std::wstring ReadRegistryOutputDir (const wchar_t* guid);
+
+/// Write list file and destination dir location to registry
+void WriteToRegistry (const wchar_t* guid, const wchar_t* listFileName, const wchar_t* directory);
+
+#endif // __7I_REGISTRYLOCATIONS_HPP__

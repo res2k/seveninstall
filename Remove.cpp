@@ -37,23 +37,11 @@
 #include "InstalledFiles.hpp"
 #include "Paths.hpp"
 #include "Registry.hpp"
-#include "Repair.hpp"
+#include "RegistryLocations.hpp"
 
 #include <algorithm>
 
 #include "Shlwapi.h"
-
-// TODO: Move somewhere else...
-std::wstring ReadRegistryListFilePath (const wchar_t* guid)
-{
-  const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
-  {
-    std::wstring keyPathUninstall (regPathUninstallInfo);
-    keyPathUninstall.append (guid);
-    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access);
-    return key.ReadString (regValLogFileName);
-  }
-}
 
 static bool StringSizeSort (const std::wstring& a, const std::wstring& b)
 {

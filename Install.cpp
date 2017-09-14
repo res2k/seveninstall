@@ -37,28 +37,7 @@
 #include "Extract.hpp"
 #include "InstalledFiles.hpp"
 #include "Paths.hpp"
-#include "Registry.hpp"
-
-// TODO: Move somewhere else...
-void WriteToRegistry (const wchar_t* guid, const InstalledFilesWriter& list, const wchar_t* directory)
-{
-  const REGSAM key_access (KEY_ALL_ACCESS | KEY_WOW64_64KEY);
-  {
-    std::wstring keyPathUninstall (regPathUninstallInfo);
-    keyPathUninstall.append (guid);
-    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access, RegistryKey::Create);
-    key.WriteString (regValLogFileName, list.GetLogFileName());
-    key.WriteString (regValInstallDir, directory);
-    key.WriteDWORD (L"SystemComponent", 1);
-  }
-  {
-    std::wstring keyPathDependencies (regPathDependencyInfo);
-    keyPathDependencies.append (guid);
-    AutoRootRegistryKey key (keyPathDependencies.c_str(), key_access, RegistryKey::Create);
-    // DisplayName?
-    // Version?
-  }
-}
+#include "RegistryLocations.hpp"
 
 int DoInstall (int argc, const wchar_t* const argv[])
 {
@@ -102,7 +81,7 @@ int DoInstall (int argc, const wchar_t* const argv[])
       // Actually write list
       listWriter.AddEntries (extractedFiles);
       // Record install in registry
-      WriteToRegistry (guid, listWriter, out_dir);
+      WriteToRegistry (guid, listWriter.GetLogFileName(), out_dir);
     }
     catch(...)
     {

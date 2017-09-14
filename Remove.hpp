@@ -48,7 +48,4 @@ public:
 
 int DoRemove (int argc, const wchar_t* const argv[]);
 
-// TODO: Move somewhere else
-std::wstring ReadRegistryListFilePath (const wchar_t* guid);
-
 #endif // __7I_REMOVE_HPP__

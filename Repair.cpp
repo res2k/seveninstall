@@ -35,26 +35,13 @@
 #include "Error.hpp"
 #include "ExitCode.hpp"
 #include "Extract.hpp"
-#include "Install.hpp"
 #include "InstalledFiles.hpp"
 #include "Paths.hpp"
-#include "Registry.hpp"
+#include "RegistryLocations.hpp"
 #include "Remove.hpp"
 
 #include <memory>
 #include <unordered_set>
-
-// TODO: Move somewhere else...
-std::wstring ReadRegistryOutputDir (const wchar_t* guid)
-{
-  const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
-  {
-    std::wstring keyPathUninstall (regPathUninstallInfo);
-    keyPathUninstall.append (guid);
-    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access);
-    return key.ReadString (regValInstallDir);
-  }
-}
 
 int DoRepair (int argc, const wchar_t* const argv[])
 {
@@ -128,7 +115,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
       // Add output dir to list so it'll get deleted on uninstall
       listWriter.AddEntries (extractedFiles);
       // Write registry entries
-      WriteToRegistry (guid, listWriter, outputDir.c_str());
+      WriteToRegistry (guid, listWriter.GetLogFileName(), outputDir.c_str());
     }
     catch(...)
     {
