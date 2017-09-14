@@ -117,25 +117,21 @@ void RemoveHelper::FlushDelayed ()
   directories.clear();
 }
 
-static void RegistryDelete (const wchar_t* regPath)
+static void RegistryDelete (InstallScope installScope, const wchar_t* regPath)
 {
-  LRESULT err (SHDeleteKeyW (HKEY_LOCAL_MACHINE, regPath));
-  if ((err == ERROR_ACCESS_DENIED) || (err == ERROR_FILE_NOT_FOUND))
-  {
-    err = SHDeleteKeyW (HKEY_CURRENT_USER, regPath);
-  }
+  LRESULT err (SHDeleteKeyW (RegistryParent (installScope), regPath));
   if (err != ERROR_SUCCESS)
   {
     printf ("Error deleting %ls from registry: %ls\n", regPath, GetErrorString (err).c_str());
   }
 }
 
-static size_t HasDependents (const wchar_t* regPath)
+static size_t HasDependents (InstallScope installScope, const wchar_t* regPath)
 {
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
   try
   {
-    AutoRootRegistryKey key (regPath, key_access);
+    RegistryKey key (RegistryParent (installScope), regPath, key_access);
     return key.NumSubkeys();
   }
   catch (const HRESULTException& e)
@@ -150,6 +146,7 @@ static size_t HasDependents (const wchar_t* regPath)
 int DoRemove (int argc, const wchar_t* const argv[])
 {
   const wchar_t* guid (nullptr);
+  InstallScope installScope = InstallScope::User;
 
   ArgsHelper args (argc, argv);
   {
@@ -158,6 +155,7 @@ int DoRemove (int argc, const wchar_t* const argv[])
     {
       return ecArgsError;
     }
+    installScope = commonArgs.GetInstallScope().value_or (installScope);
   }
 
   try
@@ -173,7 +171,7 @@ int DoRemove (int argc, const wchar_t* const argv[])
         size_t has_dep (0);
         try
         {
-          has_dep = HasDependents (keyPathDependents.c_str());
+          has_dep = HasDependents (installScope, keyPathDependents.c_str());
         }
         catch (const HRESULTException& e)
         {
@@ -185,11 +183,11 @@ int DoRemove (int argc, const wchar_t* const argv[])
           return ecHasDependencies;
         }
       }
-      RegistryDelete (keyPathDependencies.c_str());
+      RegistryDelete (installScope, keyPathDependencies.c_str());
     }
 
     // Obtain list file path from registry
-    std::wstring listFilePath (ReadRegistryListFilePath (guid));
+    std::wstring listFilePath (ReadRegistryListFilePath (installScope, guid));
     {
       RemoveHelper removeHelper;
 
@@ -208,7 +206,7 @@ int DoRemove (int argc, const wchar_t* const argv[])
       if (args.GetOption (L"-r"))
       {
         // Grab previously used output directory
-        std::wstring outputDir (ReadRegistryOutputDir (guid));
+        std::wstring outputDir (ReadRegistryOutputDir (installScope, guid));
         // Schedule for removal
         removeHelper.ScheduleRemove (outputDir.c_str());
       }
@@ -234,7 +232,7 @@ int DoRemove (int argc, const wchar_t* const argv[])
     {
       std::wstring keyPathUninstall (regPathUninstallInfo);
       keyPathUninstall.append (guid);
-      RegistryDelete (keyPathUninstall.c_str());
+      RegistryDelete (installScope, keyPathUninstall.c_str());
     }
   }
   catch (const HRESULTException& e)

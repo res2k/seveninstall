@@ -33,35 +33,36 @@
 #include "Paths.hpp"
 #include "Registry.hpp"
 
-std::wstring ReadRegistryListFilePath (const wchar_t* guid)
+std::wstring ReadRegistryListFilePath (InstallScope installScope, const wchar_t* guid)
 {
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
   {
     std::wstring keyPathUninstall (regPathUninstallInfo);
     keyPathUninstall.append (guid);
-    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access);
+    RegistryKey key (RegistryParent (installScope), keyPathUninstall.c_str(), key_access);
     return key.ReadString (regValLogFileName);
   }
 }
 
-std::wstring ReadRegistryOutputDir (const wchar_t* guid)
+std::wstring ReadRegistryOutputDir (InstallScope installScope, const wchar_t* guid)
 {
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
   {
     std::wstring keyPathUninstall (regPathUninstallInfo);
     keyPathUninstall.append (guid);
-    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access);
+    RegistryKey key (RegistryParent (installScope), keyPathUninstall.c_str(), key_access);
     return key.ReadString (regValInstallDir);
   }
 }
 
-void WriteToRegistry (const wchar_t* guid, const wchar_t* listFileName, const wchar_t* directory)
+void WriteToRegistry (InstallScope installScope, const wchar_t* guid, const wchar_t* listFileName,const wchar_t* directory)
 {
+  HKEY reg_parent = RegistryParent (installScope);
   const REGSAM key_access (KEY_ALL_ACCESS | KEY_WOW64_64KEY);
   {
     std::wstring keyPathUninstall (regPathUninstallInfo);
     keyPathUninstall.append (guid);
-    AutoRootRegistryKey key (keyPathUninstall.c_str(), key_access, RegistryKey::Create);
+    RegistryKey key (reg_parent, keyPathUninstall.c_str(), key_access, RegistryKey::Create);
     key.WriteString (regValLogFileName, listFileName);
     key.WriteString (regValInstallDir, directory);
     key.WriteDWORD (L"SystemComponent", 1);
@@ -69,8 +70,8 @@ void WriteToRegistry (const wchar_t* guid, const wchar_t* listFileName, const wc
   {
     std::wstring keyPathDependencies (regPathDependencyInfo);
     keyPathDependencies.append (guid);
-    AutoRootRegistryKey key (keyPathDependencies.c_str(), key_access, RegistryKey::Create);
-    // DisplayName?
-    // Version?
+    RegistryKey key (reg_parent, keyPathDependencies.c_str(), key_access, RegistryKey::Create);
+  // DisplayName?
+  // Version?
   }
 }
