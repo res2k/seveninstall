@@ -111,6 +111,7 @@
     <ClCompile Include="GUID.cpp" />
     <ClCompile Include="Install.cpp" />
     <ClCompile Include="InstalledFiles.cpp" />
+    <ClCompile Include="LogFile.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenCallback.cpp" />
     <ClCompile Include="Paths.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="Install.hpp" />
     <ClInclude Include="InstalledFiles.hpp" />
     <ClInclude Include="InstallScope.hpp" />
+    <ClInclude Include="LogFile.hpp" />
     <ClInclude Include="Paths.hpp" />
     <ClInclude Include="Registry.hpp" />
     <ClInclude Include="RegistryLocations.hpp" />

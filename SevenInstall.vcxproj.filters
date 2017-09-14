@@ -105,6 +105,9 @@
     <ClCompile Include="RegistryLocations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LogFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -174,6 +177,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InstallScope.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

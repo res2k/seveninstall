@@ -38,6 +38,7 @@
 #include "Error.hpp"
 #include "ExitCode.hpp"
 #include "Extract.hpp"
+#include "LogFile.hpp"
 
 #include "Install.hpp"
 #include "Remove.hpp"
@@ -68,8 +69,6 @@ enum ECommand
 
 int wmain (int argc, const wchar_t* const argv[])
 {
-    PrintBanner ();
-
     /*
      Operations:
         install -g<GUID> -o<DIR> <archive.7z> ...
@@ -85,6 +84,26 @@ int wmain (int argc, const wchar_t* const argv[])
      TODO: extract
          - no logging
      */
+
+    // Look for a log file argument
+    int log_file_arg = -1;
+    for (int i = 1; i < argc; i++)
+    {
+        if (wcsncmp (argv[i], L"-L", 2) == 0)
+        {
+            log_file_arg = i;
+            break;
+        }
+    }
+
+    if (log_file_arg != -1)
+    {
+        auto log_file_name = argv[log_file_arg] + 2;
+        int log_file_res = InitLogFile (log_file_name);
+        if (log_file_res < 0) return log_file_res;
+    }
+
+    PrintBanner ();
 
     // Look for first non-option argument as the command
     int command_index = 1;
@@ -122,7 +141,7 @@ int wmain (int argc, const wchar_t* const argv[])
     int num_filtered = 1;
     for (int i = 1; i < argc; i++)
     {
-        if (i == command_index) continue;
+        if ((i == command_index) || (i == log_file_arg)) continue;
         filtered_args[num_filtered++] = argv[i];
     }
 
