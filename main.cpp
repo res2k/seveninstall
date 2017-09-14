@@ -86,7 +86,11 @@ int wmain (int argc, const wchar_t* const argv[])
          - no logging
      */
 
-    if (argc < 2)
+    // Look for first non-option argument as the command
+    int command_index = 1;
+    while ((command_index < argc) && (*(argv[command_index]) == '-')) ++command_index;
+
+    if (command_index >= argc)
     {
         printf ("Too few arguments, expected command\n\n");
         PrintHelp (argv[0]);
@@ -94,15 +98,15 @@ int wmain (int argc, const wchar_t* const argv[])
     }
 
     ECommand cmd (cmdUnknown);
-    if (wcscmp (argv[1], L"install") == 0)
+    if (wcscmp (argv[command_index], L"install") == 0)
     {
         cmd = cmdInstall;
     }
-    else if (wcscmp (argv[1], L"repair") == 0)
+    else if (wcscmp (argv[command_index], L"repair") == 0)
     {
       cmd = cmdRepair;
     }
-    else if (wcscmp (argv[1], L"remove") == 0)
+    else if (wcscmp (argv[command_index], L"remove") == 0)
     {
       cmd = cmdRemove;
     }
@@ -115,19 +119,21 @@ int wmain (int argc, const wchar_t* const argv[])
     // Arguments w/o initial command
     const wchar_t** filtered_args = (const wchar_t**)_alloca ((argc-1) * sizeof (wchar_t*));
     filtered_args[0] = argv[0];
-    for (int i = 2; i < argc; i++)
+    int num_filtered = 1;
+    for (int i = 1; i < argc; i++)
     {
-        filtered_args[i-1] = argv[i];
+        if (i == command_index) continue;
+        filtered_args[num_filtered++] = argv[i];
     }
 
     switch (cmd)
     {
     case cmdInstall:
-        return DoInstall (argc-1, filtered_args);
+        return DoInstall (num_filtered, filtered_args);
     case cmdRepair:
-        return DoRepair (argc-1, filtered_args);
+        return DoRepair (num_filtered, filtered_args);
     case cmdRemove:
-        return DoRemove (argc-1, filtered_args);
+        return DoRemove (num_filtered, filtered_args);
     }
 
     return 0;
