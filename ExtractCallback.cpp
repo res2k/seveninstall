@@ -9,6 +9,7 @@
 
 #include "Windows/FileDir.h"
 #include "Windows/FileFind.h"
+#include "Windows/FileName.h"
 #include "Windows/TimeUtils.h"
 #include "Windows/ErrorMsg.h"
 #include "Windows/PropVariant.h"
@@ -90,7 +91,10 @@ static const char * const k_ErrorFlagsMessages[] =
 };
 
 CExtractCallback::CExtractCallback (std::vector<std::wstring>& extractedFiles, const UString& outputDir)
-  : extractedFiles (extractedFiles), outputDir (outputDir) {}
+  : extractedFiles (extractedFiles), outputDir (outputDir)
+{
+  NName::NormalizeDirPathPrefix (this->outputDir);
+}
 
 STDMETHODIMP CExtractCallback::SetTotal(UInt64 /*size*/)
 {
@@ -223,6 +227,7 @@ STDMETHODIMP CExtractCallback::SetOperationResult(Int32 opRes, Int32 encrypted)
   
   if (opRes == NArchive::NExtract::NOperationResult::kOK)
   {
+    extractedFiles.push_back ((outputDir + _currentName).Ptr ());
   }
   else
   {
