@@ -108,7 +108,7 @@ MyUString InstalledFilesReader::GetLine()
   if (file == INVALID_HANDLE_VALUE)
     THROW_HR(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
 
-  std::string utf8_line;
+  AString utf8_line;
 
   bool eol (false);
   while (!eol)
@@ -134,27 +134,31 @@ MyUString InstalledFilesReader::GetLine()
     if (newline_pos)
     {
       *newline_pos = 0;
-      utf8_line.append (buf_p);
+      utf8_line += buf_p;
       buf_p = newline_pos + 1;
       eol = true;
     }
     else
     {
-      utf8_line.append (buf, buf_end - buf_p);
+      // @@@ Ugh, AString doesn't have append w/ pointer + size
+      char last = 0;
+      std::swap (last, *buf_end);
+      utf8_line += buf_p;
+      utf8_line += last;
       buf_p = buf_end;
     }
   }
 
   // Remove trailing CR
-  if ((utf8_line.size() > 0) && (utf8_line[utf8_line.size()-1] == '\r')) utf8_line.resize (utf8_line.size() - 1);
+  utf8_line.TrimRight();
 
   MyUString line;
   // Convert line from UTF-8 to wide char
-  int buf_req = MultiByteToWideChar (CP_UTF8, 0, utf8_line.data(), utf8_line.size(), nullptr, 0);
+  int buf_req = MultiByteToWideChar (CP_UTF8, 0, utf8_line.Ptr(), utf8_line.Len(), nullptr, 0);
   if (buf_req == 0) return MyUString();
   auto line_ptr = line.GetBuf (buf_req);
   int ret = -1;
-  MultiByteToWideChar (CP_UTF8, 0, utf8_line.data (), utf8_line.size (),
+  MultiByteToWideChar (CP_UTF8, 0, utf8_line.Ptr(), utf8_line.Len(),
                        line_ptr, buf_req);
   line.ReleaseBuf_SetEnd (buf_req);
 
