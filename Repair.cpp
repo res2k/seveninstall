@@ -109,6 +109,8 @@ int DoRepair (int argc, const wchar_t* const argv[])
         removeHelper.FlushDelayed();
       }
     }
+    // Need to close handle to list file
+    listReader.reset ();
 
     // Generate file list
     InstalledFilesWriter listWriter (guid);
