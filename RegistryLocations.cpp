@@ -33,6 +33,12 @@
 #include "Paths.hpp"
 #include "Registry.hpp"
 
+const wchar_t regPathUninstallInfo[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\";
+const wchar_t regPathDependencyInfo[] = L"Software\\Classes\\Installer\\Dependencies\\";
+const wchar_t regPathDependentsSubkey[] = L"\\Dependents";
+const wchar_t regValLogFileName[] = L"LogFileName";
+const wchar_t regValInstallDir[] = L"InstallDir";
+
 std::wstring ReadRegistryListFilePath (InstallScope installScope, const wchar_t* guid)
 {
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);

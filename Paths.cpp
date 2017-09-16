@@ -98,9 +98,3 @@ std::wstring InstallLogFile (const wchar_t* guid)
   logFilePath.append (L".txt");
   return logFilePath;
 }
-
-const wchar_t regPathUninstallInfo[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\";
-const wchar_t regPathDependencyInfo[] = L"Software\\Classes\\Installer\\Dependencies\\";
-const wchar_t regPathDependentsSubkey[] = L"\\Dependents";
-const wchar_t regValLogFileName[] = L"LogFileName";
-const wchar_t regValInstallDir[] = L"InstallDir";

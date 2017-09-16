@@ -40,6 +40,15 @@
 
 class InstalledFilesWriter;
 
+/**\name Registry paths
+ * @{ */
+extern const wchar_t regPathUninstallInfo[];
+extern const wchar_t regValLogFileName[];
+extern const wchar_t regValInstallDir[];
+extern const wchar_t regPathDependencyInfo[];
+extern const wchar_t regPathDependentsSubkey[];
+/** @} */
+
 /// Read list file location stored for given GUID
 std::wstring ReadRegistryListFilePath (InstallScope installScope, const wchar_t* guid);
 /// Read destination dir stored for given GUID
