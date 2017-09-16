@@ -36,11 +36,19 @@
 #include <assert.h>
 #include <ShlObj.h>
 
-static std::wstring GetProgramDataPath ()
+static std::wstring GetDataDir (const CommonArgs& commonArgs)
 {
-  wchar_t pathBuf[MAX_PATH];
-  CHECK_HR (SHGetFolderPath (0, CSIDL_COMMON_APPDATA | CSIDL_FLAG_CREATE, 0, SHGFP_TYPE_CURRENT, pathBuf));
-  return pathBuf;
+  auto installScope = commonArgs.GetInstallScope();
+
+  std::wstring path;
+  {
+    wchar_t pathBuf[MAX_PATH];
+    const int folder = (installScope == InstallScope::User) ? CSIDL_LOCAL_APPDATA : CSIDL_COMMON_APPDATA;
+    CHECK_HR (SHGetFolderPath (0, folder | CSIDL_FLAG_CREATE, 0, SHGFP_TYPE_CURRENT, pathBuf));
+    path = pathBuf;
+  }
+  path.append (L"\\SevenInstall");
+  return path;
 }
 
 static void EnsureDirectoriesExist (const wchar_t* fullPath)
@@ -94,8 +102,7 @@ bool InstallLogLocation::Init (const CommonArgs& commonArgs)
 {
   assert (commonArgs.isValid ());
 
-  std::wstring logFilePath (GetProgramDataPath ());
-  logFilePath.append (L"\\SevenInstall");
+  std::wstring logFilePath (GetDataDir (commonArgs));
   EnsureDirectoriesExist (logFilePath.c_str());
   SetCompression (logFilePath.c_str());
   logFilePath.append (L"\\");
