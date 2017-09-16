@@ -47,7 +47,7 @@ class InstalledFilesWriter
   std::wstring logFileName;
   HANDLE file;
 public:
-  InstalledFilesWriter (const wchar_t* guid);
+  InstalledFilesWriter (const std::wstring_view filename);
   ~InstalledFilesWriter ();
 
   const wchar_t* GetLogFileName() const { return logFileName.c_str(); }

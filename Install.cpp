@@ -47,9 +47,10 @@ int DoInstall (int argc, const wchar_t* const argv[])
   InstallScope installScope = InstallScope::User;
 
   ArgsHelper args (argc, argv);
+  InstallLogLocation logLocation;
   {
     CommonArgs commonArgs (args);
-    if (!commonArgs.GetGUID (guid))
+    if (!commonArgs.GetGUID (guid) || !logLocation.Init (commonArgs))
     {
       return ecArgsError;
     }
@@ -74,7 +75,7 @@ int DoInstall (int argc, const wchar_t* const argv[])
   try
   {
     // Set up storage of "installation log" (list of extracted files)
-    InstalledFilesWriter listWriter (guid);
+    InstalledFilesWriter listWriter (logLocation.GetFilename());
     try
     {
       std::vector<std::wstring> extractedFiles;

@@ -50,9 +50,10 @@ int DoRepair (int argc, const wchar_t* const argv[])
   InstallScope installScope = InstallScope::User;
 
   ArgsHelper args (argc, argv);
+  InstallLogLocation logLocation;
   {
     CommonArgs commonArgs (args);
-    if (!commonArgs.GetGUID (guid))
+    if (!commonArgs.GetGUID (guid) || !logLocation.Init (args))
     {
       return ecArgsError;
     }
@@ -113,7 +114,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
     listReader.reset ();
 
     // Generate file list
-    InstalledFilesWriter listWriter (guid);
+    InstalledFilesWriter listWriter (logLocation.GetFilename());
     try
     {
       // Add output dir to list so it'll get deleted on uninstall

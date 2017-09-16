@@ -30,6 +30,7 @@
 
 #include "Paths.hpp"
 
+#include "CommonArgs.hpp"
 #include "Error.hpp"
 
 #include <ShlObj.h>
@@ -86,8 +87,13 @@ static void SetCompression (const wchar_t* path)
   CloseHandle (hFile);
 }
 
-std::wstring InstallLogFile (const wchar_t* guid)
+//---------------------------------------------------------------------------
+
+bool InstallLogLocation::Init (const CommonArgs& commonArgs)
 {
+  const wchar_t* guid (nullptr);
+  if (!commonArgs.GetGUID (guid)) return false;
+
   std::wstring logFilePath (GetProgramDataPath ());
   logFilePath.append (L"\\SevenInstall");
   EnsureDirectoriesExist (logFilePath.c_str());
@@ -96,5 +102,12 @@ std::wstring InstallLogFile (const wchar_t* guid)
   // We trust the GUID string since it has supposedly passed VerifyGUID() earlier.
   logFilePath.append (guid);
   logFilePath.append (L".txt");
-  return logFilePath;
+  filename = std::move (logFilePath);
+  return true;
+}
+
+const std::wstring& InstallLogLocation::GetFilename() const
+{
+  if (filename.empty()) throw HRESULTException (E_FAIL);
+  return filename;
 }

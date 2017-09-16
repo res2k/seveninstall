@@ -35,11 +35,20 @@
 #ifndef __7I_PATHS_HPP__
 #define __7I_PATHS_HPP__
 
-#include <Windows.h>
-
 #include <string>
 
-// Generate installation log file for a given installation GUID
-std::wstring InstallLogFile (const wchar_t* guid);
+class CommonArgs;
+
+class InstallLogLocation
+{
+public:
+  /// Initialize from given common arguments
+  bool Init (const CommonArgs& commonArgs);
+
+  /// Return log file name
+  const std::wstring& GetFilename() const;
+private:
+  std::wstring filename;
+};
 
 #endif // __7I_PATHS_HPP__

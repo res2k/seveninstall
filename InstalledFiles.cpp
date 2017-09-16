@@ -38,9 +38,9 @@
 
 static const wchar_t logHeader[] = L"; SevenInstall";
 
-InstalledFilesWriter::InstalledFilesWriter (const wchar_t* guid) : file (INVALID_HANDLE_VALUE)
+InstalledFilesWriter::InstalledFilesWriter (const std::wstring_view filename)
+  : file (INVALID_HANDLE_VALUE), logFileName (filename)
 {
-  logFileName = InstallLogFile (guid);
   file = CreateFileW (logFileName.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
   if (file == INVALID_HANDLE_VALUE)
   {
