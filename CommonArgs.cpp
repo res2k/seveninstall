@@ -49,6 +49,9 @@ CommonArgs::CommonArgs (const ArgsHelper& args)
     installScope = InstallScope::User;
   else if (args.GetOption (L"-M"))
     installScope = InstallScope::Machine;
+
+  args.GetOption (L"-D", fullDataDir);
+  args.GetOption (L"-d", dataDirName);
 }
 
 bool CommonArgs::isValid () const
@@ -59,3 +62,7 @@ bool CommonArgs::isValid () const
 const wchar_t* CommonArgs::GetGUID () const { return guid; }
 
 InstallScope CommonArgs::GetInstallScope () const { return installScope; }
+
+const wchar_t* CommonArgs::GetFullDataDir () const { return fullDataDir; }
+
+const wchar_t* CommonArgs::GetDataDirName () const { return dataDirName; }

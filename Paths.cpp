@@ -38,6 +38,9 @@
 
 static std::wstring GetDataDir (const CommonArgs& commonArgs)
 {
+  if (auto fullDir = commonArgs.GetFullDataDir())
+    return fullDir;
+
   auto installScope = commonArgs.GetInstallScope();
 
   std::wstring path;
@@ -47,7 +50,11 @@ static std::wstring GetDataDir (const CommonArgs& commonArgs)
     CHECK_HR (SHGetFolderPath (0, folder | CSIDL_FLAG_CREATE, 0, SHGFP_TYPE_CURRENT, pathBuf));
     path = pathBuf;
   }
-  path.append (L"\\SevenInstall");
+  path.append (L"\\");
+  if (auto dataDirName = commonArgs.GetDataDirName())
+    path.append (dataDirName);
+  else
+    path.append (L"SevenInstall");
   return path;
 }
 

@@ -60,9 +60,19 @@ public:
    * Get InstallScope (\c -U or \c -M) argument.
    */
   InstallScope GetInstallScope () const;
+  /**
+   * Get full data directory (\c -D) argument.
+   */
+  const wchar_t* GetFullDataDir () const;
+  /**
+   * Get data directory name (\c -d) argument.
+   */
+  const wchar_t* GetDataDirName () const;
 private:
   const wchar_t* guid = nullptr;
   InstallScope installScope = InstallScope::User;
+  const wchar_t* fullDataDir = nullptr;
+  const wchar_t* dataDirName = nullptr;
 };
 
 #endif // __7I_COMMONARGS_HPP__

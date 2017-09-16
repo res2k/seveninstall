@@ -54,8 +54,8 @@ static void PrintBanner ()
 static void PrintHelp (const wchar_t* exe)
 {
     printf ("Syntax:\n");
-    printf ("\t%ls install [-L<log file>] [-M|-U] -g<GUID> -o<DIR> <archive.7z>...\n", exe);
-    printf ("\t%ls repair [-L<log file>] [-M|-U] -g<GUID> <archive.7z>...\n", exe);
+    printf ("\t%ls install [-L<log file>] [-M|-U] [-D<data dir>|-d<data dir name>] -g<GUID> -o<DIR> <archive.7z>...\n", exe);
+    printf ("\t%ls repair [-L<log file>] [-M|-U] [-D<data dir>|-d<data dir name>] -g<GUID> <archive.7z>...\n", exe);
     printf ("\t%ls remove [-L<log file>] [-M|-U] -g<GUID> [--ignore-dependents]\n", exe);
 }
 
