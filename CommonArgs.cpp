@@ -33,7 +33,7 @@
 #include "ArgsHelper.hpp"
 #include "GUID.hpp"
 
-bool CommonArgs::GetGUID (const wchar_t*& guid, bool reportMissing)
+bool CommonArgs::GetGUID (const wchar_t*& guid, bool reportMissing) const
 {
   bool result (args.GetOption (L"-g", guid) && (wcslen (guid) != 0));
   if (!result && reportMissing)

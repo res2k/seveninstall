@@ -55,7 +55,7 @@ public:
    * \param required If \c true, prints a message if the argument is missing.
    * \returns Whether a GUID (\c -g) argument was given.
    */
-  bool GetGUID (const wchar_t*& guid, bool reportMissing = true);
+  bool GetGUID (const wchar_t*& guid, bool reportMissing = true) const;
   /**
    * Get InstallScope (\c -U or \c -M) argument.
    */
