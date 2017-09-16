@@ -125,3 +125,22 @@ const std::wstring& InstallLogLocation::GetFilename() const
   if (filename.empty()) throw HRESULTException (E_FAIL);
   return filename;
 }
+
+//---------------------------------------------------------------------------
+
+void NormalizePath (std::wstring& path)
+{
+  std::wstring longPath (path.size(), 0);
+  DWORD needBuf = GetLongPathName (path.c_str(),
+                                   const_cast<wchar_t*> (longPath.data()),
+                                   longPath.size() + 1);
+  if (needBuf > longPath.size() + 1)
+  {
+    longPath.resize (needBuf - 1, 0);
+    GetLongPathName (path.c_str(),
+                     const_cast<wchar_t*> (longPath.data()),
+                     longPath.size() + 1);
+  }
+  CharLower (const_cast<wchar_t*> (longPath.c_str()));
+  path = longPath;
+}

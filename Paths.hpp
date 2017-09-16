@@ -51,4 +51,7 @@ private:
   std::wstring filename;
 };
 
+/// Helper function to 'normalize' a path do it can be compared across different runs
+void NormalizePath (std::wstring& path);
+
 #endif // __7I_PATHS_HPP__

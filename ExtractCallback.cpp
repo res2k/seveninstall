@@ -4,6 +4,8 @@
 // #undef sprintf
 #include "ExtractCallback.hpp"
 
+#include "Paths.hpp"
+
 #include "Common/IntToString.h"
 #include "Common/Wildcard.h"
 
@@ -227,7 +229,9 @@ STDMETHODIMP CExtractCallback::SetOperationResult(Int32 opRes, Int32 encrypted)
   
   if (opRes == NArchive::NExtract::NOperationResult::kOK)
   {
-    extractedFiles.push_back ((outputDir + _currentName).Ptr ());
+    std::wstring filename ((outputDir + _currentName).Ptr ());
+    NormalizePath (filename);
+    extractedFiles.emplace_back (std::move (filename));
   }
   else
   {
