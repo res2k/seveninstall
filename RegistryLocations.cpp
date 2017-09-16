@@ -39,24 +39,24 @@ const wchar_t regPathDependentsSubkey[] = L"\\Dependents";
 const wchar_t regValLogFileName[] = L"LogFileName";
 const wchar_t regValInstallDir[] = L"InstallDir";
 
-std::wstring ReadRegistryListFilePath (InstallScope installScope, const wchar_t* guid)
+MyUString ReadRegistryListFilePath (InstallScope installScope, const wchar_t* guid)
 {
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
   {
-    std::wstring keyPathUninstall (regPathUninstallInfo);
-    keyPathUninstall.append (guid);
-    RegistryKey key (RegistryParent (installScope), keyPathUninstall.c_str(), key_access);
+    MyUString keyPathUninstall (regPathUninstallInfo);
+    keyPathUninstall += guid;
+    RegistryKey key (RegistryParent (installScope), keyPathUninstall.Ptr(), key_access);
     return key.ReadString (regValLogFileName);
   }
 }
 
-std::wstring ReadRegistryOutputDir (InstallScope installScope, const wchar_t* guid)
+MyUString ReadRegistryOutputDir (InstallScope installScope, const wchar_t* guid)
 {
   const REGSAM key_access (KEY_READ | KEY_WOW64_64KEY);
   {
-    std::wstring keyPathUninstall (regPathUninstallInfo);
-    keyPathUninstall.append (guid);
-    RegistryKey key (RegistryParent (installScope), keyPathUninstall.c_str(), key_access);
+    MyUString keyPathUninstall (regPathUninstallInfo);
+    keyPathUninstall += guid;
+    RegistryKey key (RegistryParent (installScope), keyPathUninstall.Ptr(), key_access);
     return key.ReadString (regValInstallDir);
   }
 }
@@ -66,17 +66,17 @@ void WriteToRegistry (InstallScope installScope, const wchar_t* guid, const wcha
   HKEY reg_parent = RegistryParent (installScope);
   const REGSAM key_access (KEY_ALL_ACCESS | KEY_WOW64_64KEY);
   {
-    std::wstring keyPathUninstall (regPathUninstallInfo);
-    keyPathUninstall.append (guid);
-    RegistryKey key (reg_parent, keyPathUninstall.c_str(), key_access, RegistryKey::Create);
+    MyUString keyPathUninstall (regPathUninstallInfo);
+    keyPathUninstall += guid;
+    RegistryKey key (reg_parent, keyPathUninstall.Ptr(), key_access, RegistryKey::Create);
     key.WriteString (regValLogFileName, listFileName);
     key.WriteString (regValInstallDir, directory);
     key.WriteDWORD (L"SystemComponent", 1);
   }
   {
-    std::wstring keyPathDependencies (regPathDependencyInfo);
-    keyPathDependencies.append (guid);
-    RegistryKey key (reg_parent, keyPathDependencies.c_str(), key_access, RegistryKey::Create);
+    MyUString keyPathDependencies (regPathDependencyInfo);
+    keyPathDependencies += guid;
+    RegistryKey key (reg_parent, keyPathDependencies.Ptr(), key_access, RegistryKey::Create);
   // DisplayName?
   // Version?
   }

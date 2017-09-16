@@ -92,7 +92,7 @@ static const char * const k_ErrorFlagsMessages[] =
   , "CRC Error"
 };
 
-CExtractCallback::CExtractCallback (std::vector<std::wstring>& extractedFiles, const UString& outputDir)
+CExtractCallback::CExtractCallback (std::vector<MyUString>& extractedFiles, const UString& outputDir)
   : extractedFiles (extractedFiles), outputDir (outputDir)
 {
   NName::NormalizeDirPathPrefix (this->outputDir);
@@ -229,7 +229,7 @@ STDMETHODIMP CExtractCallback::SetOperationResult(Int32 opRes, Int32 encrypted)
   
   if (opRes == NArchive::NExtract::NOperationResult::kOK)
   {
-    std::wstring filename ((outputDir + _currentName).Ptr ());
+    MyUString filename = (outputDir + _currentName);
     NormalizePath (filename);
     extractedFiles.emplace_back (std::move (filename));
   }

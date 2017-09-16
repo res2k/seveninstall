@@ -135,6 +135,7 @@
     <ClInclude Include="InstalledFiles.hpp" />
     <ClInclude Include="InstallScope.hpp" />
     <ClInclude Include="LogFile.hpp" />
+    <ClInclude Include="MyUString.hpp" />
     <ClInclude Include="Paths.hpp" />
     <ClInclude Include="Registry.hpp" />
     <ClInclude Include="RegistryLocations.hpp" />

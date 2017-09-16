@@ -69,7 +69,7 @@ void RegistryKey::WriteString (const wchar_t* name, const wchar_t* value)
     THROW_HR(HRESULT_FROM_WIN32(err));
 }
 
-std::wstring RegistryKey::ReadString (const wchar_t* name)
+MyUString RegistryKey::ReadString (const wchar_t* name)
 {
   wchar_t buf[256];
   std::unique_ptr<wchar_t[]> new_buf;

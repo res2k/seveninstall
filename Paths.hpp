@@ -35,7 +35,7 @@
 #ifndef __7I_PATHS_HPP__
 #define __7I_PATHS_HPP__
 
-#include <string>
+#include "MyUString.hpp"
 
 class CommonArgs;
 
@@ -46,12 +46,12 @@ public:
   bool Init (const CommonArgs& commonArgs);
 
   /// Return log file name
-  const std::wstring& GetFilename() const;
+  const MyUString& GetFilename() const;
 private:
-  std::wstring filename;
+  MyUString filename;
 };
 
 /// Helper function to 'normalize' a path do it can be compared across different runs
-void NormalizePath (std::wstring& path);
+void NormalizePath (MyUString& path);
 
 #endif // __7I_PATHS_HPP__

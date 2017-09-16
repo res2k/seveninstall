@@ -34,13 +34,14 @@
 #ifndef __ARGSHELPER_HPP__
 #define __ARGSHELPER_HPP__
 
-#include <string>
+#include "MyUString.hpp"
+
 #include <unordered_map>
 #include <vector>
 
 class ArgsHelper
 {
-    typedef std::unordered_map<std::wstring, const wchar_t*> OptionsMapType;
+    typedef std::unordered_map<MyUString, const wchar_t*> OptionsMapType;
     OptionsMapType options;
     std::vector<const wchar_t*> freeArgs;
 public:

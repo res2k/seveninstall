@@ -36,25 +36,25 @@
 #include <assert.h>
 #include <ShlObj.h>
 
-static std::wstring GetDataDir (const CommonArgs& commonArgs)
+static MyUString GetDataDir (const CommonArgs& commonArgs)
 {
   if (auto fullDir = commonArgs.GetFullDataDir())
     return fullDir;
 
   auto installScope = commonArgs.GetInstallScope();
 
-  std::wstring path;
+  MyUString path;
   {
     wchar_t pathBuf[MAX_PATH];
     const int folder = (installScope == InstallScope::User) ? CSIDL_LOCAL_APPDATA : CSIDL_COMMON_APPDATA;
     CHECK_HR (SHGetFolderPath (0, folder | CSIDL_FLAG_CREATE, 0, SHGFP_TYPE_CURRENT, pathBuf));
     path = pathBuf;
   }
-  path.append (L"\\");
+  path += L"\\";
   if (auto dataDirName = commonArgs.GetDataDirName())
-    path.append (dataDirName);
+    path += dataDirName;
   else
-    path.append (L"SevenInstall");
+    path += L"SevenInstall";
   return path;
 }
 
@@ -70,8 +70,8 @@ static void EnsureDirectoriesExist (const wchar_t* fullPath)
     const wchar_t* lastComp (wcsrchr (fullPath, '\\'));
     if (lastComp)
     {
-      std::wstring parentPath (fullPath, lastComp-fullPath);
-      EnsureDirectoriesExist(parentPath.c_str());
+      MyUString parentPath (fullPath, lastComp-fullPath);
+      EnsureDirectoriesExist(parentPath.Ptr());
     }
   }
 
@@ -109,38 +109,37 @@ bool InstallLogLocation::Init (const CommonArgs& commonArgs)
 {
   assert (commonArgs.isValid ());
 
-  std::wstring logFilePath (GetDataDir (commonArgs));
-  EnsureDirectoriesExist (logFilePath.c_str());
-  SetCompression (logFilePath.c_str());
-  logFilePath.append (L"\\");
+  MyUString logFilePath (GetDataDir (commonArgs));
+  EnsureDirectoriesExist (logFilePath.Ptr());
+  SetCompression (logFilePath.Ptr());
+  logFilePath += L"\\";
   // We trust the GUID string since it has supposedly passed VerifyGUID() earlier.
-  logFilePath.append (commonArgs.GetGUID());
-  logFilePath.append (L".txt");
+  logFilePath += commonArgs.GetGUID();
+  logFilePath += L".txt";
   filename = std::move (logFilePath);
   return true;
 }
 
-const std::wstring& InstallLogLocation::GetFilename() const
+const MyUString& InstallLogLocation::GetFilename() const
 {
-  if (filename.empty()) throw HRESULTException (E_FAIL);
+  if (filename.IsEmpty()) throw HRESULTException (E_FAIL);
   return filename;
 }
 
 //---------------------------------------------------------------------------
 
-void NormalizePath (std::wstring& path)
+void NormalizePath (MyUString& path)
 {
-  std::wstring longPath (path.size(), 0);
-  DWORD needBuf = GetLongPathName (path.c_str(),
-                                   const_cast<wchar_t*> (longPath.data()),
-                                   longPath.size() + 1);
-  if (needBuf > longPath.size() + 1)
+  MyUString longPath;
+  DWORD needBuf = GetLongPathName (path.Ptr(),
+                                   longPath.GetBuf (path.Len()),
+                                   path.Len() + 1);
+  if (needBuf > path.Len() + 1)
   {
-    longPath.resize (needBuf - 1, 0);
-    GetLongPathName (path.c_str(),
-                     const_cast<wchar_t*> (longPath.data()),
-                     longPath.size() + 1);
+    GetLongPathName (path.Ptr(),
+                     longPath.GetBuf (needBuf),
+                     needBuf);
   }
-  CharLower (const_cast<wchar_t*> (longPath.c_str()));
+  CharLower (longPath.Ptr());
   path = longPath;
 }

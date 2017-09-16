@@ -35,8 +35,7 @@
 #define __7I_REGISTRYLOCATIONS_HPP__
 
 #include "InstallScope.hpp"
-
-#include <string>
+#include "MyUString.hpp"
 
 class InstalledFilesWriter;
 
@@ -50,9 +49,9 @@ extern const wchar_t regPathDependentsSubkey[];
 /** @} */
 
 /// Read list file location stored for given GUID
-std::wstring ReadRegistryListFilePath (InstallScope installScope, const wchar_t* guid);
+MyUString ReadRegistryListFilePath (InstallScope installScope, const wchar_t* guid);
 /// Read destination dir stored for given GUID
-std::wstring ReadRegistryOutputDir (InstallScope installScope, const wchar_t* guid);
+MyUString ReadRegistryOutputDir (InstallScope installScope, const wchar_t* guid);
 
 /// Write list file and destination dir location to registry
 void WriteToRegistry (InstallScope installScope, const wchar_t* guid, const wchar_t* listFileName, const wchar_t* directory);

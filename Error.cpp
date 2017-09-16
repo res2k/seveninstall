@@ -68,7 +68,7 @@ static void to_hex (Ch (&buf)[N], long value)
   to_hex_impl (buf, value);
 }
 
-std::wstring GetErrorString (DWORD error)
+MyUString GetErrorString (DWORD error)
 {
   wchar_t buf[256];
   DWORD n = FormatMessageW (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -92,7 +92,7 @@ std::wstring GetErrorString (DWORD error)
   return buf;
 }
 
-std::wstring GetHRESULTString (HRESULT hr)
+MyUString GetHRESULTString (HRESULT hr)
 {
   if (HRESULT_FACILITY(hr) == FACILITY_WIN32)
     return GetErrorString (HRESULT_CODE(hr));

@@ -70,20 +70,20 @@ int DoRepair (int argc, const wchar_t* const argv[])
   try
   {
     // Grab previously used output directory
-    std::wstring outputDir (ReadRegistryOutputDir (commonArgs.GetInstallScope (), commonArgs.GetGUID ()));
+    MyUString outputDir (ReadRegistryOutputDir (commonArgs.GetInstallScope (), commonArgs.GetGUID ()));
 
     // Extract archive(s)
-    std::vector<std::wstring> extractedFiles;
+    std::vector<MyUString> extractedFiles;
     // Extract archives
-    Extract (archives, outputDir.c_str(), extractedFiles);
+    Extract (archives, outputDir.Ptr(), extractedFiles);
     // TODO: Should canonicalize extractedFiles
 
     // Get list of previously installed files
-    std::wstring listFilePath (ReadRegistryListFilePath (commonArgs.GetInstallScope (), commonArgs.GetGUID ()));
+    MyUString listFilePath (ReadRegistryListFilePath (commonArgs.GetInstallScope (), commonArgs.GetGUID ()));
     std::unique_ptr<InstalledFilesReader> listReader;
     try
     {
-      listReader.reset (new InstalledFilesReader (listFilePath.c_str()));
+      listReader.reset (new InstalledFilesReader (listFilePath.Ptr()));
     }
     catch(...)
     {
@@ -93,18 +93,18 @@ int DoRepair (int argc, const wchar_t* const argv[])
     // Remove all files that were in the old set, but have not been extracted this time
     if (listReader)
     {
-      std::unordered_set<std::wstring> extractedFilesSet;
+      std::unordered_set<MyUString> extractedFilesSet;
       extractedFilesSet.insert (extractedFiles.begin(), extractedFiles.end());
       {
         RemoveHelper removeHelper;
 
-        std::wstring installedFile;
-        while (!(installedFile = listReader->GetFileName()).empty())
+        MyUString installedFile;
+        while (!(installedFile = listReader->GetFileName()).IsEmpty())
         {
           // TODO: Should canonicalize file name
           if (extractedFilesSet.find (installedFile) == extractedFilesSet.end())
           {
-            removeHelper.ScheduleRemove (installedFile.c_str());
+            removeHelper.ScheduleRemove (installedFile.Ptr());
           }
         }
 
@@ -121,7 +121,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
       // Add output dir to list so it'll get deleted on uninstall
       listWriter.AddEntries (extractedFiles);
       // Write registry entries
-      WriteToRegistry (commonArgs.GetInstallScope (), commonArgs.GetGUID (), listWriter.GetLogFileName(), outputDir.c_str());
+      WriteToRegistry (commonArgs.GetInstallScope (), commonArgs.GetGUID (), listWriter.GetLogFileName(), outputDir.Ptr());
     }
     catch(...)
     {

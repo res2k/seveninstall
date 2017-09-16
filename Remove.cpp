@@ -43,9 +43,9 @@
 
 #include "Shlwapi.h"
 
-static bool StringSizeSort (const std::wstring& a, const std::wstring& b)
+static bool StringSizeSort (const MyUString& a, const MyUString& b)
 {
-  return a.size() > b.size();
+  return a.Len() > b.Len();
 }
 
 static void TryDelete (DWORD fileAttr, const wchar_t* file)
@@ -56,7 +56,7 @@ static void TryDelete (DWORD fileAttr, const wchar_t* file)
     {
       DWORD result (GetLastError());
       printf ("Error clearing 'read-only' attribute of %ls: %ls\n", file,
-              GetErrorString (result).c_str());
+              GetErrorString (result).Ptr());
       return;
     }
   }
@@ -64,7 +64,7 @@ static void TryDelete (DWORD fileAttr, const wchar_t* file)
   {
     DWORD result (GetLastError());
     printf ("Error deleting %ls: %ls\n", file,
-            GetErrorString (result).c_str());
+            GetErrorString (result).Ptr());
   }
 }
 
@@ -74,7 +74,7 @@ static void TryDeleteDir (const wchar_t* path)
   {
     DWORD result (GetLastError());
     printf ("Error deleting %ls: %ls\n", path,
-            GetErrorString (result).c_str());
+            GetErrorString (result).Ptr());
   }
 }
 
@@ -91,7 +91,7 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
     // File does not exist (probably)...
     DWORD result (GetLastError());
     printf ("Error obtaining attributes for %ls: %ls\n", path,
-            GetErrorString (result).c_str());
+            GetErrorString (result).Ptr());
   }
   else if ((fileAttr & FILE_ATTRIBUTE_DIRECTORY) != 0)
   {
@@ -110,9 +110,9 @@ void RemoveHelper::FlushDelayed ()
   // Sort directory by length descending (to get deeper nested dirs first)
   std::sort (directories.begin(), directories.end(), &StringSizeSort);
   // Remove directories
-  for (const std::wstring& dir : directories)
+  for (const MyUString& dir : directories)
   {
-    TryDeleteDir (dir.c_str());
+    TryDeleteDir (dir.Ptr());
   }
   directories.clear();
 }
@@ -122,7 +122,7 @@ static void RegistryDelete (InstallScope installScope, const wchar_t* regPath)
   LRESULT err (SHDeleteKeyW (RegistryParent (installScope), regPath));
   if (err != ERROR_SUCCESS)
   {
-    printf ("Error deleting %ls from registry: %ls\n", regPath, GetErrorString (err).c_str());
+    printf ("Error deleting %ls from registry: %ls\n", regPath, GetErrorString (err).Ptr());
   }
 }
 
@@ -156,20 +156,20 @@ int DoRemove (int argc, const wchar_t* const argv[])
   {
     bool ignoreDependencies (args.GetOption (L"--ignore-dependents"));
     {
-      std::wstring keyPathDependencies (regPathDependencyInfo);
-      keyPathDependencies.append (commonArgs.GetGUID());
-      std::wstring keyPathDependents (keyPathDependencies);
-      keyPathDependents.append (regPathDependentsSubkey);
+      MyUString keyPathDependencies (regPathDependencyInfo);
+      keyPathDependencies += commonArgs.GetGUID();
+      MyUString keyPathDependents (keyPathDependencies);
+      keyPathDependents += regPathDependentsSubkey;
       if (!ignoreDependencies)
       {
         size_t has_dep (0);
         try
         {
-          has_dep = HasDependents (commonArgs.GetInstallScope(), keyPathDependents.c_str());
+          has_dep = HasDependents (commonArgs.GetInstallScope(), keyPathDependents.Ptr());
         }
         catch (const HRESULTException& e)
         {
-          printf ("Error checking for dependents: %ls\n", GetHRESULTString (e.GetHR()).c_str());
+          printf ("Error checking for dependents: %ls\n", GetHRESULTString (e.GetHR()).Ptr());
         }
         if (has_dep > 0)
         {
@@ -177,22 +177,22 @@ int DoRemove (int argc, const wchar_t* const argv[])
           return ecHasDependencies;
         }
       }
-      RegistryDelete (commonArgs.GetInstallScope(), keyPathDependencies.c_str());
+      RegistryDelete (commonArgs.GetInstallScope(), keyPathDependencies.Ptr());
     }
 
     // Obtain list file path from registry
-    std::wstring listFilePath (ReadRegistryListFilePath (commonArgs.GetInstallScope(), commonArgs.GetGUID()));
+    MyUString listFilePath (ReadRegistryListFilePath (commonArgs.GetInstallScope(), commonArgs.GetGUID()));
     {
       RemoveHelper removeHelper;
 
       // Open list file
-      InstalledFilesReader listReader (listFilePath.c_str());
+      InstalledFilesReader listReader (listFilePath.Ptr());
       // Remove all listed files
       {
-        std::wstring installedFile;
-        while (!(installedFile = listReader.GetFileName()).empty())
+        MyUString installedFile;
+        while (!(installedFile = listReader.GetFileName()).IsEmpty())
         {
-          removeHelper.ScheduleRemove (installedFile.c_str());
+          removeHelper.ScheduleRemove (installedFile.Ptr());
         }
       }
 
@@ -200,33 +200,33 @@ int DoRemove (int argc, const wchar_t* const argv[])
       if (args.GetOption (L"-r"))
       {
         // Grab previously used output directory
-        std::wstring outputDir (ReadRegistryOutputDir (commonArgs.GetInstallScope(), commonArgs.GetGUID()));
+        MyUString outputDir (ReadRegistryOutputDir (commonArgs.GetInstallScope(), commonArgs.GetGUID()));
         // Schedule for removal
-        removeHelper.ScheduleRemove (outputDir.c_str());
+        removeHelper.ScheduleRemove (outputDir.Ptr());
       }
       removeHelper.FlushDelayed();
     }
     // Remove list file
     {
-      DWORD fileAttr (GetFileAttributesW (listFilePath.c_str()));
+      DWORD fileAttr (GetFileAttributesW (listFilePath.Ptr()));
       if (fileAttr == INVALID_FILE_ATTRIBUTES)
       {
         // Weird.
         DWORD result (GetLastError());
-        printf ("Huh. Error obtaining attributes for %ls: %ls\n", listFilePath.c_str(),
-                GetErrorString (result).c_str());
+        printf ("Huh. Error obtaining attributes for %ls: %ls\n", listFilePath.Ptr(),
+                GetErrorString (result).Ptr());
       }
       else
       {
         // Remove it
-        TryDelete (fileAttr, listFilePath.c_str());
+        TryDelete (fileAttr, listFilePath.Ptr());
       }
     }
     // Clean up registry
     {
-      std::wstring keyPathUninstall (regPathUninstallInfo);
-      keyPathUninstall.append (commonArgs.GetGUID());
-      RegistryDelete (commonArgs.GetInstallScope(), keyPathUninstall.c_str());
+      MyUString keyPathUninstall (regPathUninstallInfo);
+      keyPathUninstall += commonArgs.GetGUID();
+      RegistryDelete (commonArgs.GetInstallScope(), keyPathUninstall.Ptr());
     }
   }
   catch (const HRESULTException& e)

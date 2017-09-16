@@ -79,7 +79,7 @@ int DoInstall (int argc, const wchar_t* const argv[])
     InstalledFilesWriter listWriter (logLocation.GetFilename());
     try
     {
-      std::vector<std::wstring> extractedFiles;
+      std::vector<MyUString> extractedFiles;
       // Extract archives
       Extract (archives, out_dir, extractedFiles);
       // Actually write list

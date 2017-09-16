@@ -35,8 +35,9 @@
 #ifndef __7I_ERROR_HPP__
 #define __7I_ERROR_HPP__
 
+#include "MyUString.hpp"
+
 #include <exception>
-#include <string>
 
 #include <Windows.h>
 
@@ -54,8 +55,8 @@ public:
 #define CHECK_HR(expr)    { HRESULT _hr_ ((expr)); if (!SUCCEEDED(_hr_)) THROW_HR (_hr_); }
 
 /// Format a Windows error code
-std::wstring GetErrorString (DWORD error);
+MyUString GetErrorString (DWORD error);
 /// Format a HRESULT
-std::wstring GetHRESULTString (HRESULT hr);
+MyUString GetHRESULTString (HRESULT hr);
 
 #endif // __7I_ERROR_HPP__

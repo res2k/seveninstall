@@ -11,7 +11,8 @@
 #include "7zip/Archive/IArchive.h"
 #include "7zip/UI/Common/ArchiveExtractCallback.h"
 
-#include <string>
+#include "MyUString.hpp"
+
 #include <vector>
 
 struct IArchiveCallback;
@@ -28,7 +29,7 @@ public:
   MY_QUERYINTERFACE_END
   MY_ADDREF_RELEASE
 
-  CExtractCallback (std::vector<std::wstring>& extractedFiles, const UString& outputDir);
+  CExtractCallback (std::vector<MyUString>& extractedFiles, const UString& outputDir);
 
   STDMETHOD(SetTotal)(UInt64 total) override;
   STDMETHOD(SetCompleted)(const UInt64 *completeValue) override;
@@ -42,7 +43,7 @@ public:
 
   unsigned LogLevel = 0;
 
-  std::vector<std::wstring>& extractedFiles;
+  std::vector<MyUString>& extractedFiles;
   UInt64 NumTryArcs = 0;
   bool ThereIsError_in_Current;
   bool ThereIsWarning_in_Current;

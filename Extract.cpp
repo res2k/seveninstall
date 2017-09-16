@@ -207,7 +207,7 @@ static void ExtractOneArchive (
   CHECK_HR (result);
 }
 
-void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* targetDir, std::vector<std::wstring>& extractedFiles)
+void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* targetDir, std::vector<MyUString>& extractedFiles)
 {
   CrcGenerateTable();
   NConsoleClose::CCtrlHandlerSetter handle_control;

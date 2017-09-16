@@ -34,7 +34,7 @@
 #ifndef __7I_REGISTRY_HPP__
 #define __7I_REGISTRY_HPP__
 
-#include <string>
+#include "MyUString.hpp"
 
 #include <Windows.h>
 
@@ -88,7 +88,7 @@ public:
    * \returns Actual value.
    * \throws HRESULTException in case of an error.
    */
-  std::wstring ReadString (const wchar_t* name);
+  MyUString ReadString (const wchar_t* name);
 
   /**
    * Query number of subkeys under the key.

@@ -35,8 +35,9 @@
 #ifndef __7I_INSTALLEDFILES_HPP__
 #define __7I_INSTALLEDFILES_HPP__
 
+#include "MyUString.hpp"
+
 #include <stdio.h>
-#include <string>
 #include <vector>
 
 #include <Windows.h>
@@ -44,15 +45,15 @@
 /// Write an installed files list.
 class InstalledFilesWriter
 {
-  std::wstring logFileName;
+  MyUString logFileName;
   HANDLE file;
 public:
-  InstalledFilesWriter (const std::wstring_view filename);
+  InstalledFilesWriter (const wchar_t* filename);
   ~InstalledFilesWriter ();
 
-  const wchar_t* GetLogFileName() const { return logFileName.c_str(); }
+  const wchar_t* GetLogFileName() const { return logFileName; }
 
-  void AddEntries (const std::vector<std::wstring>& fullPaths);
+  void AddEntries (const std::vector<MyUString>& fullPaths);
   /// Remove the list that has been written
   void Discard ();
 };
@@ -66,12 +67,12 @@ class InstalledFilesReader
   char* buf_p = nullptr;
   char* buf_end = nullptr;
 
-  std::wstring GetLine();
+  MyUString GetLine();
 public:
   InstalledFilesReader (const wchar_t* path);
   ~InstalledFilesReader ();
 
-  std::wstring GetFileName();
+  MyUString GetFileName();
 };
 
 #endif // __7I_INSTALLEDFILES_HPP__

@@ -45,7 +45,7 @@ ArgsHelper::ArgsHelper (int argc, const wchar_t* const argv[])
             else
             {
                 // -s ...hort option - value after 1st letter
-                std::wstring opt_str (arg, 2);
+                MyUString opt_str (arg, 2);
                 options[opt_str] = arg+2;
             }
         }

@@ -34,11 +34,12 @@
 #ifndef __7I_REMOVE_HPP__
 #define __7I_REMOVE_HPP__
 
+#include "MyUString.hpp"
 #include <vector>
 
 class RemoveHelper
 {
-  std::vector<std::wstring> directories;
+  std::vector<MyUString> directories;
 public:
   ~RemoveHelper();
 

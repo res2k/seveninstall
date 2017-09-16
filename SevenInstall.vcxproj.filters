@@ -182,6 +182,9 @@
     <ClInclude Include="LogFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyUString.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="out\Release\libucrt_reduced.lib" />
