@@ -45,21 +45,24 @@ class ArgsHelper;
  */
 class CommonArgs
 {
-  const ArgsHelper& args;
 public:
-  CommonArgs (const ArgsHelper& args) : args (args) {}
+  CommonArgs (const ArgsHelper& args);
+
+  /// Check if all required common arguments are present.
+  bool isValid () const;
 
   /**
    * Get GUID (\c -g) argument.
-   * \param guid Returns a pointer to the GUID argument, if one is present.
-   * \param required If \c true, prints a message if the argument is missing.
-   * \returns Whether a GUID (\c -g) argument was given.
+   * \return Returns a pointer to the GUID argument, if one is present.
    */
-  bool GetGUID (const wchar_t*& guid, bool reportMissing = true) const;
+  const wchar_t* GetGUID () const;
   /**
    * Get InstallScope (\c -U or \c -M) argument.
    */
-  std::optional<InstallScope> GetInstallScope ();
+  InstallScope GetInstallScope () const;
+private:
+  const wchar_t* guid = nullptr;
+  InstallScope installScope = InstallScope::User;
 };
 
 #endif // __7I_COMMONARGS_HPP__

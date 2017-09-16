@@ -41,21 +41,22 @@
 
 int DoInstall (int argc, const wchar_t* const argv[])
 {
-  const wchar_t* guid (nullptr);
+  ArgsHelper args (argc, argv);
+  CommonArgs commonArgs (args);
+  if (!commonArgs.isValid())
+  {
+    return ecArgsError;
+  }
+
   const wchar_t* out_dir (nullptr);
   std::vector<const wchar_t*> archives;
-  InstallScope installScope = InstallScope::User;
 
-  ArgsHelper args (argc, argv);
   InstallLogLocation logLocation;
+  if (!logLocation.Init (commonArgs))
   {
-    CommonArgs commonArgs (args);
-    if (!commonArgs.GetGUID (guid) || !logLocation.Init (commonArgs))
-    {
-      return ecArgsError;
-    }
-    installScope = commonArgs.GetInstallScope().value_or (installScope);
+    return ecArgsError;
   }
+
   if (!args.GetOption (L"-o", out_dir))
   {
     printf ("'-o<DIR>' argument is required\n");
@@ -84,7 +85,7 @@ int DoInstall (int argc, const wchar_t* const argv[])
       // Actually write list
       listWriter.AddEntries (extractedFiles);
       // Record install in registry
-      WriteToRegistry (installScope, guid, listWriter.GetLogFileName(), out_dir);
+      WriteToRegistry (commonArgs.GetInstallScope(), commonArgs.GetGUID(), listWriter.GetLogFileName(), out_dir);
     }
     catch(...)
     {

@@ -45,20 +45,21 @@
 
 int DoRepair (int argc, const wchar_t* const argv[])
 {
-  const wchar_t* guid (nullptr);
-  std::vector<const wchar_t*> archives;
-  InstallScope installScope = InstallScope::User;
-
   ArgsHelper args (argc, argv);
-  InstallLogLocation logLocation;
+  CommonArgs commonArgs (args);
+  if (!commonArgs.isValid())
   {
-    CommonArgs commonArgs (args);
-    if (!commonArgs.GetGUID (guid) || !logLocation.Init (args))
-    {
-      return ecArgsError;
-    }
-    installScope = commonArgs.GetInstallScope().value_or (installScope);
+    return ecArgsError;
   }
+
+  std::vector<const wchar_t*> archives;
+
+  InstallLogLocation logLocation;
+  if (!logLocation.Init (commonArgs))
+  {
+    return ecArgsError;
+  }
+
   args.GetFreeArgs (archives);
   if (archives.empty())
   {
@@ -69,7 +70,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
   try
   {
     // Grab previously used output directory
-    std::wstring outputDir (ReadRegistryOutputDir (installScope, guid));
+    std::wstring outputDir (ReadRegistryOutputDir (commonArgs.GetInstallScope (), commonArgs.GetGUID ()));
 
     // Extract archive(s)
     std::vector<std::wstring> extractedFiles;
@@ -78,7 +79,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
     // TODO: Should canonicalize extractedFiles
 
     // Get list of previously installed files
-    std::wstring listFilePath (ReadRegistryListFilePath (installScope, guid));
+    std::wstring listFilePath (ReadRegistryListFilePath (commonArgs.GetInstallScope (), commonArgs.GetGUID ()));
     std::unique_ptr<InstalledFilesReader> listReader;
     try
     {
@@ -120,7 +121,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
       // Add output dir to list so it'll get deleted on uninstall
       listWriter.AddEntries (extractedFiles);
       // Write registry entries
-      WriteToRegistry (installScope, guid, listWriter.GetLogFileName(), outputDir.c_str());
+      WriteToRegistry (commonArgs.GetInstallScope (), commonArgs.GetGUID (), listWriter.GetLogFileName(), outputDir.c_str());
     }
     catch(...)
     {

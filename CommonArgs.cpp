@@ -33,27 +33,29 @@
 #include "ArgsHelper.hpp"
 #include "GUID.hpp"
 
-bool CommonArgs::GetGUID (const wchar_t*& guid, bool reportMissing) const
+CommonArgs::CommonArgs (const ArgsHelper& args)
 {
   bool result (args.GetOption (L"-g", guid) && (wcslen (guid) != 0));
-  if (!result && reportMissing)
+  if (!result)
   {
     printf ("'-g<GUID>' argument is required\n");
   }
-  if (result && !VerifyGUID (guid))
+  else if (result && !VerifyGUID (guid))
   {
     printf ("Not an allowed GUID: '%ls'\n", guid);
-    return false;
   }
-  return result;
+
+  if (args.GetOption (L"-U"))
+    installScope = InstallScope::User;
+  else if (args.GetOption (L"-M"))
+    installScope = InstallScope::Machine;
 }
 
-std::optional<InstallScope> CommonArgs::GetInstallScope ()
+bool CommonArgs::isValid () const
 {
-  if (args.GetOption (L"-U"))
-    return InstallScope::User;
-  else if (args.GetOption (L"-M"))
-    return InstallScope::Machine;
-  else
-    return std::nullopt;
+  return guid != nullptr;
 }
+
+const wchar_t* CommonArgs::GetGUID () const { return guid; }
+
+InstallScope CommonArgs::GetInstallScope () const { return installScope; }
