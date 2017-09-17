@@ -65,7 +65,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);shlwapi.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
-      <IgnoreSpecificDefaultLibraries>libucrtd.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libucrtd.lib;libvcruntimed.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -90,7 +90,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
-      <IgnoreSpecificDefaultLibraries>libucrt.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libucrt.lib;libvcruntime.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -122,6 +122,7 @@
     <ClCompile Include="support\downlevel_locale.cpp" />
     <ClCompile Include="support\printf.cpp" />
     <ClCompile Include="support\stdio_dummies.cpp" />
+    <ClCompile Include="support\undname.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonArgs.hpp" />
@@ -170,6 +171,23 @@ python build\reassemble-lib.py "$(UniversalCRTSdkDir)Lib\%UCRT_VERSION%\ucrt\x86
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating reduced libucrtd</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)libucrtd_reduced.lib</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86\libucrtd.lib;$(ProjectDir)libucrt_reduced.txt</AdditionalInputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="out\Release\libvcruntime_reduced.lib">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">python build\reassemble-lib.py "$(VCToolsInstallDir)lib\x86\libvcruntime.lib" -o "$(OutDir)libvcruntime_reduced.lib" "@$(ProjectDir)libvcruntime_reduced.txt"
+copy "$(VCToolsInstallDir)lib\x86\libvcruntime.pdb" "$(OutDir)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating reduced libvcruntime</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)libvcruntime_reduced.lib</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VCToolsInstallDir)lib\x86\libvcruntime.lib;$(ProjectDir)libvcruntime_reduced.txt</AdditionalInputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="out\Debug\libvcruntimed_reduced.lib">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python build\reassemble-lib.py "$(VCToolsInstallDir)lib\x86\libvcruntimed.lib" -o "$(OutDir)libvcruntimed_reduced.lib" "@$(ProjectDir)libvcruntime_reduced.txt"
+copy "$(VCToolsInstallDir)lib\x86\libvcruntimed.pdb" "$(OutDir)"
+</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating reduced libvcruntimed</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)libvcruntimed_reduced.lib</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VCToolsInstallDir)lib\x86\libvcruntimed.lib;$(ProjectDir)libvcruntime_reduced.txt</AdditionalInputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
   </ItemGroup>
