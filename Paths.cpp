@@ -140,6 +140,7 @@ void NormalizePath (MyUString& path)
                      longPath.GetBuf (needBuf),
                      needBuf);
   }
+  longPath.ReleaseBuf_CalcLen (needBuf);
   CharLower (longPath.Ptr());
-  path = longPath;
+  path = std::move (longPath);
 }
