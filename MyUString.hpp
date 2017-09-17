@@ -42,9 +42,20 @@
 /**\file
  * String type (mostly) compatible to 7-zip's UString, but with some additional functionality
  */
- class MyUString
+class MyUString
 {
-  uint8_t storage[sizeof(UString)] alignas(UString);
+  struct UString_data
+  {
+    wchar_t *_chars;
+    unsigned _len;
+    unsigned _limit;
+  };
+
+  union
+  {
+    uint8_t storage[sizeof(UString)] alignas(UString);
+    UString_data data;
+  };
 
   UString& us() { return *(reinterpret_cast<UString*> (&storage)); }
   const UString& us() const { return *(reinterpret_cast<const UString*> (&storage)); }
