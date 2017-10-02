@@ -43,11 +43,6 @@
 
 #include "Shlwapi.h"
 
-static bool StringSizeSort (const MyUString& a, const MyUString& b)
-{
-  return a.Len() > b.Len();
-}
-
 static void TryDelete (DWORD fileAttr, const wchar_t* file)
 {
   if ((fileAttr & FILE_ATTRIBUTE_READONLY) != 0)
@@ -108,7 +103,17 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
 void RemoveHelper::FlushDelayed ()
 {
   // Sort directory by length descending (to get deeper nested dirs first)
-  std::sort (directories.begin(), directories.end(), &StringSizeSort);
+  qsort (directories.data(), directories.size(), sizeof (MyUString),
+         [](const void* a, const void* b)
+         {
+           const auto& a_str = *(reinterpret_cast<const MyUString*> (a));
+           const auto& b_str = *(reinterpret_cast<const MyUString*> (b));
+           if (a_str.Len() > b_str.Len())
+             return -1;
+           else if (a_str.Len() < b_str.Len())
+             return 1;
+           return 0;
+         });
   // Remove directories
   for (const MyUString& dir : directories)
   {
