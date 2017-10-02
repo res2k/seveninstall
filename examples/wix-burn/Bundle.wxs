@@ -22,16 +22,13 @@
 
     <Chain>
       <!-- Actually SevenInstall package definition. Notice the quoting on '-o' -->
-      <ExePackage SourceFile="..\..\out\Release\SevenInstall.exe"
-                  Name="packages\SevenInstall.exe"
+      <ExePackage SourceFile="obj\$(var.Configuration)\enwik8.exe"
+                  Name="packages\enwik8.exe"
                   Id="enwik8"
                   DetectCondition="enwik8Installed"
-                  InstallCommand="install &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot; packages\enwik8.7z"
+                  InstallCommand="install &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot;"
                   UninstallCommand="remove &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) -r"
-                  RepairCommand="repair &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) packages\enwik8.7z">
-        <!-- Here go the archives to install -->
-        <Payload SourceFile="../enwik8.7z"
-                 Name="packages\enwik8.7z" />
+                  RepairCommand="repair &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID)">
         <dep:Provides Key="$(var.ENWIK8_GUID)" Version="1.0.0.0"/>
       </ExePackage>
     </Chain>
