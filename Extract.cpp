@@ -17,8 +17,6 @@
 
 #include "7zip/MyVersion.h"
 
-#include "7zCrc.h"
-
 #include <iostream>
 
 #include "Error.hpp"
@@ -209,7 +207,6 @@ static void ExtractOneArchive (
 
 void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* targetDir, std::vector<MyUString>& extractedFiles)
 {
-  CrcGenerateTable();
   NConsoleClose::CCtrlHandlerSetter handle_control;
 
   UString outputDir;

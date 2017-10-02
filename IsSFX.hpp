@@ -29,57 +29,17 @@
  */
 
 /**\file
- * Common command argument handling
+ * Check if executable module is an SFX (has attached archive)
  */
-#ifndef __7I_COMMONARGS_HPP__
-#define __7I_COMMONARGS_HPP__
+#ifndef __7I_ISSFX_HPP__
+#define __7I_ISSFX_HPP__
 
-#include "InstallScope.hpp"
 #include "MyUString.hpp"
 
-#include <optional>
-
-class ArgsHelper;
-
 /**
- * Class for common command argument handling
+ * Check if executable module is an SFX (has attached archive).
+ * \param exePath Receives path of executable if it is an SFX.
  */
-class CommonArgs
-{
-public:
-  enum class Archives { Required, None };
+bool IsSFX (MyUString& exePath);
 
-  CommonArgs (const ArgsHelper& args, Archives archivesMode = Archives::None);
-
-  /// Check if all required common arguments are present.
-  bool isValid (Archives archivesMode = Archives::None) const;
-
-  /// Return paths to archives
-  const std::vector<const wchar_t*>& GetArchives() const;
-  /**
-   * Get GUID (\c -g) argument.
-   * \return Returns a pointer to the GUID argument, if one is present.
-   */
-  const wchar_t* GetGUID () const;
-  /**
-   * Get InstallScope (\c -U or \c -M) argument.
-   */
-  InstallScope GetInstallScope () const;
-  /**
-   * Get full data directory (\c -D) argument.
-   */
-  const wchar_t* GetFullDataDir () const;
-  /**
-   * Get data directory name (\c -d) argument.
-   */
-  const wchar_t* GetDataDirName () const;
-private:
-  MyUString sfx_exe;
-  std::vector<const wchar_t*> archives;
-  const wchar_t* guid = nullptr;
-  InstallScope installScope = InstallScope::User;
-  const wchar_t* fullDataDir = nullptr;
-  const wchar_t* dataDirName = nullptr;
-};
-
-#endif // __7I_COMMONARGS_HPP__
+#endif // __7I_ISSFX_HPP__

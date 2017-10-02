@@ -62,12 +62,7 @@ int DoInstall (int argc, const wchar_t* const argv[])
     printf ("'-o<DIR>' argument is required\n");
     return ecArgsError;
   }
-  args.GetFreeArgs (archives);
-  if (archives.empty())
-  {
-    printf ("No archive files provided\n");
-    return ecArgsError;
-  }
+  archives = commonArgs.GetArchives ();
 
   // FIXME: Check if GUID is an actual, valid GUID?
   // FIXME: Check (& possibly fail) if already installed? Or perhaps behave like a "repair" then? Both (choose from command line)?

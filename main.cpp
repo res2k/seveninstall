@@ -44,6 +44,8 @@
 #include "Remove.hpp"
 #include "Repair.hpp"
 
+#include "7zCrc.h"
+
 static void PrintBanner ()
 {
     printf ("7z installer\n"
@@ -144,6 +146,9 @@ int wmain (int argc, const wchar_t* const argv[])
         if ((i == command_index) || (i == log_file_arg)) continue;
         filtered_args[num_filtered++] = argv[i];
     }
+
+    // Also used by IsSFX(), so call early in all cases
+    CrcGenerateTable();
 
     switch (cmd)
     {

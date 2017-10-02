@@ -111,6 +111,9 @@
     <ClCompile Include="support\undname.cpp">
       <Filter>support</Filter>
     </ClCompile>
+    <ClCompile Include="IsSFX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -187,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="MyUString.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IsSFX.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

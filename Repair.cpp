@@ -60,12 +60,7 @@ int DoRepair (int argc, const wchar_t* const argv[])
     return ecArgsError;
   }
 
-  args.GetFreeArgs (archives);
-  if (archives.empty())
-  {
-    printf ("No archive files provided\n");
-    return ecArgsError;
-  }
+  archives = commonArgs.GetArchives ();
 
   try
   {
