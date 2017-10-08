@@ -105,6 +105,14 @@ extern "C" int __stdio_common_vfwprintf (uint64_t options, FILE* file, const wch
     return -1;
 }
 
+extern "C"  int __stdio_common_vsprintf (uint64_t options, char* buffer, size_t bufferCount, const char* format, _locale_t locale, va_list argptr)
+{
+    printf_impl::CharBufferSink sink (buffer, bufferCount);
+    int ret = printf_impl::print (sink, format, argptr);
+    sink.null_terminate();
+    return ret;
+}
+
 extern "C" int __stdio_common_vsprintf_s (uint64_t options, char* buffer, size_t bufferCount, const char* format, _locale_t locale, va_list argptr)
 {
     CHECK_PARAM(buffer, EINVAL, -1);
