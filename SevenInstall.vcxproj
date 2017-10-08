@@ -104,6 +104,12 @@
     <ClCompile Include="7zip\CPP\7zip\Compress\LzmaRegister.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Compress\PpmdRegister.cpp" />
     <ClCompile Include="ArgsHelper.cpp" />
+    <ClCompile Include="burn-pipe\buffutil.cpp" />
+    <ClCompile Include="burn-pipe\dutil.cpp" />
+    <ClCompile Include="burn-pipe\logutil.cpp" />
+    <ClCompile Include="burn-pipe\memutil.cpp" />
+    <ClCompile Include="burn-pipe\pipe.cpp" />
+    <ClCompile Include="burn-pipe\strutil.cpp" />
     <ClCompile Include="CommonArgs.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Extract.cpp" />
@@ -132,6 +138,15 @@
     <ClCompile Include="support\undname.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="burn-pipe\buffutil.h" />
+    <ClInclude Include="burn-pipe\dutil.h" />
+    <ClInclude Include="burn-pipe\fileutil.h" />
+    <ClInclude Include="burn-pipe\logutil.h" />
+    <ClInclude Include="burn-pipe\memutil.h" />
+    <ClInclude Include="burn-pipe\pipe.h" />
+    <ClInclude Include="burn-pipe\precomp.h" />
+    <ClInclude Include="burn-pipe\regutil.h" />
+    <ClInclude Include="burn-pipe\strutil.h" />
     <ClInclude Include="CommonArgs.hpp" />
     <ClInclude Include="Extract.hpp" />
     <ClInclude Include="ArgsHelper.hpp" />

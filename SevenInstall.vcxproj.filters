@@ -22,6 +22,9 @@
     <Filter Include="support\printf_impl">
       <UniqueIdentifier>{2a4dc7a4-779a-468d-ae26-1da561c916c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="burn-pipe">
+      <UniqueIdentifier>{172366f1-10e4-4898-ba69-3e1c3f791e2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -126,6 +129,24 @@
     <ClCompile Include="ProgressReporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="burn-pipe\pipe.cpp">
+      <Filter>burn-pipe</Filter>
+    </ClCompile>
+    <ClCompile Include="burn-pipe\memutil.cpp">
+      <Filter>burn-pipe</Filter>
+    </ClCompile>
+    <ClCompile Include="burn-pipe\dutil.cpp">
+      <Filter>burn-pipe</Filter>
+    </ClCompile>
+    <ClCompile Include="burn-pipe\strutil.cpp">
+      <Filter>burn-pipe</Filter>
+    </ClCompile>
+    <ClCompile Include="burn-pipe\buffutil.cpp">
+      <Filter>burn-pipe</Filter>
+    </ClCompile>
+    <ClCompile Include="burn-pipe\logutil.cpp">
+      <Filter>burn-pipe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -214,6 +235,33 @@
     </ClInclude>
     <ClInclude Include="MulDiv64.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\pipe.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\precomp.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\buffutil.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\dutil.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\fileutil.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\logutil.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\memutil.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\strutil.h">
+      <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="burn-pipe\regutil.h">
+      <Filter>burn-pipe</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
