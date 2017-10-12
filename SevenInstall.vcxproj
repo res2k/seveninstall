@@ -110,6 +110,7 @@
     <ClCompile Include="burn-pipe\memutil.cpp" />
     <ClCompile Include="burn-pipe\pipe.cpp" />
     <ClCompile Include="burn-pipe\strutil.cpp" />
+    <ClCompile Include="BurnPipe.cpp" />
     <ClCompile Include="CommonArgs.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Extract.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="burn-pipe\precomp.h" />
     <ClInclude Include="burn-pipe\regutil.h" />
     <ClInclude Include="burn-pipe\strutil.h" />
+    <ClInclude Include="BurnPipe.hpp" />
     <ClInclude Include="CommonArgs.hpp" />
     <ClInclude Include="Extract.hpp" />
     <ClInclude Include="ArgsHelper.hpp" />

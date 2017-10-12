@@ -147,6 +147,9 @@
     <ClCompile Include="burn-pipe\logutil.cpp">
       <Filter>burn-pipe</Filter>
     </ClCompile>
+    <ClCompile Include="BurnPipe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -262,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="burn-pipe\regutil.h">
       <Filter>burn-pipe</Filter>
+    </ClInclude>
+    <ClInclude Include="BurnPipe.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

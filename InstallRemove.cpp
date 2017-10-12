@@ -284,7 +284,7 @@ static std::unordered_set<MyUString> ReadPreviousFilesList (const CommonArgs& co
   return list;
 }
 
-int DoInstallRemove (const ArgsHelper& args, Action action)
+int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
 {
   bool doExtract = (action == Action::Install) || (action == Action::Repair);
   bool doRemove = (action == Action::Remove) || (action == Action::Repair);

@@ -29,21 +29,33 @@
  */
 
 /**\file
- * Install and/or Remove action
+ * Wrapper around Burn pipe communication
  */
-#ifndef SEVENI_INSTALL_REMOVE_HPP
-#define SEVENI_INSTALL_REMOVE_HPP
+#ifndef SEVENI_BURNPIPE_HPP_
+#define SEVENI_BURNPIPE_HPP_
+
+#include <memory>
 
 class ArgsHelper;
-class BurnPipe;
+struct _BURN_PIPE_CONNECTION;
 
-enum struct Action
+class BurnPipe
 {
-  Install,
-  Remove,
-  Repair
+public:
+  /// Create a BurnPipe instance
+  static BurnPipe Create (const ArgsHelper& args);
+
+  BurnPipe (BurnPipe&& other);
+  ~BurnPipe ();
+
+  BurnPipe& operator= (BurnPipe&& other);
+
+  bool IsConnected () const;
+private:
+  std::unique_ptr<_BURN_PIPE_CONNECTION> pipeConnection;
+
+  BurnPipe ();
+  BurnPipe (const wchar_t* name, const wchar_t* secret, uint32_t processId);
 };
 
-int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action actions);
-
-#endif // SEVENI_INSTALL_REMOVE_HPP
+#endif // SEVENI_BURNPIPE_HPP_

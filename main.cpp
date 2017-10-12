@@ -36,6 +36,7 @@
 #include <string.h>
 
 #include "ArgsHelper.hpp"
+#include "BurnPipe.hpp"
 #include "Error.hpp"
 #include "ExitCode.hpp"
 #include "Extract.hpp"
@@ -150,15 +151,17 @@ int wmain (int argc, const wchar_t* const argv[])
     CrcGenerateTable();
 
     ArgsHelper args (num_filtered, filtered_args);
+    /// Create pipe in any case if needed, as calling process waits for it
+    BurnPipe pipe = BurnPipe::Create (args);
 
     switch (cmd)
     {
     case cmdInstall:
-        return DoInstallRemove (args, Action::Install);
+        return DoInstallRemove (args, pipe, Action::Install);
     case cmdRepair:
-        return DoInstallRemove (args, Action::Repair);
+        return DoInstallRemove (args, pipe, Action::Repair);
     case cmdRemove:
-        return DoInstallRemove (args, Action::Remove);
+        return DoInstallRemove (args, pipe, Action::Remove);
     }
 
     return 0;
