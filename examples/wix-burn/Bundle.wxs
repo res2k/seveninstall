@@ -25,6 +25,7 @@
       <ExePackage SourceFile="obj\$(var.Configuration)\enwik8.exe"
                   Name="packages\enwik8.exe"
                   Id="enwik8"
+                  Protocol="burn"
                   DetectCondition="enwik8Installed"
                   InstallCommand="install &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot;"
                   UninstallCommand="remove &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) -r"
