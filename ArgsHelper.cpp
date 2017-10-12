@@ -30,6 +30,13 @@
 
 #include "ArgsHelper.hpp"
 
+static const wchar_t arg_burn_filehandle[] = L"burn.filehandle.self";
+static const wchar_t arg_burn_embedded[] = L"burn.embedded";
+
+const wchar_t* ArgsHelper::burnEmbeddedPipeName = L"burn.embedded.name";
+const wchar_t* ArgsHelper::burnEmbeddedPipeSecret = L"burn.embedded.secret";
+const wchar_t* ArgsHelper::burnEmbeddedPipePPID = L"burn.embedded.ppid";
+
 ArgsHelper::ArgsHelper (int argc, const wchar_t* const argv[])
 {
     for (int a = 1; a < argc; a++)
@@ -37,7 +44,20 @@ ArgsHelper::ArgsHelper (int argc, const wchar_t* const argv[])
         const wchar_t* arg (argv[a]);
         if (arg[0] == '-')
         {
-            if (arg[1] == '-')
+            if (_wcsnicmp (arg+1, arg_burn_filehandle, wcslen (arg_burn_filehandle)) == 0)
+            {
+                // Special case; treat as long options, separated by '='
+                auto sep = wcschr (arg + 1, '=');
+                options[arg_burn_filehandle] = sep ? sep+1 : nullptr;
+            }
+            else if (_wcsnicmp (arg+1, arg_burn_embedded, wcslen (arg_burn_embedded)) == 0)
+            {
+                // Special case; actually three arguments follow: connection name, secret, parent PID
+                if (++a < argc) { options[burnEmbeddedPipeName] = argv[a]; }
+                if (++a < argc) { options[burnEmbeddedPipeSecret] = argv[a]; }
+                if (++a < argc) { options[burnEmbeddedPipePPID] = argv[a]; }
+            }
+            else if (arg[1] == '-')
             {
                 // --long option - no value
                 options[arg] = nullptr;

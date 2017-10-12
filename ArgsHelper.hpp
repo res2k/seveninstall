@@ -50,6 +50,11 @@ public:
     bool GetOption (const wchar_t* prefix, const wchar_t*& value) const;
     bool GetOption (const wchar_t* option) const;
     void GetFreeArgs (std::vector<const wchar_t*>& args) const;
+
+    /// Special names for options passed in by Burn
+    static const wchar_t* burnEmbeddedPipeName;
+    static const wchar_t* burnEmbeddedPipeSecret;
+    static const wchar_t* burnEmbeddedPipePPID;
 };
 
 #endif // __ARGSHELPER_HPP__
