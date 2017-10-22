@@ -114,8 +114,10 @@
     <ClCompile Include="IsSFX.cpp" />
     <ClCompile Include="LogFile.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MulDiv64.cpp" />
     <ClCompile Include="OpenCallback.cpp" />
     <ClCompile Include="Paths.cpp" />
+    <ClCompile Include="ProgressReporter.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="RegistryLocations.cpp" />
     <ClCompile Include="support\argv_wildcards.cpp" />
@@ -143,6 +145,7 @@
     <ClInclude Include="InstallScope.hpp" />
     <ClInclude Include="IsSFX.hpp" />
     <ClInclude Include="LogFile.hpp" />
+    <ClInclude Include="MulDiv64.hpp" />
     <ClInclude Include="MyUString.hpp" />
     <ClInclude Include="Paths.hpp" />
     <ClInclude Include="ProgressReporter.hpp" />

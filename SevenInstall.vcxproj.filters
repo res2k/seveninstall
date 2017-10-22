@@ -120,6 +120,12 @@
     <ClCompile Include="support\strnlen.cpp">
       <Filter>support</Filter>
     </ClCompile>
+    <ClCompile Include="MulDiv64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressReporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -204,6 +210,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ProgressReporter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MulDiv64.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

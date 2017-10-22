@@ -28,56 +28,57 @@
     For more information, please refer to <http://unlicense.org>
  */
 
-/**\file
- * Progress reporting utility
- */
+#include "ProgressReporter.hpp"
 
-#ifndef SEVENI_PROGRESSREPORTER_HPP_
-#define SEVENI_PROGRESSREPORTER_HPP_
+#include "MulDiv64.hpp"
 
-#include <stdint.h>
+#include <assert.h>
 
-#include <vector>
+ProgressReporterMultiStep::ProgressReporterMultiStep (ProgressReporter& target) : target (target) {}
 
-struct ProgressReporter
+ProgressReporterMultiStep::phase_type ProgressReporterMultiStep::AddPhase (uint64_t total)
 {
-  virtual ~ProgressReporter() {}
-
-  virtual void SetTotal (uint64_t total) = 0;
-  virtual void SetCompleted (uint64_t completed) = 0;
-};
-
-class ProgressReporterDummy : public ProgressReporter
-{
-public:
-  void SetTotal (uint64_t /*total*/) override {}
-  void SetCompleted (uint64_t /*completed*/) override {}
-};
-
-class ProgressReporterMultiStep : protected ProgressReporter
-{
-public:
-  ProgressReporterMultiStep (ProgressReporter& target);
-
-  typedef size_t phase_type;
-  phase_type AddPhase (uint64_t total);
-
-  ProgressReporter& GetPhase (phase_type phase);
-protected:
-  ProgressReporter& target;
-
-  struct PhaseInfo
+  uint64_t phasesTotal = 0;
+  if (!phases.empty())
   {
-    uint64_t start, size;
-  };
-  std::vector<PhaseInfo> phases;
-  phase_type currentPhase = (phase_type)-1;
-  uint64_t currentTotal = 0;
+    const auto& lastPhase = phases.back();
+    phasesTotal = lastPhase.start + lastPhase.size;
+  }
 
-  bool phasesDirty = true;
+  auto new_id = phases.size();
+  PhaseInfo newPhase;
+  newPhase.start = phasesTotal;
+  newPhase.size = total;
+  phases.push_back (newPhase);
+  phasesDirty = true;
+  return new_id;
+}
 
-  void SetTotal (uint64_t total) override;
-  void SetCompleted (uint64_t completed) override;
-};
+ProgressReporter& ProgressReporterMultiStep::GetPhase (phase_type phase)
+{
+  assert(!phases.empty());
+  if (phasesDirty)
+  {
+    const auto& lastPhase = phases.back();
+    target.SetTotal (lastPhase.start + lastPhase.size);
+    phasesDirty = false;
+  }
 
-#endif // SEVENI_PROGRESSREPORTER_HPP_
+  currentPhase = phase;
+  currentTotal = 0;
+  target.SetCompleted (phases[currentPhase].start);
+  return *this;
+}
+
+void ProgressReporterMultiStep::SetTotal (uint64_t total)
+{
+  currentTotal = total;
+}
+
+void ProgressReporterMultiStep::SetCompleted (uint64_t completed)
+{
+  const auto& phaseInfo = phases[currentPhase];
+  uint64_t targetCompleted = phaseInfo.start;
+  if (currentTotal != 0) targetCompleted += MulDiv64 (completed, phaseInfo.size, currentTotal);
+  target.SetCompleted (targetCompleted);
+}

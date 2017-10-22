@@ -29,55 +29,14 @@
  */
 
 /**\file
- * Progress reporting utility
+ * 64-bit multiplication-division
  */
-
-#ifndef SEVENI_PROGRESSREPORTER_HPP_
-#define SEVENI_PROGRESSREPORTER_HPP_
+#ifndef SEVENI_MULDIV64_HPP_
+#define SEVENI_MULDIV64_HPP_
 
 #include <stdint.h>
 
-#include <vector>
+/// Compute: (a*b)/c. Returns UINT64_MAX in case of overflow
+uint64_t MulDiv64 (uint64_t a, uint64_t b, uint64_t c);
 
-struct ProgressReporter
-{
-  virtual ~ProgressReporter() {}
-
-  virtual void SetTotal (uint64_t total) = 0;
-  virtual void SetCompleted (uint64_t completed) = 0;
-};
-
-class ProgressReporterDummy : public ProgressReporter
-{
-public:
-  void SetTotal (uint64_t /*total*/) override {}
-  void SetCompleted (uint64_t /*completed*/) override {}
-};
-
-class ProgressReporterMultiStep : protected ProgressReporter
-{
-public:
-  ProgressReporterMultiStep (ProgressReporter& target);
-
-  typedef size_t phase_type;
-  phase_type AddPhase (uint64_t total);
-
-  ProgressReporter& GetPhase (phase_type phase);
-protected:
-  ProgressReporter& target;
-
-  struct PhaseInfo
-  {
-    uint64_t start, size;
-  };
-  std::vector<PhaseInfo> phases;
-  phase_type currentPhase = (phase_type)-1;
-  uint64_t currentTotal = 0;
-
-  bool phasesDirty = true;
-
-  void SetTotal (uint64_t total) override;
-  void SetCompleted (uint64_t completed) override;
-};
-
-#endif // SEVENI_PROGRESSREPORTER_HPP_
+#endif // SEVENI_MULDIV64_HPP_
