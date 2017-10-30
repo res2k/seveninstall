@@ -71,6 +71,7 @@ public:
 class InstalledFilesReader
 {
   HANDLE file;
+  uint64_t fileSize = 0;
   bool eof = false;
   char buf[256];
   char* buf_p = nullptr;
@@ -80,6 +81,9 @@ class InstalledFilesReader
 public:
   InstalledFilesReader (const wchar_t* path);
   ~InstalledFilesReader ();
+
+  uint64_t GetFileSize () const { return fileSize; }
+  uint64_t GetProcessed () const;
 
   MyUString GetFileName();
 };

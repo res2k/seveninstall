@@ -81,6 +81,7 @@ InstalledFilesReader::InstalledFilesReader (const wchar_t* filename) : file (INV
   {
     THROW_HR(HRESULT_FROM_WIN32(GetLastError()));
   }
+  GetFileSizeEx (file, reinterpret_cast<LARGE_INTEGER*> (&fileSize));
   // Skip BOM, if present
   char bom_buf[3];
   DWORD bytes_read = 0;
@@ -97,6 +98,15 @@ InstalledFilesReader::InstalledFilesReader (const wchar_t* filename) : file (INV
 InstalledFilesReader::~InstalledFilesReader ()
 {
   if (file != INVALID_HANDLE_VALUE) CloseHandle (file);
+}
+
+uint64_t InstalledFilesReader::GetProcessed () const
+{
+  uint64_t currentPos = 0;
+  LARGE_INTEGER li_null = { 0, 0 };
+  if (!SetFilePointerEx (file, li_null, reinterpret_cast<LARGE_INTEGER*> (&currentPos), FILE_CURRENT))
+    return 0;
+  return currentPos;
 }
 
 MyUString InstalledFilesReader::GetLine()
