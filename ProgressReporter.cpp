@@ -82,3 +82,10 @@ void ProgressReporterMultiStep::SetCompleted (uint64_t completed)
   if (currentTotal != 0) targetCompleted += MulDiv64 (completed, phaseInfo.size, currentTotal);
   target.SetCompleted (targetCompleted);
 }
+
+//---------------------------------------------------------------------
+
+std::shared_ptr<ProgressReporter> GetDefaultProgress ()
+{
+  return std::make_shared<ProgressReporterDummy> ();
+}

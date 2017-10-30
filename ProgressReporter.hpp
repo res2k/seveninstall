@@ -37,6 +37,7 @@
 
 #include <stdint.h>
 
+#include <memory>
 #include <vector>
 
 struct ProgressReporter
@@ -79,5 +80,8 @@ protected:
   void SetTotal (uint64_t total) override;
   void SetCompleted (uint64_t completed) override;
 };
+
+/// Get a default progress reporter.
+std::shared_ptr<ProgressReporter> GetDefaultProgress ();
 
 #endif // SEVENI_PROGRESSREPORTER_HPP_
