@@ -92,6 +92,9 @@ bool CommonArgs::isValid (Archives archivesMode) const
   case Archives::None:
     archives_flag = archives.empty() || (archives[0] == sfx_exe.Ptr());
     break;
+  case Archives::DontCare:
+    archives_flag = true;
+    break;
   }
   return (guid != nullptr) && archives_flag;
 }

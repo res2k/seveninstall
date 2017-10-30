@@ -47,7 +47,7 @@ class ArgsHelper;
 class CommonArgs
 {
 public:
-  enum class Archives { Required, None };
+  enum class Archives { Required, None, DontCare };
 
   CommonArgs (const ArgsHelper& args, Archives archivesMode = Archives::None);
 
