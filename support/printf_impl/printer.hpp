@@ -138,6 +138,7 @@ namespace printf_impl
                 if (value == 0)
                 {
                     *out_ptr = '0';
+                    digits_len = 1;
                     if (pad_width > 1) zero_pad = pad_width-1;
                 }
                 else
@@ -215,6 +216,7 @@ namespace printf_impl
                 if (value == 0)
                 {
                     *out_ptr = '0';
+                    digits_len = 1;
                     if (pad_width > 1) zero_pad = pad_width-1;
                 }
                 else
@@ -248,6 +250,7 @@ namespace printf_impl
                         digits_len++;
                         abs_value = new_value;
                     }
+                    out_ptr++;
                     if (negative)
                     {
                         prefix[0] = '-';
