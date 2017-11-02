@@ -51,6 +51,10 @@ public:
   BurnPipe& operator= (BurnPipe&& other);
 
   bool IsConnected () const;
+
+  enum struct Processing { Continue, Cancel };
+  /// Send progress over pipe
+  Processing SendProgress (unsigned int percent);
 private:
   std::unique_ptr<_BURN_PIPE_CONNECTION> pipeConnection;
 

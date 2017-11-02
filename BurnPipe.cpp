@@ -98,3 +98,28 @@ bool BurnPipe::IsConnected () const
 {
   return pipeConnection && (pipeConnection->hPipe != INVALID_HANDLE_VALUE);
 }
+
+BurnPipe::Processing BurnPipe::SendProgress (unsigned int percent)
+{
+  HRESULT hr;
+  BYTE* dataPtr = nullptr;
+  DWORD dataSize = 0;
+  DWORD result = 0;
+
+  // Progress percentage
+  hr = BuffWriteNumber (&dataPtr, &dataSize, percent);
+  if (SUCCEEDED(hr))
+  {
+    // Overall progress percentage
+    hr = BuffWriteNumber (&dataPtr, &dataSize, percent);
+  }
+  if (SUCCEEDED(hr))
+  {
+    hr = PipeSendMessage (pipeConnection->hPipe, 2/*BURN_EMBEDDED_MESSAGE_TYPE_PROGRESS*/, dataPtr, dataSize, nullptr, nullptr, &result);
+  }
+
+  ReleaseBuffer (dataPtr);
+
+  if (FAILED(hr)) return Processing::Cancel;
+  return (result == IDCANCEL) ? Processing::Cancel : Processing::Continue;
+}
