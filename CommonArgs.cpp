@@ -34,43 +34,20 @@
 #include "GUID.hpp"
 #include "IsSFX.hpp"
 
-CommonArgs::CommonArgs (const ArgsHelper& args, Archives archivesMode)
+CommonArgs::CommonArgs (const ArgsHelper& args)
 {
+  std::vector<const wchar_t*> archive_args;
+  args.GetFreeArgs (archive_args);
+  if (IsSFX (sfx_exe) && archive_args.empty())
   {
-    bool need_archives = archivesMode == Archives::Required;
-
-    std::vector<const wchar_t*> archive_args;
-    args.GetFreeArgs (archive_args);
-    if (IsSFX (sfx_exe))
-    {
-      if (!archive_args.empty())
-      {
-        printf ("Executable is SFX, but archive files were provided\n");
-      }
-      else
-      {
-        archives.emplace_back (sfx_exe.Ptr());
-      }
-    }
-    else
-    {
-      if (archive_args.empty() && need_archives)
-      {
-        printf ("No archive files provided\n");
-      }
-      archives = std::move (archive_args);
-    }
+    archives.emplace_back (sfx_exe.Ptr());
+  }
+  else
+  {
+    archives = std::move (archive_args);
   }
 
-  bool result (args.GetOption (L"-g", guid) && (wcslen (guid) != 0));
-  if (!result)
-  {
-    printf ("'-g<GUID>' argument is required\n");
-  }
-  else if (result && !VerifyGUID (guid))
-  {
-    printf ("Not an allowed GUID: '%ls'\n", guid);
-  }
+  args.GetOption (L"-g", guid);
 
   if (args.GetOption (L"-U"))
     installScope = InstallScope::User;
@@ -81,22 +58,46 @@ CommonArgs::CommonArgs (const ArgsHelper& args, Archives archivesMode)
   args.GetOption (L"-d", dataDirName);
 }
 
-bool CommonArgs::isValid (Archives archivesMode) const
+bool CommonArgs::checkValid (Archives archivesMode) const
 {
+  bool guid_valid ((guid != nullptr) && (wcslen (guid) != 0));
+  if (!guid_valid)
+  {
+    printf ("'-g<GUID>' argument is required\n");
+  }
+  else if (guid_valid && !VerifyGUID (guid))
+  {
+    printf ("Not an allowed GUID: '%ls'\n", guid);
+  }
+
+  bool is_sfx = !sfx_exe.IsEmpty();
+  bool sfx_archives = (archives.size() == 1) && (archives[0] == sfx_exe.Ptr());
+
   bool archives_flag;
   switch (archivesMode)
   {
   case Archives::Required:
-    archives_flag = !archives.empty();
+    archives_flag = !archives.empty ();
+    if (is_sfx && !sfx_archives)
+    {
+      printf ("Executable is SFX, but archive files were provided\n");
+      archives_flag = false;
+    }
+    else if (!archives_flag)
+    {
+      printf ("No archive files provided\n");
+    }
     break;
   case Archives::None:
-    archives_flag = archives.empty() || (archives[0] == sfx_exe.Ptr());
-    break;
-  case Archives::DontCare:
-    archives_flag = true;
+    archives_flag = archives.empty() || sfx_archives;
+    if (!archives_flag)
+    {
+      printf ("Archive files provided, but we don't want any\n");
+    }
     break;
   }
-  return (guid != nullptr) && archives_flag;
+
+  return guid_valid && archives_flag;
 }
 
 const std::vector<const wchar_t*>& CommonArgs::GetArchives() const { return archives; }

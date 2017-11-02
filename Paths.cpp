@@ -107,7 +107,7 @@ static void SetCompression (const wchar_t* path)
 
 bool InstallLogLocation::Init (const CommonArgs& commonArgs)
 {
-  assert (commonArgs.isValid (CommonArgs::Archives::DontCare));
+  assert (commonArgs.GetGUID () != nullptr);
 
   MyUString logFilePath (GetDataDir (commonArgs));
   EnsureDirectoriesExist (logFilePath.Ptr());

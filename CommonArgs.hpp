@@ -47,12 +47,12 @@ class ArgsHelper;
 class CommonArgs
 {
 public:
-  enum class Archives { Required, None, DontCare };
+  enum class Archives { Required, None };
 
-  CommonArgs (const ArgsHelper& args, Archives archivesMode = Archives::None);
+  CommonArgs (const ArgsHelper& args);
 
-  /// Check if all required common arguments are present.
-  bool isValid (Archives archivesMode = Archives::None) const;
+  /// Check if all required common arguments are present. Prints messages as needed.
+  bool checkValid (Archives archivesMode = Archives::None) const;
 
   /// Return paths to archives
   const std::vector<const wchar_t*>& GetArchives() const;

@@ -43,7 +43,7 @@ int DoInstall (int argc, const wchar_t* const argv[])
 {
   ArgsHelper args (argc, argv);
   CommonArgs commonArgs (args);
-  if (!commonArgs.isValid (CommonArgs::Archives::Required))
+  if (!commonArgs.checkValid (CommonArgs::Archives::Required))
   {
     return ecArgsError;
   }
