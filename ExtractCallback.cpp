@@ -114,9 +114,14 @@ STDMETHODIMP CExtractCallback::SetCompleted(const UInt64* completeValue)
 {
   MT_LOCK
 
-  if (completeValue) progress.SetCompleted (*completeValue);
+  HRESULT hr = S_OK;
+  if (completeValue)
+  {
+    if (progress.SetCompleted (*completeValue) == ProgressReporter::Processing::Cancel)
+      hr = E_ABORT;
+  }
 
-  return CheckBreak2();
+  return SUCCEEDED(hr) ? CheckBreak2() : hr;
 }
 
 STDMETHODIMP CExtractCallback::AskOverwrite(

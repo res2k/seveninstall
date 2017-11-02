@@ -75,12 +75,12 @@ void ProgressReporterMultiStep::SetTotal (uint64_t total)
   currentTotal = total;
 }
 
-void ProgressReporterMultiStep::SetCompleted (uint64_t completed)
+ProgressReporter::Processing ProgressReporterMultiStep::SetCompleted (uint64_t completed)
 {
   const auto& phaseInfo = phases[currentPhase];
   uint64_t targetCompleted = phaseInfo.start;
   if (currentTotal != 0) targetCompleted += MulDiv64 (completed, phaseInfo.size, currentTotal);
-  target.SetCompleted (targetCompleted);
+  return target.SetCompleted (targetCompleted);
 }
 
 //---------------------------------------------------------------------

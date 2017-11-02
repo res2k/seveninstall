@@ -44,15 +44,18 @@ struct ProgressReporter
 {
   virtual ~ProgressReporter() {}
 
+  /// Progress feedback: whether to continue or cancel processing
+  enum struct Processing { Continue, Cancel };
+
   virtual void SetTotal (uint64_t total) = 0;
-  virtual void SetCompleted (uint64_t completed) = 0;
+  virtual Processing SetCompleted (uint64_t completed) = 0;
 };
 
 class ProgressReporterDummy : public ProgressReporter
 {
 public:
   void SetTotal (uint64_t /*total*/) override {}
-  void SetCompleted (uint64_t /*completed*/) override {}
+  Processing SetCompleted (uint64_t /*completed*/) override { return Processing::Continue; }
 };
 
 class ProgressReporterMultiStep : protected ProgressReporter
@@ -78,7 +81,7 @@ protected:
   bool phasesDirty = true;
 
   void SetTotal (uint64_t total) override;
-  void SetCompleted (uint64_t completed) override;
+  Processing SetCompleted (uint64_t completed) override;
 };
 
 /// Get a default progress reporter.
