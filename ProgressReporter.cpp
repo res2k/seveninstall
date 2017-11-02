@@ -30,6 +30,7 @@
 
 #include "ProgressReporter.hpp"
 
+#include "BurnPipe.hpp"
 #include "MulDiv64.hpp"
 
 #include <assert.h>
@@ -85,7 +86,27 @@ ProgressReporter::Processing ProgressReporterMultiStep::SetCompleted (uint64_t c
 
 //---------------------------------------------------------------------
 
-std::shared_ptr<ProgressReporter> GetDefaultProgress ()
+ProgressReporterPipe::ProgressReporterPipe (BurnPipe& pipe) : pipe (pipe) {}
+
+void ProgressReporterPipe::SetTotal (uint64_t total)
 {
-  return std::make_shared<ProgressReporterDummy> ();
+  this->total = total;
+}
+
+ProgressReporter::Processing ProgressReporterPipe::SetCompleted (uint64_t completed)
+{
+  if (total == 0) return Processing::Continue;
+  auto percent = static_cast<unsigned int> (MulDiv64 (completed, 100, total));
+  auto send_result = pipe.SendProgress (percent);
+  return send_result == BurnPipe::Processing::Continue ? Processing::Continue : Processing::Cancel;
+}
+
+//---------------------------------------------------------------------
+
+std::shared_ptr<ProgressReporter> GetDefaultProgress (BurnPipe& pipe)
+{
+  if (pipe.IsConnected())
+    return std::make_shared<ProgressReporterPipe> (pipe);
+  else
+    return std::make_shared<ProgressReporterDummy> ();
 }

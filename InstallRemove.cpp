@@ -303,7 +303,7 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
     return ecArgsError;
   }
 
-  auto progressOutput = GetDefaultProgress ();
+  auto progressOutput = GetDefaultProgress (pipe);
 
   ProgressReporterMultiStep actionProgress (*progressOutput);
   auto progPhaseRegistryDelete = actionProgress.AddPhase (doRemove ? 1 : 0);

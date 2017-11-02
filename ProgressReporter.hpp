@@ -40,6 +40,8 @@
 #include <memory>
 #include <vector>
 
+class BurnPipe;
+
 struct ProgressReporter
 {
   virtual ~ProgressReporter() {}
@@ -84,7 +86,19 @@ protected:
   Processing SetCompleted (uint64_t completed) override;
 };
 
+class ProgressReporterPipe : public ProgressReporter
+{
+public:
+  ProgressReporterPipe (BurnPipe& pipe);
+
+  void SetTotal (uint64_t total) override;
+  Processing SetCompleted (uint64_t completed) override;
+private:
+  BurnPipe& pipe;
+  uint64_t total = 0;
+};
+
 /// Get a default progress reporter.
-std::shared_ptr<ProgressReporter> GetDefaultProgress ();
+std::shared_ptr<ProgressReporter> GetDefaultProgress (BurnPipe& pipe);
 
 #endif // SEVENI_PROGRESSREPORTER_HPP_
