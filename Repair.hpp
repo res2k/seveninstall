@@ -34,8 +34,8 @@
 #ifndef __7I_REPAIR_HPP__
 #define __7I_REPAIR_HPP__
 
-#include <string>
+class ArgsHelper;
 
-int DoRepair (int argc, const wchar_t* const argv[]);
+int DoRepair (const ArgsHelper& args);
 
 #endif // __7I_REPAIR_HPP__

@@ -148,9 +148,8 @@ static size_t HasDependents (InstallScope installScope, const wchar_t* regPath)
   return 0;
 }
 
-int DoRemove (int argc, const wchar_t* const argv[])
+int DoRemove (const ArgsHelper& args)
 {
-  ArgsHelper args (argc, argv);
   CommonArgs commonArgs (args);
   if (!commonArgs.checkValid (CommonArgs::Archives::None))
   {

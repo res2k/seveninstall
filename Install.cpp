@@ -39,9 +39,8 @@
 #include "Paths.hpp"
 #include "RegistryLocations.hpp"
 
-int DoInstall (int argc, const wchar_t* const argv[])
+int DoInstall (const ArgsHelper& args)
 {
-  ArgsHelper args (argc, argv);
   CommonArgs commonArgs (args);
   if (!commonArgs.checkValid (CommonArgs::Archives::Required))
   {

@@ -37,6 +37,8 @@
 #include "MyUString.hpp"
 #include <vector>
 
+class ArgsHelper;
+
 class RemoveHelper
 {
   std::vector<MyUString> directories;
@@ -47,6 +49,6 @@ public:
   void FlushDelayed ();
 };
 
-int DoRemove (int argc, const wchar_t* const argv[]);
+int DoRemove (const ArgsHelper& args);
 
 #endif // __7I_REMOVE_HPP__

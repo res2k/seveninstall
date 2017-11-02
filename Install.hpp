@@ -34,6 +34,8 @@
 #ifndef __7I_INSTALL_HPP__
 #define __7I_INSTALL_HPP__
 
-int DoInstall (int argc, const wchar_t* const argv[]);
+class ArgsHelper;
+
+int DoInstall (const ArgsHelper& args);
 
 #endif // __7I_INSTALL_HPP__

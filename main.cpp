@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ArgsHelper.hpp"
 #include "Error.hpp"
 #include "ExitCode.hpp"
 #include "Extract.hpp"
@@ -150,14 +151,16 @@ int wmain (int argc, const wchar_t* const argv[])
     // Also used by IsSFX(), so call early in all cases
     CrcGenerateTable();
 
+    ArgsHelper args (num_filtered, filtered_args);
+
     switch (cmd)
     {
     case cmdInstall:
-        return DoInstall (num_filtered, filtered_args);
+        return DoInstall (args);
     case cmdRepair:
-        return DoRepair (num_filtered, filtered_args);
+        return DoRepair (args);
     case cmdRemove:
-        return DoRemove (num_filtered, filtered_args);
+        return DoRemove (args);
     }
 
     return 0;

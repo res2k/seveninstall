@@ -43,9 +43,8 @@
 #include <memory>
 #include <unordered_set>
 
-int DoRepair (int argc, const wchar_t* const argv[])
+int DoRepair (const ArgsHelper& args)
 {
-  ArgsHelper args (argc, argv);
   CommonArgs commonArgs (args);
   if (!commonArgs.checkValid (CommonArgs::Archives::Required))
   {
