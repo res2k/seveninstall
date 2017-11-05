@@ -159,20 +159,24 @@ namespace printf_impl
             }
         case 'd':
         case 'i':
-            ++p;
-            return print<printer::Int> (sink, format_fwp, args, size_spec, 10);
         case 'o':
-            ++p;
-            return print<printer::Int> (sink, format_fwp, args, size_spec, 8, printer::Int::Unsigned);
         case 'u':
-            ++p;
-            return print<printer::Int> (sink, format_fwp, args, size_spec, 10, printer::Int::Unsigned);
         case 'x':
-            ++p;
-            return print<printer::Int> (sink, format_fwp, args, size_spec, 16, printer::Int::Unsigned);
         case 'X':
-            ++p;
-            return print<printer::Int> (sink, format_fwp, args, size_spec, 16, printer::Int::Unsigned | printer::Int::Uppercase);
+            {
+                int base = 10;
+                if (*p == 'o')
+                    base = 8;
+                else if ((*p == 'x') || (*p == 'X'))
+                    base = 16;
+                unsigned int flags = 0;
+                if ((*p == 'o') || (*p == 'u') || (*p == 'x') || (*p == 'X'))
+                    flags |= printer::Int::Unsigned;
+                if (*p == 'X')
+                    flags |= printer::Int::Uppercase;
+                ++p;
+                return print<printer::Int> (sink, format_fwp, args, size_spec, base, flags);
+            }
         case 'e':
         case 'E':
         case 'f':

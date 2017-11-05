@@ -58,11 +58,7 @@ namespace printf_impl
             int ret = -1;
             if (WideCharToMultiByte (codepage, 0, s, n, buf, buf_req, nullptr, nullptr) != 0)
             {
-                DWORD bytes_written = 0;
-                if (!WriteFile (handle, buf, buf_req, &bytes_written, nullptr))
-                    ret = -1;
-                else
-                    ret = static_cast<int> (bytes_written);
+                ret = ascii (buf, buf_req);
             }
             _freea (buf);
             return ret;
@@ -74,9 +70,7 @@ namespace printf_impl
             if (codepage == GetACP())
             {
                 // No conversion necessary
-                DWORD bytes_written = 0;
-                if (!WriteFile (handle, s, n, &bytes_written, nullptr)) return -1;
-                return static_cast<int> (bytes_written);
+                return ascii (s, n);
             }
 
             // Convert to wide char
