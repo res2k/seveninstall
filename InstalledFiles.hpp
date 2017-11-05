@@ -78,4 +78,17 @@ public:
   MyUString GetFileName();
 };
 
+class InstalledFilesCounter
+{
+public:
+  InstalledFilesCounter (const wchar_t* listsDir);
+
+  unsigned int IncFileRef (const MyUString& path);
+  unsigned int DecFileRef (const MyUString& path);
+private:
+  std::unordered_map<MyUString, unsigned int> files_refs;
+
+  void ReadLogFile (const wchar_t* path);
+};
+
 #endif // __7I_INSTALLEDFILES_HPP__

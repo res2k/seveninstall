@@ -186,3 +186,61 @@ MyUString InstalledFilesReader::GetFileName()
   }
   return MyUString();
 }
+
+//---------------------------------------------------------------------------
+
+InstalledFilesCounter::InstalledFilesCounter (const wchar_t* listsDir)
+{
+  MyUString wildcard = listsDir;
+  wildcard += L"\\*.txt";
+  WIN32_FIND_DATAW find_data;
+  HANDLE find_handle = FindFirstFileW (wildcard.Ptr(), &find_data);
+  if (find_handle != INVALID_HANDLE_VALUE)
+  {
+    do
+    {
+      MyUString file_path = listsDir;
+      file_path += L"\\";
+      file_path += find_data.cFileName;
+      ReadLogFile (file_path.Ptr());
+    }
+    while (FindNextFile (find_handle, &find_data));
+
+    FindClose (find_handle);
+  }
+}
+
+unsigned int InstalledFilesCounter::IncFileRef (const MyUString& path)
+{
+  return ++(files_refs.try_emplace (path, 0).first->second);
+}
+
+unsigned int InstalledFilesCounter::DecFileRef (const MyUString& path)
+{
+  auto it = files_refs.find (path);
+  if (it == files_refs.end ()) return 0;
+  if (it->second == 0) return 0;
+  return --(it->second);
+}
+
+void InstalledFilesCounter::ReadLogFile (const wchar_t* path)
+{
+  try
+  {
+    InstalledFilesReader reader (path);
+    MyUString filename;
+    while (!(filename = reader.GetFileName()).IsEmpty())
+    {
+      NormalizePath (filename);
+      IncFileRef (filename);
+    }
+  }
+  catch (HRESULTException& hre)
+  {
+    fprintf (stderr, "ERROR reading %ls: %ls\n", path, GetHRESULTString (hre.GetHR()).Ptr());
+  }
+  catch (std::exception& e)
+  {
+    fprintf (stderr, "ERROR reading %ls: %s\n", path, e.what());
+  }
+}
