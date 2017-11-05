@@ -6,3 +6,5 @@ _memcmp_.obj
 memcpy.obj
 -x
 memmove.obj
+-x
+memset.obj
