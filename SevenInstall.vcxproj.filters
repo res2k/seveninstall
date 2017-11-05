@@ -117,6 +117,9 @@
     <ClCompile Include="support\argv_wildcards.cpp">
       <Filter>support</Filter>
     </ClCompile>
+    <ClCompile Include="support\memory.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">

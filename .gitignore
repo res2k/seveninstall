@@ -5,3 +5,5 @@ out
 *.opensdf
 /.vs
 /.vscode
+ntdll/Debug
+ntdll/Release

@@ -63,7 +63,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;$(OutDir)\pseudo_ntdll\ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
       <IgnoreSpecificDefaultLibraries>libucrtd.lib;libvcruntimed.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -88,7 +88,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;$(OutDir)\pseudo_ntdll\ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
       <IgnoreSpecificDefaultLibraries>libucrt.lib;libvcruntime.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -122,6 +122,9 @@
     <ClCompile Include="Repair.cpp" />
     <ClCompile Include="support\argv_wildcards.cpp" />
     <ClCompile Include="support\downlevel_locale.cpp" />
+    <ClCompile Include="support\memory.cpp">
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="support\printf.cpp" />
     <ClCompile Include="support\stdio_dummies.cpp" />
     <ClCompile Include="support\undname.cpp" />

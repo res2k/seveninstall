@@ -1,2 +1,4 @@
 -x
 undname.obj
+-x
+_memcmp_.obj
