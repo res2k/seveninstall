@@ -327,6 +327,13 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
       RegistryDelete (commonArgs.GetInstallScope(), keyPathDependencies.Ptr());
     }
 
+    std::optional<InstalledFilesCounter> filesCounter;
+    if (doRemove && !args.GetOption (L"--no-global-refs"))
+    {
+      // FIXME?: This may have weird results if the actual list file is at another location!
+      filesCounter = InstalledFilesCounter (logLocation.GetLogsPath());
+    }
+
     // Grab previous files list
     MyUString listFilePath;
     auto previousFiles = ReadPreviousFilesList (commonArgs, action == Action::Remove, listFilePath);
@@ -350,7 +357,8 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
       RemoveHelper removeHelper;
       for (const auto& removeFile : previousFiles)
       {
-        removeHelper.ScheduleRemove (removeFile.Ptr());
+        if (!filesCounter || (filesCounter->DecFileRef (removeFile) == 0))
+          removeHelper.ScheduleRemove (removeFile.Ptr());
       }
 
       // Remove old directory, either for Remove action, or a 'move' repair
