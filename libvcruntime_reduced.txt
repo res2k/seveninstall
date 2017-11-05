@@ -2,3 +2,7 @@
 undname.obj
 -x
 _memcmp_.obj
+-x
+memcpy.obj
+-x
+memmove.obj
