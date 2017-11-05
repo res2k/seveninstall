@@ -45,9 +45,12 @@ public:
   /// Initialize from given common arguments
   bool Init (const CommonArgs& commonArgs);
 
+  /// Get directory with log files
+  const MyUString& GetLogsPath() const;
   /// Return log file name
   const MyUString& GetFilename() const;
 private:
+  MyUString logsDir;
   MyUString filename;
 };
 

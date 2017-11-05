@@ -109,15 +109,21 @@ bool InstallLogLocation::Init (const CommonArgs& commonArgs)
 {
   assert (commonArgs.GetGUID () != nullptr);
 
-  MyUString logFilePath (GetDataDir (commonArgs));
-  EnsureDirectoriesExist (logFilePath.Ptr());
-  SetCompression (logFilePath.Ptr());
-  logFilePath += L"\\";
+  logsDir = GetDataDir (commonArgs);
+  EnsureDirectoriesExist (logsDir.Ptr());
+  SetCompression (logsDir.Ptr());
+  filename = logsDir;
+  filename += L"\\";
   // We trust the GUID string since it has supposedly passed VerifyGUID() earlier.
-  logFilePath += commonArgs.GetGUID();
-  logFilePath += L".txt";
-  filename = std::move (logFilePath);
+  filename += commonArgs.GetGUID();
+  filename += L".txt";
   return true;
+}
+
+const MyUString& InstallLogLocation::GetLogsPath() const
+{
+  if (logsDir.IsEmpty()) throw HRESULTException (E_FAIL);
+  return logsDir;
 }
 
 const MyUString& InstallLogLocation::GetFilename() const
