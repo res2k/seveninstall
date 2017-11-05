@@ -26,3 +26,5 @@ ___acrt_stdio_initializer
 ___acrt_stdio_terminator
 -x
 stdio_initializer.obj
+-x
+argv_wildcards.obj

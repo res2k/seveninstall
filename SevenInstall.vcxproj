@@ -120,6 +120,7 @@
     <ClCompile Include="RegistryLocations.cpp" />
     <ClCompile Include="Remove.cpp" />
     <ClCompile Include="Repair.cpp" />
+    <ClCompile Include="support\argv_wildcards.cpp" />
     <ClCompile Include="support\downlevel_locale.cpp" />
     <ClCompile Include="support\printf.cpp" />
     <ClCompile Include="support\stdio_dummies.cpp" />
