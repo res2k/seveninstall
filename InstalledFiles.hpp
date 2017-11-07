@@ -38,6 +38,8 @@
 #include "MyUString.hpp"
 
 #include <stdio.h>
+
+#include <set>
 #include <vector>
 
 #include <Windows.h>
@@ -53,6 +55,7 @@ public:
 
   const wchar_t* GetLogFileName() const { return logFileName; }
 
+  void AddEntries (const std::set<MyUString>& fullPaths);
   void AddEntries (const std::vector<MyUString>& fullPaths);
   /// Remove the list that has been written
   void Discard ();
