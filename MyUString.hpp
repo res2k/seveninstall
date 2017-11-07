@@ -108,12 +108,29 @@ public:
 
   bool operator== (const MyUString& other) const { return us() == other.us(); }
   bool operator== (const UString& other) const { return us() == other; }
+  bool operator== (const wchar_t* other) const { return us() == other; }
   bool operator!= (const MyUString& other) const { return us() != other.us(); }
   bool operator!= (const UString& other) const { return us() != other; }
+  bool operator!= (const wchar_t* other) const { return us() != other; }
 
   MyUString& operator+= (const wchar_t* s) { us() += s; return *this; }
   MyUString& operator+= (const MyUString& s) { us() += s.us(); return *this; }
   MyUString& operator+= (const UString& s) { us() += s; return *this; }
+
+  bool operator< (const MyUString& other) const
+  {
+    if (Ptr() == nullptr)
+    {
+      return other.Ptr() != nullptr;
+    }
+    else
+    {
+      if (other.Ptr() == nullptr) return false;
+
+      auto compare_len = std::min (Len(), other.Len()) + 1; // Include NUL terminator
+      return wmemcmp (Ptr(), other.Ptr(), compare_len) < 0;
+    }
+  }
 };
 
 namespace std
