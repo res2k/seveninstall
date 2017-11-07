@@ -34,7 +34,6 @@
 #ifndef __SUPPORT_PRINTF_HPP__
 #define __SUPPORT_PRINTF_HPP__
 
-#define NOMINMAX
 #include <windows.h>
 
 //@{
