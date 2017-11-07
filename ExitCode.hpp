@@ -41,7 +41,8 @@ enum
     ecSuccess = __HRESULT_FROM_WIN32(ERROR_SUCCESS),
 
     ecArgsError = __HRESULT_FROM_WIN32(ERROR_BAD_ARGUMENTS),
-    ecHasDependencies = __HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED)
+    ecHasDependencies = __HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED),
+    ecException = E_FAIL
 };
 
 #endif // __EXITCODE_HPP__

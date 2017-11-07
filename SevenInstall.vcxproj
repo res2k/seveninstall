@@ -109,8 +109,8 @@
     <ClCompile Include="Extract.cpp" />
     <ClCompile Include="ExtractCallback.cpp" />
     <ClCompile Include="GUID.cpp" />
-    <ClCompile Include="Install.cpp" />
     <ClCompile Include="InstalledFiles.cpp" />
+    <ClCompile Include="InstallRemove.cpp" />
     <ClCompile Include="IsSFX.cpp" />
     <ClCompile Include="LogFile.cpp" />
     <ClCompile Include="main.cpp" />
@@ -118,8 +118,6 @@
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="RegistryLocations.cpp" />
-    <ClCompile Include="Remove.cpp" />
-    <ClCompile Include="Repair.cpp" />
     <ClCompile Include="support\argv_wildcards.cpp" />
     <ClCompile Include="support\downlevel_locale.cpp" />
     <ClCompile Include="support\memory.cpp">
@@ -139,6 +137,7 @@
     <ClInclude Include="GUID.hpp" />
     <ClInclude Include="Install.hpp" />
     <ClInclude Include="InstalledFiles.hpp" />
+    <ClInclude Include="InstallRemove.hpp" />
     <ClInclude Include="InstallScope.hpp" />
     <ClInclude Include="IsSFX.hpp" />
     <ClInclude Include="LogFile.hpp" />

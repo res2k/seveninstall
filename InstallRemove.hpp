@@ -29,13 +29,20 @@
  */
 
 /**\file
- * "repair" action
+ * Install and/or Remove action
  */
-#ifndef __7I_REPAIR_HPP__
-#define __7I_REPAIR_HPP__
+#ifndef SEVENI_INSTALL_REMOVE_HPP
+#define SEVENI_INSTALL_REMOVE_HPP
 
 class ArgsHelper;
 
-int DoRepair (const ArgsHelper& args);
+enum struct Action
+{
+  Install,
+  Remove,
+  Repair
+};
 
-#endif // __7I_REPAIR_HPP__
+int DoInstallRemove (const ArgsHelper& args, Action actions);
+
+#endif // SEVENI_INSTALL_REMOVE_HPP

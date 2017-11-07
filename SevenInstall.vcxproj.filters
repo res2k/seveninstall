@@ -27,9 +27,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Install.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ArgsHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,13 +45,7 @@
     <ClCompile Include="Registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Remove.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Error.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Repair.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zRegister.cpp">
@@ -119,6 +110,9 @@
     </ClCompile>
     <ClCompile Include="support\memory.cpp">
       <Filter>support</Filter>
+    </ClCompile>
+    <ClCompile Include="InstallRemove.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +192,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IsSFX.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InstallRemove.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

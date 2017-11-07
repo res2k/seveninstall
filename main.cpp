@@ -41,9 +41,7 @@
 #include "Extract.hpp"
 #include "LogFile.hpp"
 
-#include "Install.hpp"
-#include "Remove.hpp"
-#include "Repair.hpp"
+#include "InstallRemove.hpp"
 
 #include "7zCrc.h"
 
@@ -156,11 +154,11 @@ int wmain (int argc, const wchar_t* const argv[])
     switch (cmd)
     {
     case cmdInstall:
-        return DoInstall (args);
+        return DoInstallRemove (args, Action::Install);
     case cmdRepair:
-        return DoRepair (args);
+        return DoInstallRemove (args, Action::Repair);
     case cmdRemove:
-        return DoRemove (args);
+        return DoInstallRemove (args, Action::Remove);
     }
 
     return 0;
