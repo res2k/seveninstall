@@ -43,6 +43,20 @@
 #include <memory>
 #include <unordered_set>
 
+// Helper: Sort a std::vector<MyUString>
+template<typename SortFunc>
+static inline void SortStringVec (std::vector<MyUString>& vec, SortFunc sort_func)
+{
+  qsort_s (vec.data(), vec.size(), sizeof (MyUString),
+           [](void* f, const void* a, const void* b)
+           {
+             const auto& a_str = *(reinterpret_cast<const MyUString*> (a));
+             const auto& b_str = *(reinterpret_cast<const MyUString*> (b));
+             return (*reinterpret_cast<SortFunc*> (f))(a_str, b_str);
+           },
+           &sort_func);
+}
+
 class RemoveHelper
 {
   std::vector<MyUString> directories;
@@ -132,17 +146,15 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
 void RemoveHelper::FlushDelayed ()
 {
   // Sort directory by length descending (to get deeper nested dirs first)
-  qsort (directories.data(), directories.size(), sizeof (MyUString),
-         [](const void* a, const void* b)
-         {
-           const auto& a_str = *(reinterpret_cast<const MyUString*> (a));
-           const auto& b_str = *(reinterpret_cast<const MyUString*> (b));
-           if (a_str.Len() > b_str.Len())
-             return -1;
-           else if (a_str.Len() < b_str.Len())
-             return 1;
-           return 0;
-         });
+  SortStringVec (directories,
+                 [](const MyUString& a, const MyUString& b)
+                 {
+                   if (a.Len() > b.Len())
+                     return -1;
+                   else if (a.Len() < b.Len())
+                     return 1;
+                   return 0;
+                 });
   // Remove directories
   for (const MyUString& dir : directories)
   {
