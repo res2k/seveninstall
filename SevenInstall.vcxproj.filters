@@ -117,6 +117,9 @@
     <ClCompile Include="support\str_func.cpp">
       <Filter>support</Filter>
     </ClCompile>
+    <ClCompile Include="support\strnlen.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
