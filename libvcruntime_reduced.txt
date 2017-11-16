@@ -8,3 +8,15 @@ memcpy.obj
 memmove.obj
 -x
 memset.obj
+-x
+wcschr.obj
+-x
+wcsrchr.obj
+-x
+wcsstr.obj
+-x
+strchr.obj
+-x
+strrchr.obj
+-x
+strstr.obj

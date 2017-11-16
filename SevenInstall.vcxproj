@@ -125,6 +125,7 @@
     </ClCompile>
     <ClCompile Include="support\printf.cpp" />
     <ClCompile Include="support\stdio_dummies.cpp" />
+    <ClCompile Include="support\str_func.cpp" />
     <ClCompile Include="support\undname.cpp" />
   </ItemGroup>
   <ItemGroup>
