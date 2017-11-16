@@ -233,7 +233,8 @@ static MyUString GetOutputDirectory (const ArgsHelper& args,
 
 static std::unordered_set<MyUString> ReadPreviousFilesList (const CommonArgs& commonArgs,
                                                             bool requireList,
-                                                            MyUString& listFilePath)
+                                                            MyUString& listFilePath,
+                                                            bool silent)
 {
   std::unordered_set<MyUString> list;
 
@@ -258,7 +259,7 @@ static std::unordered_set<MyUString> ReadPreviousFilesList (const CommonArgs& co
   }
 
   // Print list exception
-  if (listException)
+  if (listException && !silent)
   {
     try
     {
@@ -348,7 +349,7 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
 
     // Grab previous files list
     MyUString listFilePath;
-    auto previousFiles = ReadPreviousFilesList (commonArgs, action == Action::Remove, listFilePath);
+    auto previousFiles = ReadPreviousFilesList (commonArgs, action == Action::Remove, listFilePath, action == Action::Install);
 
     // Extract new files (Install/Repair)
     std::vector<MyUString> extractedFiles;
