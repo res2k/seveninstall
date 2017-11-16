@@ -401,15 +401,20 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
     // Write new files list (Install/Repair)
     if (doExtract)
     {
-      std::set<MyUString> allFiles (extractedFiles.begin(), extractedFiles.end());
-      allFiles.insert (previousFiles.begin(), previousFiles.end());;
+      std::unordered_set<MyUString> allFiles (extractedFiles.begin(), extractedFiles.end());
+      allFiles.insert (previousFiles.begin(), previousFiles.end());
 
       // Generate file list
       InstalledFilesWriter listWriter (logLocation.GetFilename());
       try
       {
         // Add output dir to list so it'll get deleted on uninstall
-        listWriter.AddEntries (allFiles);
+        std::vector<MyUString> allFiles_v (allFiles.begin(), allFiles.end());
+        SortStringVec (allFiles_v,
+                       [](const MyUString& a, const MyUString& b)
+                       {
+                         return wmemcmp (a.Ptr(), b.Ptr(), std::min (a.Len(), b.Len()) + 1);
+                       });
         // Write registry entries
         WriteToRegistry (commonArgs.GetInstallScope (), commonArgs.GetGUID (), listWriter.GetLogFileName(), outputDir.Ptr());
       }

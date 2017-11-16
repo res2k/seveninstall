@@ -57,24 +57,6 @@ InstalledFilesWriter::~InstalledFilesWriter ()
   if (file != INVALID_HANDLE_VALUE) CloseHandle (file);
 }
 
-void InstalledFilesWriter::AddEntries (const std::set<MyUString>& fullPaths)
-{
-  if (file != INVALID_HANDLE_VALUE)
-  {
-    for (const MyUString& fullPath : fullPaths)
-      Hprintf (file, "%ls\n", fullPath.Ptr());
-  }
-}
-
-void InstalledFilesWriter::AddEntries (const std::vector<MyUString>& fullPaths)
-{
-  if (file != INVALID_HANDLE_VALUE)
-  {
-    for (const MyUString& fullPath : fullPaths)
-      Hprintf (file, "%ls\n", fullPath.Ptr());
-  }
-}
-
 void InstalledFilesWriter::Discard ()
 {
   if (file != INVALID_HANDLE_VALUE)
@@ -83,6 +65,11 @@ void InstalledFilesWriter::Discard ()
     file = INVALID_HANDLE_VALUE;
   }
   DeleteFileW (logFileName.Ptr());
+}
+
+void InstalledFilesWriter::PrintFile (const MyUString& filename)
+{
+  Hprintf (file, "%ls\n", filename.Ptr());
 }
 
 //---------------------------------------------------------------------------

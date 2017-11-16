@@ -39,9 +39,6 @@
 
 #include <stdio.h>
 
-#include <set>
-#include <vector>
-
 #include <Windows.h>
 
 /// Write an installed files list.
@@ -49,14 +46,23 @@ class InstalledFilesWriter
 {
   MyUString logFileName;
   HANDLE file;
+
+  void PrintFile (const MyUString& filename);
 public:
   InstalledFilesWriter (const wchar_t* filename);
   ~InstalledFilesWriter ();
 
   const wchar_t* GetLogFileName() const { return logFileName; }
 
-  void AddEntries (const std::set<MyUString>& fullPaths);
-  void AddEntries (const std::vector<MyUString>& fullPaths);
+  template<typename Container>
+  void AddEntries (const Container& fullPaths)
+  {
+    if (file != INVALID_HANDLE_VALUE)
+    {
+      for (const MyUString& fullPath : fullPaths)
+        PrintFile (fullPath);
+    }
+  }
   /// Remove the list that has been written
   void Discard ();
 };
