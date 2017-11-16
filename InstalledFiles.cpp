@@ -166,7 +166,6 @@ MyUString InstalledFilesReader::GetLine()
   int buf_req = MultiByteToWideChar (CP_UTF8, 0, utf8_line.Ptr(), utf8_line.Len(), nullptr, 0);
   if (buf_req == 0) return MyUString();
   auto line_ptr = line.GetBuf (buf_req);
-  int ret = -1;
   MultiByteToWideChar (CP_UTF8, 0, utf8_line.Ptr(), utf8_line.Len(),
                        line_ptr, buf_req);
   line.ReleaseBuf_SetEnd (buf_req);
