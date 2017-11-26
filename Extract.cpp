@@ -205,7 +205,10 @@ static void ExtractOneArchive (
   CHECK_HR (result);
 }
 
-void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* targetDir, std::vector<MyUString>& extractedFiles)
+void Extract (ProgressReporter& progress,
+              const std::vector<const wchar_t*>& archives,
+              const wchar_t* targetDir,
+              std::vector<MyUString>& extractedFiles)
 {
   NConsoleClose::CCtrlHandlerSetter handle_control;
 
@@ -219,7 +222,7 @@ void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* target
 
   CObjectVector<COpenType> types;
 
-  CExtractCallback* ecs = new CExtractCallback (extractedFiles, outputDir);
+  CExtractCallback* ecs = new CExtractCallback (progress, extractedFiles, outputDir);
   CMyComPtr<IFolderArchiveExtractCallback> extractCallback = ecs;
 
   COpenCallback openCallback;

@@ -16,6 +16,7 @@
 #include <vector>
 
 struct IArchiveCallback;
+struct ProgressReporter;
 
 class CExtractCallback :
   public IExtractCallbackUI,
@@ -29,7 +30,7 @@ public:
   MY_QUERYINTERFACE_END
   MY_ADDREF_RELEASE
 
-  CExtractCallback (std::vector<MyUString>& extractedFiles, const UString& outputDir);
+  CExtractCallback (ProgressReporter& progress, std::vector<MyUString>& extractedFiles, const UString& outputDir);
 
   STDMETHOD(SetTotal)(UInt64 total) override;
   STDMETHOD(SetCompleted)(const UInt64 *completeValue) override;
@@ -43,6 +44,7 @@ public:
 
   unsigned LogLevel = 0;
 
+  ProgressReporter& progress;
   std::vector<MyUString>& extractedFiles;
   UInt64 NumTryArcs = 0;
   bool ThereIsError_in_Current;

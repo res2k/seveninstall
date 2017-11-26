@@ -37,6 +37,7 @@
 #include "Extract.hpp"
 #include "InstalledFiles.hpp"
 #include "Paths.hpp"
+#include "ProgressReporter.hpp"
 #include "Registry.hpp"
 #include "RegistryLocations.hpp"
 
@@ -64,7 +65,7 @@ public:
   ~RemoveHelper();
 
   void ScheduleRemove (const wchar_t* path);
-  void FlushDelayed ();
+  void FlushDelayed (ProgressReporter& progress);
 };
 
 #include "Shlwapi.h"
@@ -118,7 +119,8 @@ static void TryDeleteDir (const wchar_t* path)
 
 RemoveHelper::~RemoveHelper()
 {
-  FlushDelayed();
+  ProgressReporterDummy dummyProgress;
+  FlushDelayed (dummyProgress);
 }
 
 void RemoveHelper::ScheduleRemove (const wchar_t* path)
@@ -143,8 +145,9 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   }
 }
 
-void RemoveHelper::FlushDelayed ()
+void RemoveHelper::FlushDelayed (ProgressReporter& progress)
 {
+  progress.SetTotal (directories.size ());
   // Sort directory by length descending (to get deeper nested dirs first)
   SortStringVec (directories,
                  [](const MyUString& a, const MyUString& b)
@@ -156,9 +159,11 @@ void RemoveHelper::FlushDelayed ()
                    return 0;
                  });
   // Remove directories
+  size_t count = 0;
   for (const MyUString& dir : directories)
   {
     TryDeleteDir (dir.Ptr());
+    progress.SetCompleted (++count);
   }
   directories.clear();
 }
@@ -298,6 +303,18 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
     return ecArgsError;
   }
 
+  ProgressReporterDummy progressOutput;
+
+  ProgressReporterMultiStep actionProgress (progressOutput);
+  auto progPhaseRegistryDelete = actionProgress.AddPhase (doRemove ? 1 : 0);
+  auto progPhaseReadFilesLists = actionProgress.AddPhase (doRemove ? 2 : 0);
+  auto progPhaseExtract = actionProgress.AddPhase (doExtract ? 100 : 0);
+  auto progPhaseRemoveFiles = actionProgress.AddPhase (doRemove ? 100 : 0);
+  auto progPhaseRemoveFlush = actionProgress.AddPhase (doRemove ? 5 : 0);
+  auto progPhaseRemoveCleanup = actionProgress.AddPhase (doRemove ? 1 : 0);
+  auto progPhaseWriteList = actionProgress.AddPhase (doExtract ? 1 : 0);
+  auto progPhaseFinish = actionProgress.AddPhase (doExtract ? 1 : 0);
+
   archives = commonArgs.GetArchives ();
 
   try
@@ -315,6 +332,9 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
 
     if (action == Action::Remove)
     {
+      auto& progRegistryDelete = actionProgress.GetPhase (progPhaseRegistryDelete);
+      progRegistryDelete.SetTotal (1);
+
       bool ignoreDependencies = args.GetOption (L"--ignore-dependents");
       MyUString keyPathDependencies (regPathDependencyInfo);
       keyPathDependencies += commonArgs.GetGUID();
@@ -338,42 +358,54 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
         }
       }
       RegistryDelete (commonArgs.GetInstallScope(), keyPathDependencies.Ptr());
+
+      progRegistryDelete.SetCompleted (1);
     }
 
+    auto& progReadFilesLists = actionProgress.GetPhase (progPhaseReadFilesLists);
+    progReadFilesLists.SetTotal (2);
     std::optional<InstalledFilesCounter> filesCounter;
     if (doRemove && !args.GetOption (L"--no-global-refs"))
     {
       // FIXME?: This may have weird results if the actual list file is at another location!
       filesCounter = InstalledFilesCounter (logLocation.GetLogsPath());
     }
+    progReadFilesLists.SetCompleted (1);
 
     // Grab previous files list
     MyUString listFilePath;
     auto previousFiles = ReadPreviousFilesList (commonArgs, action == Action::Remove, listFilePath, action == Action::Install);
+    progReadFilesLists.SetCompleted (2);
 
     // Extract new files (Install/Repair)
     std::vector<MyUString> extractedFiles;
     if (doExtract)
     {
-      Extract (archives, outDirArg ? outDirArg : outputDir.Ptr(), extractedFiles);
+      Extract (actionProgress.GetPhase (progPhaseExtract), archives, outDirArg ? outDirArg : outputDir.Ptr(), extractedFiles);
     }
 
     // Remove previous files (Remove/Repair)
     if (doRemove)
     {
+      auto& progRemoveFiles = actionProgress.GetPhase (progPhaseRemoveFiles);
+
       // ...but exclude those just extracted
       for (const auto& extracted : extractedFiles)
       {
         previousFiles.erase (extracted);
       }
 
+      progRemoveFiles.SetTotal (previousFiles.size());
       RemoveHelper removeHelper;
+      size_t n = 0;
       for (const auto& removeFile : previousFiles)
       {
         if (!filesCounter || (filesCounter->DecFileRef (removeFile) == 0))
           removeHelper.ScheduleRemove (removeFile.Ptr());
+        progRemoveFiles.SetCompleted (++n);
       }
 
+      auto& progRemoveFlush = actionProgress.GetPhase (progPhaseRemoveFlush);
       // Remove old directory, either for Remove action, or a 'move' repair
       if (doRemove && (!outDirArg || (outputDir != outDirArg)))
       {
@@ -384,11 +416,14 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
           removeHelper.ScheduleRemove (outputDir.Ptr());
         }
       }
-      removeHelper.FlushDelayed();
+      removeHelper.FlushDelayed (progRemoveFlush);
 
+      auto& progRemoveCleanup = actionProgress.GetPhase (progPhaseRemoveCleanup);
+      progRemoveCleanup.SetTotal (2);
       previousFiles.clear();
       // Remove previous list file
       if (!listFilePath.IsEmpty()) TryDelete (listFilePath.Ptr());
+      progRemoveCleanup.SetCompleted (1);
 
       // Remove registry entry
       {
@@ -396,6 +431,7 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
         keyPathUninstall += commonArgs.GetGUID();
         RegistryDelete (commonArgs.GetInstallScope(), keyPathUninstall.Ptr());
       }
+      progRemoveCleanup.SetCompleted (2);
     }
 
     // Write new files list (Install/Repair)
@@ -408,6 +444,9 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
       InstalledFilesWriter listWriter (logLocation.GetFilename());
       try
       {
+        auto& progWriteList = actionProgress.GetPhase (progPhaseWriteList);
+        progWriteList.SetTotal (1);
+
         // Add output dir to list so it'll get deleted on uninstall
         std::vector<MyUString> allFiles_v (allFiles.begin(), allFiles.end());
         SortStringVec (allFiles_v,
@@ -416,8 +455,12 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
                          return wmemcmp (a.Ptr(), b.Ptr(), std::min (a.Len(), b.Len()) + 1);
                        });
         listWriter.AddEntries (allFiles_v);
+
         // Write registry entries
+        auto& progFinish = actionProgress.GetPhase (progPhaseFinish);
+        progFinish.SetTotal (1);
         WriteToRegistry (commonArgs.GetInstallScope (), commonArgs.GetGUID (), listWriter.GetLogFileName(), outputDir.Ptr());
+        progFinish.SetCompleted (1);
       }
       catch(...)
       {

@@ -5,6 +5,7 @@
 #include "ExtractCallback.hpp"
 
 #include "Paths.hpp"
+#include "ProgressReporter.hpp"
 
 #include "Common/IntToString.h"
 #include "Common/Wildcard.h"
@@ -92,22 +93,28 @@ static const char * const k_ErrorFlagsMessages[] =
   , "CRC Error"
 };
 
-CExtractCallback::CExtractCallback (std::vector<MyUString>& extractedFiles, const UString& outputDir)
-  : extractedFiles (extractedFiles), outputDir (outputDir)
+CExtractCallback::CExtractCallback (ProgressReporter& progress,
+                                    std::vector<MyUString>& extractedFiles,
+                                    const UString& outputDir)
+  : progress (progress), extractedFiles (extractedFiles), outputDir (outputDir)
 {
   NName::NormalizeDirPathPrefix (this->outputDir);
 }
 
-STDMETHODIMP CExtractCallback::SetTotal(UInt64 /*size*/)
+STDMETHODIMP CExtractCallback::SetTotal(UInt64 size)
 {
   MT_LOCK
+
+  progress.SetTotal (size);
 
   return CheckBreak2();
 }
 
-STDMETHODIMP CExtractCallback::SetCompleted(const UInt64 * /*completeValue*/)
+STDMETHODIMP CExtractCallback::SetCompleted(const UInt64* completeValue)
 {
   MT_LOCK
+
+  if (completeValue) progress.SetCompleted (*completeValue);
 
   return CheckBreak2();
 }

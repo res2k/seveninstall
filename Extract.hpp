@@ -42,7 +42,12 @@
 
 extern const char extractCopyright[];
 
+struct ProgressReporter;
+
 /// Helper to extract 7-zip archives
-void Extract (const std::vector<const wchar_t*>& archives, const wchar_t* targetDir, std::vector<MyUString>& extractedFiles);
+void Extract (ProgressReporter& progress,
+              const std::vector<const wchar_t*>& archives,
+              const wchar_t* targetDir,
+              std::vector<MyUString>& extractedFiles);
 
 #endif // __EXTRACT_HPP__
