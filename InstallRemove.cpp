@@ -415,6 +415,7 @@ int DoInstallRemove (const ArgsHelper& args, Action action)
                        {
                          return wmemcmp (a.Ptr(), b.Ptr(), std::min (a.Len(), b.Len()) + 1);
                        });
+        listWriter.AddEntries (allFiles_v);
         // Write registry entries
         WriteToRegistry (commonArgs.GetInstallScope (), commonArgs.GetGUID (), listWriter.GetLogFileName(), outputDir.Ptr());
       }
