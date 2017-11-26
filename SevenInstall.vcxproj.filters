@@ -203,6 +203,9 @@
     <ClInclude Include="InstallRemove.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProgressReporter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="out\Release\libucrt_reduced.lib" />
