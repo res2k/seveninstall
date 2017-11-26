@@ -2,6 +2,11 @@ IMPORTANT: This license does *not* apply to the 7zip source code (found in
 subdirectory 7zip), which is mostly licensed under GNU LGPL license.
 See 7zip.org for more information.
 
+IMPORTANT: This license does *not* apply to the Burn source code (found in
+subdirectory burn-pipe) which is licensed under the Microsoft Reciprocal
+License.
+See burn-pipe/LICENSE.TXT for more information.
+
 ---
 
 This is free and unencumbered software released into the public domain.
