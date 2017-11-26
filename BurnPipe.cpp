@@ -34,6 +34,8 @@
 
 #include "burn-pipe/precomp.h"
 
+const char burnPipeCopyright[] = "Portions Copyright (c) .NET Foundation and contributors.";
+
 BurnPipe BurnPipe::Create (const ArgsHelper& args)
 {
   const wchar_t* pipeName;

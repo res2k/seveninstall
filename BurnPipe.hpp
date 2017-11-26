@@ -39,6 +39,8 @@
 class ArgsHelper;
 struct _BURN_PIPE_CONNECTION;
 
+extern const char burnPipeCopyright[];
+
 class BurnPipe
 {
 public:

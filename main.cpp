@@ -50,7 +50,8 @@ static void PrintBanner ()
 {
     printf ("7z installer\n"
             "%s\n"
-            "\n", extractCopyright);
+            "%s\n"
+            "\n", extractCopyright, burnPipeCopyright);
 }
 
 static void PrintHelp (const wchar_t* exe)
