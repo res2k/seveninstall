@@ -276,4 +276,7 @@
     <CustomBuild Include="out\Release\libvcruntime_reduced.lib" />
     <CustomBuild Include="out\Debug\libvcruntimed_reduced.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

@@ -7,3 +7,4 @@ out
 /.vscode
 ntdll/Debug
 ntdll/Release
+packages
