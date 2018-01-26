@@ -271,10 +271,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="out\Release\libucrt_reduced.lib" />
-    <CustomBuild Include="out\Debug\libucrtd_reduced.lib" />
-    <CustomBuild Include="out\Release\libvcruntime_reduced.lib" />
-    <CustomBuild Include="out\Debug\libvcruntimed_reduced.lib" />
+    <CustomBuild Include="libucrt_reduced.txt" />
+    <CustomBuild Include="libvcruntime_reduced.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
