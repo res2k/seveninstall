@@ -46,6 +46,8 @@
 
 #include "7zCrc.h"
 
+#include <optional>
+
 static void PrintBanner ()
 {
     printf ("7z installer\n"
@@ -88,6 +90,10 @@ int wmain (int argc, const wchar_t* const argv[])
          - no logging
      */
 
+    /* Stores error occured during argument initialization.
+     * Only emitted after pipe was (possibly) initialized. */
+    std::optional<int> error_result;
+
     // Look for a log file argument
     int log_file_arg = -1;
     for (int i = 1; i < argc; i++)
@@ -103,7 +109,7 @@ int wmain (int argc, const wchar_t* const argv[])
     {
         auto log_file_name = argv[log_file_arg] + 2;
         int log_file_res = InitLogFile (log_file_name);
-        if (log_file_res < 0) return log_file_res;
+        if (log_file_res < 0) error_result = log_file_res;
     }
 
     PrintBanner ();
@@ -116,7 +122,7 @@ int wmain (int argc, const wchar_t* const argv[])
     {
         printf ("Too few arguments, expected command\n\n");
         PrintHelp (argv[0]);
-        return ecArgsError;
+        return ecArgsError; // Note: Can't have pipe arguments
     }
 
     ECommand cmd (cmdUnknown);
@@ -126,16 +132,16 @@ int wmain (int argc, const wchar_t* const argv[])
     }
     else if (wcscmp (argv[command_index], L"repair") == 0)
     {
-      cmd = cmdRepair;
+        cmd = cmdRepair;
     }
     else if (wcscmp (argv[command_index], L"remove") == 0)
     {
-      cmd = cmdRemove;
+        cmd = cmdRemove;
     }
     else
     {
-      printf ("Unknown command %ls\n", argv[1]);
-      return ecArgsError;
+        printf ("Unknown command %ls\n", argv[1]);
+        if (!error_result) error_result = ecArgsError;
     }
 
     // Arguments w/o initial command
@@ -154,6 +160,9 @@ int wmain (int argc, const wchar_t* const argv[])
     ArgsHelper args (num_filtered, filtered_args);
     /// Create pipe in any case if needed, as calling process waits for it
     BurnPipe pipe = BurnPipe::Create (args);
+
+    // Now return error if any occured during argument initialization
+    if (error_result) return *error_result;
 
     switch (cmd)
     {
