@@ -41,11 +41,11 @@ class InstalledFilesWriter;
 
 /**\name Registry paths
  * @{ */
-extern const wchar_t regPathUninstallInfo[];
+extern const char regPathUninstallInfo[];
 extern const wchar_t regValLogFileName[];
 extern const wchar_t regValInstallDir[];
-extern const wchar_t regPathDependencyInfo[];
-extern const wchar_t regPathDependentsSubkey[];
+extern const char regPathDependencyInfo[];
+extern const char regPathDependentsSubkey[];
 /** @} */
 
 /// Read list file location stored for given GUID

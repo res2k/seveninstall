@@ -33,9 +33,9 @@
 #include "Paths.hpp"
 #include "Registry.hpp"
 
-const wchar_t regPathUninstallInfo[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\";
-const wchar_t regPathDependencyInfo[] = L"Software\\Classes\\Installer\\Dependencies\\";
-const wchar_t regPathDependentsSubkey[] = L"\\Dependents";
+const char regPathUninstallInfo[] = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\";
+const char regPathDependencyInfo[] = "Software\\Classes\\Installer\\Dependencies\\";
+const char regPathDependentsSubkey[] = "\\Dependents";
 const wchar_t regValLogFileName[] = L"LogFileName";
 const wchar_t regValInstallDir[] = L"InstallDir";
 
