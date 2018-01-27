@@ -34,6 +34,8 @@
 
 #include "burn-pipe/precomp.h"
 
+#include <Shlwapi.h>
+
 const char burnPipeCopyright[] = "Portions Copyright (c) .NET Foundation and contributors.";
 
 BurnPipe BurnPipe::Create (const ArgsHelper& args)
@@ -45,10 +47,9 @@ BurnPipe BurnPipe::Create (const ArgsHelper& args)
       && args.GetOption (ArgsHelper::burnEmbeddedPipeSecret, pipeSecret)
       && args.GetOption (ArgsHelper::burnEmbeddedPipePPID, pipePPID))
   {
-    wchar_t* ppid_end;
-    uint32_t ppid_val = wcstoul (pipePPID, &ppid_end, 10);
-    if (ppid_end != pipePPID)
-      return BurnPipe (pipeName, pipeSecret, ppid_val);
+    int ppid_val;
+    if (StrToIntExW (pipePPID, STIF_DEFAULT, &ppid_val))
+      return BurnPipe (pipeName, pipeSecret, static_cast<uint32_t> (ppid_val));
   }
 
   return BurnPipe ();
