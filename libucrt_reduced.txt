@@ -30,3 +30,7 @@ stdio_initializer.obj
 argv_wildcards.obj
 -x
 strnlen.obj
+-x
+wcsncmp.obj
+-x
+wcsnicmp.obj
