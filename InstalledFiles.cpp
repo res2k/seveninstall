@@ -148,7 +148,7 @@ MyUString InstalledFilesReader::GetLine()
     {
       // @@@ Ugh, AString doesn't have append w/ pointer + size
       char last = 0;
-      std::swap (last, *buf_end);
+      std::swap (last, *(buf_end - 1);
       utf8_line += buf_p;
       utf8_line += last;
       buf_p = buf_end;
