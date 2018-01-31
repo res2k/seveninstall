@@ -237,7 +237,6 @@ static MyUString GetOutputDirectory (const ArgsHelper& args,
 }
 
 static std::unordered_set<MyUString> ReadPreviousFilesList (const CommonArgs& commonArgs,
-                                                            bool requireList,
                                                             MyUString& listFilePath,
                                                             bool silent)
 {
@@ -258,7 +257,6 @@ static std::unordered_set<MyUString> ReadPreviousFilesList (const CommonArgs& co
   }
   catch (...)
   {
-    if (requireList) throw;
     // Else: Continue
     listException = std::current_exception();
   }
@@ -320,14 +318,28 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
   try
   {
     const wchar_t* outDirArg = nullptr;
-    MyUString outputDir = GetOutputDirectory (args, commonArgs, action, outDirArg);
-    if (outputDir.IsEmpty())
+    MyUString outputDir;
+    try
     {
-      if (action == Action::Install)
-        fprintf (stderr, "'-o<DIR>' argument is required\n");
-      else
-        fprintf (stderr, "No installation directory found\n");
-      return ecArgsError;
+      outputDir = GetOutputDirectory (args, commonArgs, action, outDirArg);
+      if (outputDir.IsEmpty ())
+      {
+        if (action == Action::Install)
+          fprintf (stderr, "'-o<DIR>' argument is required\n");
+        else
+          fprintf (stderr, "No installation directory found\n");
+        if (!doRemove) return ecArgsError;
+      }
+    }
+    catch (const HRESULTException& e)
+    {
+      fprintf (stderr, "Error determining installation directory: %ls\n", GetHRESULTString (e.GetHR()).Ptr());
+      if (!doRemove) return e.GetHR();
+    }
+    catch (const std::exception& e)
+    {
+      fprintf (stderr, "Error determining installation directory: %s\n", e.what());
+      if (!doRemove) return ecException;
     }
 
     if (action == Action::Remove)
@@ -374,7 +386,7 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
 
     // Grab previous files list
     MyUString listFilePath;
-    auto previousFiles = ReadPreviousFilesList (commonArgs, action == Action::Remove, listFilePath, action == Action::Install);
+    auto previousFiles = ReadPreviousFilesList (commonArgs, listFilePath, action == Action::Install);
     progReadFilesLists.SetCompleted (2);
 
     // Extract new files (Install/Repair)
@@ -413,7 +425,7 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
         if (args.GetOption (L"-r"))
         {
           // Schedule for removal
-          removeHelper.ScheduleRemove (outputDir.Ptr());
+          if (!outputDir.IsEmpty()) removeHelper.ScheduleRemove (outputDir.Ptr());
         }
       }
       removeHelper.FlushDelayed (progRemoveFlush);
