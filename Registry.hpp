@@ -67,6 +67,9 @@ public:
   RegistryKey (HKEY parent, const wchar_t* key, REGSAM access, CreateTag& tag);
   ~RegistryKey ();
 
+  /// Obtain HKEY value associated with key
+  operator HKEY() const { return key; }
+
   /**
    * Write a DWORD value to the registry.
    * \param name Name of the value.
