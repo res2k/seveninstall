@@ -170,10 +170,31 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
 
 static void RegistryDelete (InstallScope installScope, const wchar_t* regPath)
 {
-  LRESULT err (SHDeleteKeyW (RegistryParent (installScope), regPath));
-  if (err != ERROR_SUCCESS)
+  const REGSAM key_access (KEY_READ | KEY_SET_VALUE | DELETE | KEY_WOW64_64KEY);
+  try
   {
-    fprintf (stderr, "Error deleting %ls from registry: %ls\n", regPath, GetErrorString (err).Ptr());
+    MyUString parentPath;
+    const wchar_t* keyName = nullptr;
+    if (auto keyNameSep = wcsrchr (regPath, '\\'))
+    {
+      parentPath = MyUString (regPath, keyNameSep - regPath);
+      keyName = keyNameSep + 1;
+    }
+    else
+    {
+      parentPath = regPath;
+    }
+    RegistryKey key (RegistryParent (installScope), parentPath.Ptr(), key_access);
+    LRESULT err (SHDeleteKeyW (key, keyName));
+    if (err != ERROR_SUCCESS)
+    {
+      fprintf (stderr, "Error deleting %ls from registry: %ls\n", regPath, GetErrorString (err).Ptr());
+    }
+  }
+  catch (const HRESULTException& e)
+  {
+      fprintf (stderr, "Error deleting %ls from registry: %ls\n", regPath,
+               GetHRESULTString (e.GetHR()).Ptr());
   }
 }
 
