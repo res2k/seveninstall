@@ -140,13 +140,22 @@ void NormalizePath (MyUString& path)
   DWORD needBuf = GetLongPathName (path.Ptr(),
                                    longPath.GetBuf (path.Len()),
                                    path.Len() + 1);
-  if (needBuf > path.Len() + 1)
+  if (GetLastError () != ERROR_SUCCESS)
   {
-    GetLongPathName (path.Ptr(),
-                     longPath.GetBuf (needBuf),
-                     needBuf);
+    // In case of error, just go with the original path
+    longPath.ReleaseBuf_SetEnd (0);
+    longPath = path;
   }
-  longPath.ReleaseBuf_CalcLen (needBuf);
+  else
+  {
+    if (needBuf > path.Len () + 1)
+    {
+      GetLongPathName (path.Ptr (),
+                       longPath.GetBuf (needBuf),
+                       needBuf);
+    }
+    longPath.ReleaseBuf_CalcLen (needBuf);
+  }
   CharLower (longPath.Ptr());
   path = std::move (longPath);
 }
