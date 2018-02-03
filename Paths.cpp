@@ -150,3 +150,23 @@ void NormalizePath (MyUString& path)
   CharLower (longPath.Ptr());
   path = std::move (longPath);
 }
+
+MyUString GetExePath ()
+{
+  MyUString result;
+
+  wchar_t buf[MAX_PATH];
+  DWORD bufSize = sizeof(buf)/sizeof(buf[0]);
+  auto needSize = GetModuleFileNameW (nullptr, buf, bufSize);
+  if (needSize+1 > bufSize)
+  {
+    bufSize = needSize+1;
+    GetModuleFileNameW (nullptr, result.GetBuf (needSize), bufSize);
+    result.ReleaseBuf_CalcLen (bufSize);
+  }
+  else
+  {
+    result = buf;
+  }
+  return result;
+}

@@ -57,4 +57,7 @@ private:
 /// Helper function to 'normalize' a path do it can be compared across different runs
 void NormalizePath (MyUString& path);
 
+/// Get path of this EXE
+MyUString GetExePath ();
+
 #endif // __7I_PATHS_HPP__

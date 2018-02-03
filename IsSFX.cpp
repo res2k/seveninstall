@@ -30,6 +30,8 @@
 
 #include "IsSFX.hpp"
 
+#include "Paths.hpp"
+
 #include "7z.h"
 #include "7zCrc.h"
 #include "CpuArch.h"
@@ -84,26 +86,6 @@ static bool FindSignature (HANDLE file, uint64_t& resPos)
 
 static MyUString cached_exe_path;
 static bool cached_sfx_result;
-
-static MyUString GetExePath ()
-{
-  MyUString result;
-
-  wchar_t buf[MAX_PATH];
-  DWORD bufSize = sizeof(buf)/sizeof(buf[0]);
-  auto needSize = GetModuleFileNameW (nullptr, buf, bufSize);
-  if (needSize+1 > bufSize)
-  {
-    bufSize = needSize+1;
-    GetModuleFileNameW (nullptr, result.GetBuf (needSize), bufSize);
-    result.ReleaseBuf_CalcLen (bufSize);
-  }
-  else
-  {
-    result = buf;
-  }
-  return result;
-}
 
 bool IsSFX (MyUString& exePath)
 {
