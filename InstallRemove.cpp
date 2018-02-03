@@ -193,8 +193,8 @@ static void RegistryDelete (InstallScope installScope, const wchar_t* regPath)
   }
   catch (const HRESULTException& e)
   {
-      fprintf (stderr, "Error deleting %ls from registry: %ls\n", regPath,
-               GetHRESULTString (e.GetHR()).Ptr());
+    fprintf (stderr, "Error deleting %ls from registry: %ls\n", regPath,
+             GetHRESULTString (e.GetHR()).Ptr());
   }
 }
 
