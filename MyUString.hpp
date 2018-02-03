@@ -80,8 +80,8 @@ public:
   bool IsEmpty() const { return us().IsEmpty(); }
 
   operator const wchar_t* () const { return us().Ptr(); }
-  operator const UString& () const;
-  operator UString& ();
+  operator const UString& () const { return us(); }
+  operator UString& () { return us(); }
   wchar_t* Ptr() { return const_cast<wchar_t*> (us().Ptr()); }
   const wchar_t* Ptr() const { return us().Ptr(); }
 
@@ -118,6 +118,12 @@ public:
   MyUString& operator+= (const MyUString& s) { us() += s.us(); return *this; }
   MyUString& operator+= (const UString& s) { us() += s; return *this; }
 
+  friend MyUString operator+(const MyUString &s, wchar_t c) { return s.us() + c; }
+
+  friend MyUString operator+(const MyUString &s1, const MyUString &s2) { return s1.us() + s2.us(); }
+  friend MyUString operator+(const MyUString &s1, const wchar_t *s2) { return s1.us() + s2; }
+  friend MyUString operator+(const wchar_t *s1, const MyUString &s2) { return s1 + s2.us(); }
+
   bool operator< (const MyUString& other) const
   {
     if (Ptr() == nullptr)
@@ -132,6 +138,10 @@ public:
       return wmemcmp (Ptr(), other.Ptr(), compare_len) < 0;
     }
   }
+
+  int ReverseFind_PathSepar() const { return us().ReverseFind_PathSepar(); }
+
+  void DeleteFrom (unsigned index) { us().DeleteFrom (index); }
 };
 
 namespace std
