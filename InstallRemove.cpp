@@ -41,6 +41,8 @@
 #include "Registry.hpp"
 #include "RegistryLocations.hpp"
 
+#include "Windows/FileName.h"
+
 #include <memory>
 #include <unordered_set>
 
@@ -255,6 +257,14 @@ static MyUString GetOutputDirectory (const ArgsHelper& args,
   }
 
   return MyUString ();
+}
+
+static MyUString GetExeDir ()
+{
+  auto path = GetExePath();
+  int pathsep = path.ReverseFind_PathSepar();
+  if (pathsep != -1) path.DeleteFrom (pathsep + 1);
+  return path;
 }
 
 static std::unordered_set<MyUString> ReadPreviousFilesList (const CommonArgs& commonArgs,
@@ -472,6 +482,36 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
     {
       std::unordered_set<MyUString> allFiles (extractedFiles.begin(), extractedFiles.end());
       allFiles.insert (previousFiles.begin(), previousFiles.end());
+
+      // Add artifacts files, if given
+      const wchar_t* artifactsFile;
+      if (args.GetOption (L"-A", artifactsFile))
+      {
+        auto artifactsFileFull = GetExeDir() + artifactsFile;
+
+        try
+        {
+          MyUString outDir = outDirArg ? outDirArg : outputDir.Ptr();
+          NWindows::NFile::NName::NormalizeDirPathPrefix (outDir);
+          InstalledFilesReader artifactsReader (artifactsFileFull);
+
+          MyUString artifactFile;
+          while (!(artifactFile = artifactsReader.GetFileName()).IsEmpty())
+          {
+            artifactFile = outDir + artifactFile;
+            NormalizePath (artifactFile);
+            allFiles.insert (artifactFile);
+          }
+        }
+        catch (const HRESULTException& e)
+        {
+          fprintf (stderr, "Error reading artifacts from %ls: %ls\n", artifactsFileFull.Ptr(), GetHRESULTString (e.GetHR()).Ptr());
+        }
+        catch (const std::exception& e)
+        {
+          fprintf (stderr, "Error reading artifacts from %ls: %s\n", artifactsFileFull.Ptr(), e.what());
+        }
+      }
 
       // Generate file list
       InstalledFilesWriter listWriter (logLocation.GetFilename());
