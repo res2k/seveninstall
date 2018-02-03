@@ -27,9 +27,10 @@
                   Id="enwik8"
                   Protocol="burn"
                   DetectCondition="enwik8Installed"
-                  InstallCommand="install &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot;"
+                  InstallCommand="install &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot; -Aartifacts.txt"
                   UninstallCommand="remove &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) -r"
-                  RepairCommand="repair &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID)">
+                  RepairCommand="repair &quot;-L[WixBundleLog_enwik8]&quot; -M -g$(var.ENWIK8_GUID) &quot;-o[InstallFolder]&quot; -Aartifacts.txt">
+        <Payload Id="artifacts" SourceFile="artifacts.txt" Name="packages\artifacts.txt" />
         <dep:Provides Key="$(var.ENWIK8_GUID)" Version="1.0.0.0"/>
       </ExePackage>
     </Chain>
