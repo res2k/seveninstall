@@ -109,6 +109,11 @@ uint64_t InstalledFilesReader::GetProcessed () const
   return currentPos;
 }
 
+static bool isSpace (char ch)
+{
+  return (ch == ' ') || (ch == '\t') || (ch == '\r');
+}
+
 MyUString InstalledFilesReader::GetLine()
 {
   if (file == INVALID_HANDLE_VALUE)
@@ -156,7 +161,8 @@ MyUString InstalledFilesReader::GetLine()
   }
 
   // Remove trailing CR
-  utf8_line.TrimRight();
+  while ((utf8_line.Len() > 0) && isSpace (utf8_line[utf8_line.Len()-1]))
+    utf8_line.DeleteFrom (utf8_line.Len()-1);
 
   MyUString line;
   // Convert line from UTF-8 to wide char
