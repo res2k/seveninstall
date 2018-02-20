@@ -156,15 +156,9 @@ STDMETHODIMP CExtractCallback::PrepareOperation(const wchar_t *name, Int32 /* is
 
   if (show2)
   {
-    _tempA = s;
-    if (name)
-      _tempA.Add_Space();
-    printf ("%s", _tempA.Ptr ());
+    printf (name ?  "%s " : "%s", s);
 
-    _tempU.Empty();
-    if (name)
-      _tempU = name;
-    printf ("%ls", _tempU.Ptr ());
+    if (name) printf ("%ls", name);
     if (position)
       printf (" <%llu>", *position);
     printf ("\n");
@@ -303,7 +297,8 @@ HRESULT CExtractCallback::BeforeOpen(const wchar_t *name, bool testMode)
   ThereIsWarning_in_Current = false;
   NumFileErrors_in_Current = 0;
 
-  printf ("\n%s%ls", (testMode ? kTesting : kExtracting), name);
+  printf ("\n%s%ls\n", (testMode ? kTesting : kExtracting), name);
+  if (kExtracting) printf ("... to: %ls\n", outputDir.Ptr());
 
   return S_OK;
 }

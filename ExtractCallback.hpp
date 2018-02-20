@@ -22,8 +22,6 @@ class CExtractCallback :
   public IExtractCallbackUI,
   public CMyUnknownImp
 {
-  AString _tempA;
-  UString _tempU;
   UString _currentName;
 public:
   MY_QUERYINTERFACE_BEGIN2(IFolderArchiveExtractCallback)
@@ -42,7 +40,7 @@ public:
   // INTERFACE_IArchiveExtractCallbackMessage(;)
   INTERFACE_IFolderArchiveExtractCallback2(;)
 
-  unsigned LogLevel = 0;
+  unsigned LogLevel = 1;
 
   ProgressReporter& progress;
   std::vector<MyUString>& extractedFiles;
