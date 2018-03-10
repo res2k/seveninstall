@@ -48,7 +48,7 @@ static HRESULT DecompressArchive(
   FString outDir = options.OutputDir;
   UString replaceName = arc.DefaultName;
 
-  outDir.Replace(FSTRING_ANY_MASK, us2fs(Get_Correct_FsFile_Name(replaceName)));
+  outDir.Replace(FString("*"), us2fs(Get_Correct_FsFile_Name(replaceName)));
 
   UInt32 numItems;
   RINOK(archive->GetNumberOfItems(&numItems));

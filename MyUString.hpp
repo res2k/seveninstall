@@ -73,7 +73,7 @@ public:
   MyUString (UString&& other) : MyUString () { std::swap_ranges (&storage[0], &storage[0] + sizeof (storage), reinterpret_cast<uint8_t*> (&other)); }
   MyUString (const wchar_t* s) { new (storage) UString (s); }
   MyUString (const wchar_t* s, size_t n) : MyUString() { us().SetFrom (s, n); }
-  MyUString (const char* s) : MyUString() { us().SetFromAscii (s); }
+  MyUString (const char* s) : MyUString() { us() = s; }
   ~MyUString () { us().~UString(); }
 
   unsigned Len() const { return us().Len(); }

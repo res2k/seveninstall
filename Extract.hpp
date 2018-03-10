@@ -34,6 +34,7 @@
 #ifndef __EXTRACT_HPP__
 #define __EXTRACT_HPP__
 
+#include "Common/Common.h"
 #include "MyUString.hpp"
 
 #include <vector>

@@ -16,7 +16,6 @@
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zHandler.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zHeader.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zIn.cpp" />
-    <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zProperties.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\Common\CoderMixer2.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\Common\ItemNameUtils.cpp" />
     <ClCompile Include="7zip\CPP\7zip\Archive\Common\OutStreamWithCRC.cpp" />

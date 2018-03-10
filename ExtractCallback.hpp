@@ -6,6 +6,7 @@
 
 #include <Windows.h>
 
+#include "Common/Common.h"
 #include "Common/MyString.h"
 #include "7zip/Common/FileStreams.h"
 #include "7zip/Archive/IArchive.h"

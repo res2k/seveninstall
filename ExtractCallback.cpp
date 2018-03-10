@@ -489,7 +489,7 @@ static void GetPropName(PROPID propID, const wchar_t *name, AString &nameA, UStr
 static void PrintPropertyPair2(FILE* f, PROPID propID, const wchar_t *name, const CPropVariant &prop)
 {
   UString s;
-  ConvertPropertyToString(s, prop, propID);
+  ConvertPropertyToString2(s, prop, propID);
   if (!s.IsEmpty())
   {
     AString nameA;
@@ -624,10 +624,10 @@ static HRESULT Print_OpenArchive_Error(FILE* f, const CCodecs *codecs, const CAr
 void Add_Messsage_Pre_ArcType(UString &s, const char *pre, const wchar_t *arcType)
 {
   s.Add_LF();
-  s.AddAscii(pre);
-  s.AddAscii(" as [");
+  s += pre;
+  s += " as [";
   s += arcType;
-  s.AddAscii("] archive");
+  s += "] archive";
 }
 
 void Print_ErrorFormatIndex_Warning(FILE* f, const CCodecs *codecs, const CArc &arc)
@@ -639,7 +639,7 @@ void Print_ErrorFormatIndex_Warning(FILE* f, const CCodecs *codecs, const CArc &
   if (arc.FormatIndex == er.ErrorFormatIndex)
   {
     s.Add_LF();
-    s.AddAscii("The archive is open with offset");
+    s += "The archive is open with offset";
   }
   else
   {
