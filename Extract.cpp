@@ -148,7 +148,7 @@ static void ExtractOneArchive (
 
   CArchiveExtractCallback *ecs = new CArchiveExtractCallback;
   CMyComPtr<IArchiveExtractCallback> ec(ecs);
-  ecs->InitForMulti(false, options.PathMode, options.OverwriteMode);
+  ecs->InitForMulti(false, options.PathMode, options.OverwriteMode, false);
   #ifndef _SFX
   ecs->SetHashMethods(hash);
   #endif
