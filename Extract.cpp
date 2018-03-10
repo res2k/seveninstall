@@ -118,9 +118,11 @@ static HRESULT DecompressArchive(
 
   HRESULT result;
   Int32 testMode = (options.TestMode && !calcCrc) ? 1: 0;
+  CArchiveExtractCallback_Closer ecsCloser(ecs);
   result = archive->Extract(&realIndices.Front(), realIndices.Size(), testMode, ecs);
+  HRESULT res2 = ecsCloser.Close();
   if (result == S_OK)
-    result = ecs->SetDirsTimes();
+    result = res2;
   return callback->ExtractResult(result);
 }
 
