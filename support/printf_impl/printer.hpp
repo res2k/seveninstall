@@ -160,6 +160,7 @@ namespace printf_impl
                         digits_len++;
                         value = new_value;
                     }
+                    out_ptr++;
                     if ((fwp.flags & ffNumericalOpt) != 0)
                     {
                         // FIXME?: Pass in as arg?
