@@ -62,6 +62,7 @@ static inline void SortStringVec (std::vector<MyUString>& vec, SortFunc sort_fun
 
 class RemoveHelper
 {
+  size_t notFoundCounter = 0;
   std::vector<MyUString> directories;
 public:
   ~RemoveHelper();
@@ -72,16 +73,14 @@ public:
 
 #include "Shlwapi.h"
 
-static void TryDelete (DWORD fileAttr, const wchar_t* file)
+static DWORD TryDelete (DWORD fileAttr, const wchar_t* file)
 {
   if ((fileAttr & FILE_ATTRIBUTE_READONLY) != 0)
   {
     if (!SetFileAttributesW (file, fileAttr & ~FILE_ATTRIBUTE_READONLY))
     {
       DWORD result (GetLastError());
-      fprintf (stderr, "Error clearing 'read-only' attribute of %ls: %ls\n", file,
-               GetErrorString (result).Ptr());
-      return;
+      return result;
     }
   }
   if (!DeleteFileW (file))
@@ -89,34 +88,35 @@ static void TryDelete (DWORD fileAttr, const wchar_t* file)
     DWORD result (GetLastError());
     fprintf (stderr, "Error deleting %ls: %ls\n", file,
              GetErrorString (result).Ptr());
+    return result;
   }
+  return ERROR_SUCCESS;
 }
 
-static void TryDelete (const wchar_t* file)
+static DWORD TryDelete (const wchar_t* file)
 {
   DWORD fileAttr (GetFileAttributesW (file));
   if (fileAttr == INVALID_FILE_ATTRIBUTES)
   {
     // Weird.
     DWORD result (GetLastError());
-    fprintf (stderr, "Huh. Error obtaining attributes for %ls: %ls\n", file,
-             GetErrorString (result).Ptr());
+    return result;
   }
   else
   {
     // Remove it
-    TryDelete (fileAttr, file);
+    return TryDelete (fileAttr, file);
   }
 }
 
-static void TryDeleteDir (const wchar_t* path)
+static DWORD TryDeleteDir (const wchar_t* path)
 {
   if (!RemoveDirectoryW (path))
   {
     DWORD result (GetLastError());
-    fprintf (stderr, "Error deleting %ls: %ls\n", path,
-             GetErrorString (result).Ptr());
+    return result;
   }
+  return ERROR_SUCCESS;
 }
 
 RemoveHelper::~RemoveHelper()
@@ -132,8 +132,15 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   {
     // File does not exist (probably)...
     DWORD result (GetLastError());
-    fprintf (stderr, "Error obtaining attributes for %ls: %ls\n", path,
-             GetErrorString (result).Ptr());
+    if (result == ERROR_FILE_NOT_FOUND)
+    {
+      ++notFoundCounter;
+    }
+    else if (result != ERROR_SUCCESS)
+    {
+      fprintf (stderr, "Error obtaining attributes for %ls: %ls\n", path,
+               GetErrorString (result).Ptr ());
+    }
   }
   else if ((fileAttr & FILE_ATTRIBUTE_DIRECTORY) != 0)
   {
@@ -143,7 +150,16 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   else
   {
     // Remove it
-    TryDelete (fileAttr, path);
+    auto result = TryDelete (fileAttr, path);
+    if (result == ERROR_FILE_NOT_FOUND)
+    {
+      ++notFoundCounter;
+    }
+    else if (result != ERROR_SUCCESS)
+    {
+      fprintf (stderr, "Error deleting %ls: %ls\n", path,
+               GetErrorString (result).Ptr ());
+    }
   }
 }
 
@@ -164,10 +180,26 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
   size_t count = 0;
   for (const MyUString& dir : directories)
   {
-    TryDeleteDir (dir.Ptr());
+    auto result = TryDeleteDir (dir.Ptr());
+    if (result == ERROR_FILE_NOT_FOUND)
+    {
+      ++notFoundCounter;
+    }
+    else if (result != ERROR_SUCCESS)
+    {
+      fprintf (stderr, "Error deleting %ls: %ls\n", dir.Ptr (),
+               GetErrorString (result).Ptr ());
+    }
     progress.SetCompleted (++count);
   }
   directories.clear();
+
+  if (notFoundCounter > 0)
+  {
+    fprintf (stderr, "%zu files/directories to delete were not found.\n", notFoundCounter);
+  }
+
+  notFoundCounter = 0;
 }
 
 static void RegistryDelete (InstallScope installScope, const wchar_t* regPath)
