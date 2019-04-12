@@ -203,9 +203,9 @@ python build\reassemble-lib.py "$(UniversalCRTSdkDir)Lib\%UCRT_VERSION%\ucrt\x86
     </CustomBuild>
     <CustomBuild Include="libvcruntime_reduced.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">python build\reassemble-lib.py "$(VCToolsInstallDir)lib\x86\libvcruntime.lib" -o "$(OutDir)libvcruntime_reduced.lib" "@$(ProjectDir)libvcruntime_reduced.txt"
-copy "$(VCToolsInstallDir)lib\x86\libvcruntime.pdb" "$(OutDir)"</Command>
+copy "$(VCToolsInstallDir)lib\x86\libvcruntime.*pdb" "$(OutDir)"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python build\reassemble-lib.py "$(VCToolsInstallDir)lib\x86\libvcruntimed.lib" -o "$(OutDir)libvcruntimed_reduced.lib" "@$(ProjectDir)libvcruntime_reduced.txt"
-copy "$(VCToolsInstallDir)lib\x86\libvcruntimed.pdb" "$(OutDir)"
+copy "$(VCToolsInstallDir)lib\x86\libvcruntimed.*pdb" "$(OutDir)"
 </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating reduced libvcruntime</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating reduced libvcruntimed</Message>
