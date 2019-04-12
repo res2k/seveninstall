@@ -5,6 +5,7 @@
 
 #pragma function (memcmp)
 #pragma function (memcpy)
+#pragma function (memmove)
 #pragma function (memset)
 
 /* Default memory functions implemented using NT runtime functions.
