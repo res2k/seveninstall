@@ -86,7 +86,9 @@
     <ClCompile Include="7zip\C\CpuArch.c" />
     <ClCompile Include="7zip\C\Delta.c" />
     <ClCompile Include="7zip\C\Lzma2Dec.c" />
+    <ClCompile Include="7zip\C\Lzma2DecMt.c" />
     <ClCompile Include="7zip\C\LzmaDec.c" />
+    <ClCompile Include="7zip\C\MtDec.c" />
     <ClCompile Include="7zip\C\Ppmd7.c" />
     <ClCompile Include="7zip\C\Ppmd7Dec.c" />
     <ClCompile Include="7zip\C\Threads.c" />

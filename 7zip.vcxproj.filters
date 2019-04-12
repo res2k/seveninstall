@@ -264,5 +264,11 @@
     <ClCompile Include="7zip\CPP\7zip\UI\Console\ConsoleClose.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
+    <ClCompile Include="7zip\C\Lzma2DecMt.c">
+      <Filter>Source Files\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="7zip\C\MtDec.c">
+      <Filter>Source Files\Codecs</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
