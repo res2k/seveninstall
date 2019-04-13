@@ -1,3 +1,7 @@
+#include <string.h>
+
+#pragma function (wcslen)
+
 extern "C" size_t strnlen (const char* str, size_t numberOfElements)
 {
   size_t n = 0;
