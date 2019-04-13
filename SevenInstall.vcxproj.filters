@@ -153,6 +153,9 @@
     <ClCompile Include="support\wcscmp.cpp">
       <Filter>support</Filter>
     </ClCompile>
+    <ClCompile Include="support\syserror.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -276,6 +279,7 @@
   <ItemGroup>
     <CustomBuild Include="libucrt_reduced.txt" />
     <CustomBuild Include="libvcruntime_reduced.txt" />
+    <CustomBuild Include="libcpmt_reduced.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
