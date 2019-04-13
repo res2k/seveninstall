@@ -4,6 +4,7 @@ extern "C" size_t wcsnlen (const wchar_t* str, size_t numberOfElements)
   const wchar_t* p = str;
   while ((*p != 0) && (n < numberOfElements))
   {
+    p++;
     n++;
   }
   return n;
