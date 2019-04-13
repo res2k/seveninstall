@@ -68,7 +68,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>shlwapi.lib;$(OutDir)\pseudo_ntdll\ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
-      <IgnoreSpecificDefaultLibraries>libucrtd.lib;libvcruntimed.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libucrtd.lib;libvcruntimed.lib;libcpmtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -93,7 +93,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>shlwapi.lib;$(OutDir)\pseudo_ntdll\ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
-      <IgnoreSpecificDefaultLibraries>libucrt.lib;libvcruntime.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libucrt.lib;libvcruntime.lib;libcpmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -213,6 +213,19 @@ copy "$(VCToolsInstallDir)lib\x86\libvcruntimed.*pdb" "$(OutDir)"
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)libvcruntimed_reduced.lib</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VCToolsInstallDir)lib\x86\libvcruntime.lib;$(ProjectDir)libvcruntime_reduced.txt</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VCToolsInstallDir)lib\x86\libvcruntimed.lib;$(ProjectDir)libvcruntime_reduced.txt</AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="libcpmt_reduced.txt">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">python build\reassemble-lib.py "$(VCToolsInstallDir)lib\x86\libcpmt.lib" -o "$(OutDir)libcpmt_reduced.lib" "@$(ProjectDir)libcpmt_reduced.txt"
+copy "$(VCToolsInstallDir)lib\x86\libcpmt.*pdb" "$(OutDir)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python build\reassemble-lib.py "$(VCToolsInstallDir)lib\x86\libcpmtd.lib" -o "$(OutDir)libcpmtd_reduced.lib" "@$(ProjectDir)libcpmt_reduced.txt"
+copy "$(VCToolsInstallDir)lib\x86\libcpmtd.*pdb" "$(OutDir)"
+</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating reduced libcpmt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating reduced libcpmtd</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)libcpmt_reduced.lib</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)libcpmtd_reduced.lib</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VCToolsInstallDir)lib\x86\libcpmt.lib;$(ProjectDir)libcpmt_reduced.txt</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VCToolsInstallDir)lib\x86\libcpmtd.lib;$(ProjectDir)libcpmt_reduced.txt</AdditionalInputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
