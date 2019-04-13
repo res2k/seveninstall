@@ -134,6 +134,7 @@
     <ClCompile Include="RegistryLocations.cpp" />
     <ClCompile Include="support\argv_wildcards.cpp" />
     <ClCompile Include="support\downlevel_locale.cpp" />
+    <ClCompile Include="support\environment_initialization_dummies.cpp" />
     <ClCompile Include="support\memory.cpp">
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
     </ClCompile>

@@ -34,3 +34,5 @@ strnlen.obj
 wcsncmp.obj
 -x
 wcsnicmp.obj
+-x
+environment_initialization.obj
