@@ -36,3 +36,7 @@ wcsncmp.obj
 wcsnicmp.obj
 -x
 environment_initialization.obj
+-x
+setlocale.obj
+-x
+wsetlocale.obj
