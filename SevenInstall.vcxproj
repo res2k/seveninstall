@@ -69,6 +69,7 @@
       <AdditionalDependencies>shlwapi.lib;$(OutDir)\pseudo_ntdll\ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
       <IgnoreSpecificDefaultLibraries>libucrtd.lib;libvcruntimed.lib;libcpmtd.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>noenv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -94,6 +95,7 @@
       <AdditionalDependencies>shlwapi.lib;$(OutDir)\pseudo_ntdll\ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
       <IgnoreSpecificDefaultLibraries>libucrt.lib;libvcruntime.lib;libcpmt.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>noenv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
