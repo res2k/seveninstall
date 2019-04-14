@@ -44,7 +44,7 @@ namespace printf_impl
             SizeSpec size;
             int ch_value;
         public:
-            Char (const FormatFWP& /*fwp*/, va_list& args, SizeSpec size)
+            Char (const FormatFWP& /*fwp*/, va_list& args, SizeSpec size) : size (size)
             {
                 switch (size)
                 {
