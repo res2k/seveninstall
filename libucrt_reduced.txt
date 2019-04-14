@@ -40,3 +40,5 @@ environment_initialization.obj
 setlocale.obj
 -x
 wsetlocale.obj
+-x
+ctype.obj

@@ -71,6 +71,14 @@
       <IgnoreSpecificDefaultLibraries>libucrtd.lib;libvcruntimed.lib;libcpmtd.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>noenv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PreBuildEvent>
+      <Message>Generating ctype data generation code...</Message>
+      <Command>set UCRT_VERSION=10.0.16299.0
+python build\extract-lib-obj.py "$(UniversalCRTSdkDir)Lib\%UCRT_VERSION%\ucrt\x86\libucrtd.lib" ctype.obj -o "$(OutDir)orig-ctype.obj"
+md "$(ProjectDir)generated" &gt; NUL
+python build\extract-ctype-data.py "$(OutDir)orig-ctype.obj" &gt;"$(ProjectDir)generated\ctype.cpp"
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -97,6 +105,14 @@
       <IgnoreSpecificDefaultLibraries>libucrt.lib;libvcruntime.lib;libcpmt.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>noenv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PreBuildEvent>
+      <Command>set UCRT_VERSION=10.0.16299.0
+python build\extract-lib-obj.py "$(UniversalCRTSdkDir)Lib\%UCRT_VERSION%\ucrt\x86\libucrt.lib" ctype.obj -o "$(OutDir)orig-ctype.obj"
+md "$(ProjectDir)generated" &gt; NUL
+python build\extract-ctype-data.py "$(OutDir)orig-ctype.obj" &gt;"$(ProjectDir)generated\ctype.cpp"
+</Command>
+      <Message>Generating ctype data generation code...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="7zip\CPP\7zip\Archive\7z\7zRegister.cpp" />
@@ -132,6 +148,9 @@
     <ClCompile Include="ProgressReporter.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="RegistryLocations.cpp" />
+    <ClCompile Include="generated\ctype.cpp">
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="support\argv_wildcards.cpp" />
     <ClCompile Include="support\downlevel_locale.cpp" />
     <ClCompile Include="support\environment_initialization_dummies.cpp" />
