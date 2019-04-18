@@ -167,7 +167,7 @@ namespace printf_impl
             {
                 spec = ssLong;
                 ++p;
-                if (*p == 'h')
+                if (*p == 'l')
                 {
                     spec = ssLongLong;
                     ++p;
