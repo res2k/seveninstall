@@ -41,6 +41,8 @@ public:
   // INTERFACE_IArchiveExtractCallbackMessage(;)
   INTERFACE_IFolderArchiveExtractCallback2(;)
 
+  bool AnyErrors() const;
+
   unsigned LogLevel = 1;
 
   ProgressReporter& progress;

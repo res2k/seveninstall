@@ -350,6 +350,10 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
   bool doExtract = (action == Action::Install) || (action == Action::Repair);
   bool doRemove = (action == Action::Remove) || (action == Action::Repair);
 
+  /* HRESULT value to return. Updated when a sub-action failed, but other
+   * sub-actions could still be performed. */
+  HRESULT actionHR = S_OK;
+
   CommonArgs commonArgs (args);
   if (!commonArgs.checkValid (doExtract ? CommonArgs::Archives::Required : CommonArgs::Archives::None))
   {
@@ -456,7 +460,14 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
     std::vector<MyUString> extractedFiles;
     if (doExtract)
     {
-      Extract (actionProgress.GetPhase (progPhaseExtract), archives, outDirArg ? outDirArg : outputDir.Ptr(), extractedFiles);
+      try
+      {
+        Extract (actionProgress.GetPhase (progPhaseExtract), archives, outDirArg ? outDirArg : outputDir.Ptr(), extractedFiles);
+      }
+      catch(const HRESULTException& e)
+      {
+        actionHR = e.GetHR();
+      }
     }
 
     // Remove previous files (Remove/Repair)
@@ -585,5 +596,6 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
     return ecException;
   }
 
+  if (FAILED(actionHR)) return actionHR;
   return ecSuccess;
 }

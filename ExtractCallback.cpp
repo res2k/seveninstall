@@ -789,3 +789,8 @@ HRESULT CExtractCallback::ExtractResult(HRESULT result)
 
   return CheckBreak2();
 }
+
+bool CExtractCallback::AnyErrors() const
+{
+  return NumArcsWithError > 0;
+}
