@@ -60,12 +60,23 @@ static inline void SortStringVec (std::vector<MyUString>& vec, SortFunc sort_fun
            &sort_func);
 }
 
+// Update a HRESULT with a new one if it indicates success.
+static void UpdateHR (HRESULT& hr, HRESULT newHr)
+{
+  if (SUCCEEDED(hr)) hr = newHr;
+}
+
 class RemoveHelper
 {
+  HRESULT hr = S_OK;
   size_t notFoundCounter = 0;
   std::vector<MyUString> directories;
+  std::unordered_set<MyUString> reallyDeleted;
 public:
   ~RemoveHelper();
+
+  HRESULT GetHR() const { return hr; }
+  const std::unordered_set<MyUString>& GetReallyDeleted() const { return reallyDeleted; }
 
   void ScheduleRemove (const wchar_t* path);
   void FlushDelayed (ProgressReporter& progress);
@@ -135,11 +146,17 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
     if (result == ERROR_FILE_NOT_FOUND)
     {
       ++notFoundCounter;
+      reallyDeleted.insert (path);
     }
     else if (result != ERROR_SUCCESS)
     {
+      UpdateHR (hr, HRESULT_FROM_WIN32(result));
       fprintf (stderr, "Error obtaining attributes for %ls: %ls\n", path,
                GetErrorString (result).Ptr ());
+    }
+    else
+    {
+      reallyDeleted.insert (path);
     }
   }
   else if ((fileAttr & FILE_ATTRIBUTE_DIRECTORY) != 0)
@@ -154,11 +171,17 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
     if (result == ERROR_FILE_NOT_FOUND)
     {
       ++notFoundCounter;
+      reallyDeleted.insert (path);
     }
     else if (result != ERROR_SUCCESS)
     {
+      UpdateHR (hr, HRESULT_FROM_WIN32(result));
       fprintf (stderr, "Error deleting %ls: %ls\n", path,
                GetErrorString (result).Ptr ());
+    }
+    else
+    {
+      reallyDeleted.insert (path);
     }
   }
 }
@@ -184,11 +207,17 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
     if (result == ERROR_FILE_NOT_FOUND)
     {
       ++notFoundCounter;
+      reallyDeleted.insert (dir);
     }
     else if (result != ERROR_SUCCESS)
     {
+      UpdateHR (hr, HRESULT_FROM_WIN32(result));
       fprintf (stderr, "Error deleting %ls: %ls\n", dir.Ptr (),
                GetErrorString (result).Ptr ());
+    }
+    else
+    {
+      reallyDeleted.insert (dir);
     }
     progress.SetCompleted (++count);
   }
@@ -503,10 +532,14 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
         }
       }
       removeHelper.FlushDelayed (progRemoveFlush);
+      UpdateHR (actionHR, removeHelper.GetHR());
 
       auto& progRemoveCleanup = actionProgress.GetPhase (progPhaseRemoveCleanup);
       progRemoveCleanup.SetTotal (2);
-      previousFiles.clear();
+      for (const auto& deleted_file : removeHelper.GetReallyDeleted())
+      {
+        previousFiles.erase (deleted_file);
+      }
       // Remove previous list file
       if (!listFilePath.IsEmpty()) TryDelete (listFilePath.Ptr());
       progRemoveCleanup.SetCompleted (1);
