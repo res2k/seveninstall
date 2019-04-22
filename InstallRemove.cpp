@@ -88,11 +88,8 @@ static DWORD TryDelete (DWORD fileAttr, const wchar_t* file)
 {
   if ((fileAttr & FILE_ATTRIBUTE_READONLY) != 0)
   {
-    if (!SetFileAttributesW (file, fileAttr & ~FILE_ATTRIBUTE_READONLY))
-    {
-      DWORD result (GetLastError());
-      return result;
-    }
+    SetFileAttributesW (file, fileAttr & ~FILE_ATTRIBUTE_READONLY);
+    // Ignore errors, assume DeleteFile() will fail anyway
   }
   if (!DeleteFileW (file))
   {
