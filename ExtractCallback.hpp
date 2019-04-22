@@ -41,7 +41,7 @@ public:
   // INTERFACE_IArchiveExtractCallbackMessage(;)
   INTERFACE_IFolderArchiveExtractCallback2(;)
 
-  bool AnyErrors() const;
+  HRESULT GetExtractHR() const;
 
   unsigned LogLevel = 1;
 
@@ -50,6 +50,7 @@ public:
   UInt64 NumTryArcs = 0;
   bool ThereIsError_in_Current;
   bool ThereIsWarning_in_Current;
+  HRESULT extractHR = S_OK;
   UInt64 NumCantOpenArcs = 0;
   UInt64 NumOkArcs = 0;
   UInt64 NumArcsWithError = 0;

@@ -124,14 +124,66 @@ STDMETHODIMP CExtractCallback::SetCompleted(const UInt64* completeValue)
   return SUCCEEDED(hr) ? CheckBreak2() : hr;
 }
 
+static const char * const kCantDeleteOutputFile = "Can not delete output file";
+static const char * const kCantDeleteOutputDir = "Can not delete output folder";
+
 STDMETHODIMP CExtractCallback::AskOverwrite(
     const wchar_t *existName, const FILETIME *existTime, const UInt64 *existSize,
     const wchar_t *newName, const FILETIME *newTime, const UInt64 *newSize,
     Int32 *answer)
 {
+  RINOK(CheckBreak2());
+
   /* FIXME: If we'd do some sort of 'rollback' support (ability to
    * 'undo' an extraction of some file), this would be the place */
+
   *answer = NOverwriteAnswer::kYes;
+  /* Try to delete the existing file if it already exists.
+     Although the 7zip code already tries to do that if we return
+     NOverwriteAnswer::kYes we get only an error message in case that
+     fails, not the actual _code_. But that's useful... */
+  DWORD fileAttr (GetFileAttributesW (existName));
+  if (fileAttr != INVALID_FILE_ATTRIBUTES)
+  {
+    DWORD deleteResult = ERROR_SUCCESS;
+    bool isDirectory = (fileAttr & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    if (isDirectory)
+    {
+      if (!RemoveDirectoryW (existName))
+      {
+        deleteResult = GetLastError();
+      }
+    }
+    else
+    {
+      if ((fileAttr & FILE_ATTRIBUTE_READONLY) != 0)
+      {
+        SetFileAttributesW (existName, fileAttr & ~FILE_ATTRIBUTE_READONLY);
+        // Ignore errors, assume DeleteFile() will fail anyway
+      }
+      if (!DeleteFileW (existName))
+      {
+        deleteResult = GetLastError();
+      }
+    }
+    if ((deleteResult != ERROR_SUCCESS)
+      && (deleteResult != ERROR_FILE_NOT_FOUND))
+    {
+      if (SUCCEEDED(extractHR))
+      {
+        extractHR = HRESULT_FROM_WIN32(deleteResult);
+      }
+      *answer = NOverwriteAnswer::kNo;
+
+      UString s (isDirectory ? kCantDeleteOutputDir : kCantDeleteOutputFile);
+      s += " : ";
+      s += NError::MyFormatMessage (deleteResult);
+      s += " : ";
+      s += existName;
+      RINOK(MessageError (s));
+    }
+  }
+
   return CheckBreak2();
 }
 
@@ -790,7 +842,8 @@ HRESULT CExtractCallback::ExtractResult(HRESULT result)
   return CheckBreak2();
 }
 
-bool CExtractCallback::AnyErrors() const
+HRESULT CExtractCallback::GetExtractHR() const
 {
-  return NumArcsWithError > 0;
+  if (FAILED(extractHR)) return extractHR;
+  return (NumArcsWithError > 0) ? E_FAIL : S_OK;
 }

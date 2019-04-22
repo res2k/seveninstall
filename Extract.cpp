@@ -257,6 +257,6 @@ void Extract (ProgressReporter& progress,
     }
   }
 
-  HRESULT extractHR = ecs->AnyErrors() ? E_FAIL : S_OK;
+  HRESULT extractHR = ecs->GetExtractHR();
   CHECK_HR(extractHR);
 }
