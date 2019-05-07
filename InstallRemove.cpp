@@ -211,7 +211,7 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
     }
     else if (result != ERROR_SUCCESS)
     {
-      UpdateHR (hr, HRESULT_FROM_WIN32(result));
+      // Print the error, but don't let it cause an overall failure
       fprintf (stderr, "Error deleting %ls: %ls\n", dir.Ptr (),
                GetErrorString (result).Ptr ());
     }
