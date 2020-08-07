@@ -73,7 +73,7 @@ class InstalledFilesReader
   HANDLE file;
   uint64_t fileSize = 0;
   bool eof = false;
-  char buf[256];
+  char buf[4 * 1024];
   char* buf_p = nullptr;
   char* buf_end = nullptr;
 

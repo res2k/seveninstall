@@ -139,6 +139,7 @@ public:
     }
   }
 
+  int Find(wchar_t c) const { return us().Find(c); }
   int ReverseFind_PathSepar() const { return us().ReverseFind_PathSepar(); }
 
   void DeleteFrom (unsigned index) { us().DeleteFrom (index); }

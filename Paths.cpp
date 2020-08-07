@@ -137,24 +137,32 @@ const MyUString& InstallLogLocation::GetFilename() const
 void NormalizePath (MyUString& path)
 {
   MyUString longPath;
-  DWORD needBuf = GetLongPathName (path.Ptr(),
-                                   longPath.GetBuf (path.Len()),
-                                   path.Len() + 1);
-  if (GetLastError () != ERROR_SUCCESS)
+  // Optimization: only call GetLongPathName() if path contains short components
+  if (path.Find ('~') != -1)
   {
-    // In case of error, just go with the original path
-    longPath.ReleaseBuf_SetEnd (0);
-    longPath = path;
+    DWORD needBuf = GetLongPathName (path.Ptr(),
+                                     longPath.GetBuf (MAX_PATH),
+                                     path.Len() + 1);
+    if (GetLastError () != ERROR_SUCCESS)
+    {
+      // In case of error, just go with the original path
+      longPath.ReleaseBuf_SetEnd (0);
+      longPath = path;
+    }
+    else
+    {
+      if (needBuf > path.Len () + 1)
+      {
+        GetLongPathName (path.Ptr (),
+                        longPath.GetBuf (needBuf),
+                        needBuf);
+      }
+      longPath.ReleaseBuf_CalcLen (needBuf);
+    }
   }
   else
   {
-    if (needBuf > path.Len () + 1)
-    {
-      GetLongPathName (path.Ptr (),
-                       longPath.GetBuf (needBuf),
-                       needBuf);
-    }
-    longPath.ReleaseBuf_CalcLen (needBuf);
+    longPath = path;
   }
   CharLower (longPath.Ptr());
   path = std::move (longPath);
