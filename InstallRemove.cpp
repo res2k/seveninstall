@@ -43,18 +43,19 @@
 
 #include "Windows/FileName.h"
 
+#include <queue>
 #include <memory>
 #include <unordered_set>
 
 // Helper: Sort a std::vector<MyUString>
-template<typename SortFunc>
-static inline void SortStringVec (std::vector<MyUString>& vec, SortFunc sort_func)
+template<typename T, typename SortFunc>
+static inline void SortVec (std::vector<T>& vec, SortFunc sort_func)
 {
-  qsort_s (vec.data(), vec.size(), sizeof (MyUString),
+  qsort_s (vec.data(), vec.size(), sizeof (T),
            [](void* f, const void* a, const void* b)
            {
-             const auto& a_str = *(reinterpret_cast<const MyUString*> (a));
-             const auto& b_str = *(reinterpret_cast<const MyUString*> (b));
+             const auto& a_str = *(reinterpret_cast<const T*> (a));
+             const auto& b_str = *(reinterpret_cast<const T*> (b));
              return (*reinterpret_cast<SortFunc*> (f))(a_str, b_str);
            },
            &sort_func);
@@ -70,7 +71,12 @@ class RemoveHelper
 {
   HRESULT hr = S_OK;
   size_t notFoundCounter = 0;
-  std::vector<MyUString> directories;
+  struct Dir
+  {
+    MyUString path;
+    bool recursive = false;
+  };
+  std::vector<Dir> directories;
   std::unordered_set<MyUString> reallyDeleted;
 public:
   ~RemoveHelper();
@@ -127,6 +133,70 @@ static DWORD TryDeleteDir (const wchar_t* path)
   return ERROR_SUCCESS;
 }
 
+static DWORD TryDeleteDirRecursive (const wchar_t* path)
+{
+  typedef std::pair<MyUString, DWORD> deleteQueueEntry;
+  std::deque<deleteQueueEntry> deleteQueue;
+
+  DWORD fileAttr (GetFileAttributesW (path));
+  if (fileAttr == INVALID_FILE_ATTRIBUTES)
+  {
+    return GetLastError ();
+  }
+
+  deleteQueue.push_back (std::make_pair(path, fileAttr));
+  while (!deleteQueue.empty ())
+  {
+    auto currentEntry = std::move (deleteQueue.front ());
+    deleteQueue.pop_front ();
+
+    DWORD deleteResult = ERROR_SUCCESS;
+    if ((currentEntry.second & FILE_ATTRIBUTE_DIRECTORY) != 0)
+    {
+      MyUString findPattern (currentEntry.first);
+      findPattern += L"\\*";
+      WIN32_FIND_DATA findData;
+      auto findHandle = FindFirstFileEx (findPattern.Ptr (), FindExInfoBasic, &findData, FindExSearchNameMatch, nullptr, FIND_FIRST_EX_LARGE_FETCH);
+      if (findHandle != INVALID_HANDLE_VALUE)
+      {
+        size_t numFiles = 0;
+        do
+        {
+          if ((wcscmp (findData.cFileName, L".") == 0) || (wcscmp (findData.cFileName, L"..") == 0)) continue;
+          MyUString fullPath (currentEntry.first);
+          fullPath += L"\\";
+          fullPath += findData.cFileName;
+          deleteQueue.push_front (std::make_pair (std::move (fullPath), findData.dwFileAttributes));
+          ++numFiles;
+        } while (FindNextFile (findHandle, &findData));
+        FindClose (findHandle);
+
+        if (numFiles != 0)
+        {
+          // Scan again, later
+          deleteQueue.push_back (currentEntry);
+        }
+        else
+        {
+          deleteResult = TryDeleteDir (currentEntry.first);
+        }
+      }
+    }
+    else
+    {
+      deleteResult = TryDelete (currentEntry.first);
+    }
+
+    if ((deleteResult != ERROR_SUCCESS) && (deleteResult != ERROR_FILE_NOT_FOUND))
+    {
+      fprintf (stderr, "Error deleting %ls: %ls\n", currentEntry.first.Ptr(),
+        GetErrorString (deleteResult).Ptr ());
+    }
+  }
+
+  return ERROR_SUCCESS;
+}
+
 RemoveHelper::~RemoveHelper()
 {
   ProgressReporterDummy dummyProgress;
@@ -135,6 +205,15 @@ RemoveHelper::~RemoveHelper()
 
 void RemoveHelper::ScheduleRemove (const wchar_t* path)
 {
+  // Special case: A path ending with "\**" is assumed to be a directory and removed recursively
+  auto path_len = wcslen (path);
+  if ((path_len >= 3) && (wcscmp (path + path_len - 3, L"\\**") == 0))
+  {
+    MyUString new_path (path, path_len - 3);
+    directories.push_back (Dir{ std::move (new_path), true });
+    return;
+  }
+
   DWORD fileAttr (GetFileAttributesW (path));
   if (fileAttr == INVALID_FILE_ATTRIBUTES)
   {
@@ -159,7 +238,7 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   else if ((fileAttr & FILE_ATTRIBUTE_DIRECTORY) != 0)
   {
     // Handle directories later
-    directories.push_back (path);
+    directories.push_back (Dir{ path, false });
   }
   else
   {
@@ -187,34 +266,34 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
 {
   progress.SetTotal (directories.size ());
   // Sort directory by length descending (to get deeper nested dirs first)
-  SortStringVec (directories,
-                 [](const MyUString& a, const MyUString& b)
-                 {
-                   if (a.Len() > b.Len())
-                     return -1;
-                   else if (a.Len() < b.Len())
-                     return 1;
-                   return 0;
-                 });
+  SortVec (directories,
+    [](const Dir& a, const Dir& b)
+    {
+      if (a.path.Len () > b.path.Len ())
+        return -1;
+      else if (a.path.Len () < b.path.Len ())
+        return 1;
+      return 0;
+    });
   // Remove directories
   size_t count = 0;
-  for (const MyUString& dir : directories)
+  for (const auto& dir : directories)
   {
-    auto result = TryDeleteDir (dir.Ptr());
+    auto result = dir.recursive ? TryDeleteDirRecursive(dir.path.Ptr()) : TryDeleteDir (dir.path.Ptr());
     if (result == ERROR_FILE_NOT_FOUND)
     {
       ++notFoundCounter;
-      reallyDeleted.insert (dir);
+      reallyDeleted.insert (dir.path);
     }
     else if (result != ERROR_SUCCESS)
     {
       // Print the error, but don't let it cause an overall failure
-      fprintf (stderr, "Error deleting %ls: %ls\n", dir.Ptr (),
+      fprintf (stderr, "Error deleting %ls: %ls\n", dir.path.Ptr (),
                GetErrorString (result).Ptr ());
     }
     else
     {
-      reallyDeleted.insert (dir);
+      reallyDeleted.insert (dir.path);
     }
     progress.SetCompleted (++count);
   }
@@ -595,11 +674,11 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
 
         // Add output dir to list so it'll get deleted on uninstall
         std::vector<MyUString> allFiles_v (allFiles.begin(), allFiles.end());
-        SortStringVec (allFiles_v,
-                       [](const MyUString& a, const MyUString& b)
-                       {
-                         return wmemcmp (a.Ptr(), b.Ptr(), std::min (a.Len(), b.Len()) + 1);
-                       });
+        SortVec (allFiles_v,
+          [](const MyUString& a, const MyUString& b)
+          {
+            return wmemcmp (a.Ptr (), b.Ptr (), std::min (a.Len (), b.Len ()) + 1);
+          });
         listWriter.AddEntries (allFiles_v);
 
         // Write registry entries
