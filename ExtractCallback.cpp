@@ -4,6 +4,7 @@
 // #undef sprintf
 #include "ExtractCallback.hpp"
 
+#include "DeletionHelper.hpp"
 #include "Paths.hpp"
 #include "ProgressReporter.hpp"
 
@@ -126,6 +127,8 @@ STDMETHODIMP CExtractCallback::SetCompleted(const UInt64* completeValue)
 
 static const char * const kCantDeleteOutputFile = "Can not delete output file";
 static const char * const kCantDeleteOutputDir = "Can not delete output folder";
+static const char * const kDeleteOutputFileAfterReboot = "Deleting output file needs reboot";
+static const char * const kDeleteOutputDirAfterReboot = "Deleting output folder needs reboot";
 
 STDMETHODIMP CExtractCallback::AskOverwrite(
     const wchar_t *existName, const FILETIME *existTime, const UInt64 *existSize,
@@ -156,17 +159,19 @@ STDMETHODIMP CExtractCallback::AskOverwrite(
     }
     else
     {
-      if ((fileAttr & FILE_ATTRIBUTE_READONLY) != 0)
-      {
-        SetFileAttributesW (existName, fileAttr & ~FILE_ATTRIBUTE_READONLY);
-        // Ignore errors, assume DeleteFile() will fail anyway
-      }
-      if (!DeleteFileW (existName))
-      {
-        deleteResult = GetLastError();
-      }
+      deleteResult = FileDelete(fileAttr, existName);
     }
-    if ((deleteResult != ERROR_SUCCESS)
+    if(deleteResult == ERROR_SUCCESS_REBOOT_REQUIRED) {
+      // MoveFileEx() was invoked. Let extract to an alternative filename,
+      // generate MoveFileEx() renames for that later
+      *answer = NOverwriteAnswer::kRename;
+      renamesRequested.emplace(newName, existName);
+
+      UString s (isDirectory ? kDeleteOutputDirAfterReboot : kDeleteOutputFileAfterReboot);
+      s += " : ";
+      s += existName;
+      printf("%ls\n", s.Ptr());
+    } else if ((deleteResult != ERROR_SUCCESS)
       && (deleteResult != ERROR_FILE_NOT_FOUND))
     {
       if (SUCCEEDED(extractHR))
@@ -845,5 +850,9 @@ HRESULT CExtractCallback::ExtractResult(HRESULT result)
 HRESULT CExtractCallback::GetExtractHR() const
 {
   if (FAILED(extractHR)) return extractHR;
-  return (NumArcsWithError > 0) ? E_FAIL : S_OK;
+  if(NumArcsWithError > 0)
+    return E_FAIL;
+  if(!renamesRequested.empty())
+    return HRESULT_FROM_WIN32(ERROR_SUCCESS_REBOOT_REQUIRED);
+  return S_OK;
 }

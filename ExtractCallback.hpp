@@ -47,6 +47,8 @@ public:
 
   ProgressReporter& progress;
   std::vector<MyUString>& extractedFiles;
+  // map from item name to desired full path
+  std::unordered_map<MyUString, MyUString> renamesRequested;
   UInt64 NumTryArcs = 0;
   bool ThereIsError_in_Current;
   bool ThereIsWarning_in_Current;

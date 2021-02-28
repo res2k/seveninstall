@@ -134,6 +134,7 @@ python build\extract-ctype-data.py "$(OutDir)orig-ctype.obj" &gt;"$(ProjectDir)g
     <ClCompile Include="burn-pipe\strutil.cpp" />
     <ClCompile Include="BurnPipe.cpp" />
     <ClCompile Include="CommonArgs.cpp" />
+    <ClCompile Include="DeletionHelper.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Extract.cpp" />
     <ClCompile Include="ExtractCallback.cpp" />
@@ -179,6 +180,7 @@ python build\extract-ctype-data.py "$(OutDir)orig-ctype.obj" &gt;"$(ProjectDir)g
     <ClInclude Include="burn-pipe\strutil.h" />
     <ClInclude Include="BurnPipe.hpp" />
     <ClInclude Include="CommonArgs.hpp" />
+    <ClInclude Include="DeletionHelper.hpp" />
     <ClInclude Include="Extract.hpp" />
     <ClInclude Include="ArgsHelper.hpp" />
     <ClInclude Include="ExitCode.hpp" />

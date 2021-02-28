@@ -165,6 +165,9 @@
     <ClCompile Include="generated\ctype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DeletionHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArgsHelper.hpp">
@@ -282,6 +285,9 @@
       <Filter>burn-pipe</Filter>
     </ClInclude>
     <ClInclude Include="BurnPipe.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeletionHelper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

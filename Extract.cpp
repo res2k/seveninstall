@@ -4,13 +4,16 @@
 #include "Common/MyInitGuid.h" // Must be placed before any header originating from 7zip 
 
 #include "Windows/DLL.h"
+#include "Windows/ErrorMsg.h"
 #include "Windows/FileDir.h"
 #include "Windows/FileName.h"
+#include "Windows/PropVariant.h"
 
 #include "7zip/ICoder.h"
 #include "7zip/UI/Common/ExitCode.h"
 #include "7zip/UI/Common/Extract.h"
 #include "7zip/UI/Common/ExtractingFilePath.h"
+#include "7zip/UI/Common/PropIDUtils.h"
 #include "7zip/UI/Common/SetProperties.h"
 
 #include "7zip/UI/Console/ConsoleClose.h"
@@ -26,6 +29,7 @@
 using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
+using namespace NCOM;
 
 const char extractCopyright[] = "Based on 7zip " MY_VERSION " : Portions " MY_COPYRIGHT " : " MY_DATE;
 
@@ -35,7 +39,7 @@ static HRESULT DecompressArchive(
     UInt64 packSize,
     const CExtractOptions &options,
     bool calcCrc,
-    IExtractCallbackUI *callback,
+    CExtractCallback *callback,
     CArchiveExtractCallback *ecs,
     UString &errorMessage)
 {
@@ -123,6 +127,34 @@ static HRESULT DecompressArchive(
   HRESULT res2 = ecsCloser.Close();
   if (result == S_OK)
     result = res2;
+
+  // Apply renames requested via MoveFileEx()
+  if (!callback->renamesRequested.empty()) {
+    for (unsigned int i = 0; i < ecs->_renamedFiles.Size(); i++) {
+      const auto& renamePair = ecs->_renamedFiles[i];
+      CPropVariant prop;
+      if (SUCCEEDED(archive->GetProperty(renamePair.Index, kpidPath, &prop))) {
+        UString name;
+        ConvertPropertyToString2(name, prop, kpidPath);
+        auto renameReqIt = callback->renamesRequested.find(name);
+        if (renameReqIt != callback->renamesRequested.end()) {
+          if (!MoveFileExW(fs2us(renamePair.Path).Ptr(), renameReqIt->second, MOVEFILE_DELAY_UNTIL_REBOOT)) {
+            HRESULT res = ::GetLastError();
+            fprintf(stderr, "Error setting up delayed renaming of %ls to %ls: %ls\n", fs2us(renamePair.Path).Ptr(),
+                    renameReqIt->second.Ptr(), NError::MyFormatMessage(result).Ptr());
+          }
+        }
+      } else {
+        // Cleanup attempt...
+        if (!MoveFileExW(fs2us(renamePair.Path).Ptr(), nullptr, MOVEFILE_DELAY_UNTIL_REBOOT)) {
+          HRESULT res = ::GetLastError();
+          fprintf(stderr, "Error setting up delayed removal of %ls: %ls\n", fs2us(renamePair.Path).Ptr(),
+                  NError::MyFormatMessage(result).Ptr());
+        }
+      }
+    }
+  }
+
   return callback->ExtractResult(result);
 }
 
@@ -132,7 +164,7 @@ static void ExtractOneArchive (
     const UString& arcPath,
     const CExtractOptions &options,
     IOpenCallbackUI *openCallback,
-    IExtractCallbackUI *extractCallback,
+    CExtractCallback *extractCallback,
     #ifndef _SFX
     IHashCalc *hash,
     #endif

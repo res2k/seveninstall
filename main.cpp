@@ -37,6 +37,7 @@
 
 #include "ArgsHelper.hpp"
 #include "BurnPipe.hpp"
+#include "DeletionHelper.hpp"
 #include "Error.hpp"
 #include "ExitCode.hpp"
 #include "Extract.hpp"
@@ -163,6 +164,8 @@ int wmain (int argc, const wchar_t* const argv[])
 
     // Now return error if any occured during argument initialization
     if (error_result) return *error_result;
+
+    ParseDeletionOptions(args);
 
     switch (cmd)
     {
