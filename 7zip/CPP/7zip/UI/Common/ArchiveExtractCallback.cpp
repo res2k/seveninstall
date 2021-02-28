@@ -1113,6 +1113,7 @@ if (askExtractMode == NArchive::NExtract::NAskMode::kExtract && !_testMode)
     NFind::CFileInfo fileInfo;
     if (fileInfo.Find(fullProcessedPath))
     {
+      bool doRename = false;
       switch (_overwriteMode)
       {
         case NExtract::NOverwriteMode::kSkip:
@@ -1136,13 +1137,14 @@ if (askExtractMode == NArchive::NExtract::NAskMode::kExtract && !_testMode)
             case NOverwriteAnswer::kNoToAll: _overwriteMode = NExtract::NOverwriteMode::kSkip; return S_OK;
             case NOverwriteAnswer::kYes: break;
             case NOverwriteAnswer::kYesToAll: _overwriteMode = NExtract::NOverwriteMode::kOverwrite; break;
+            case NOverwriteAnswer::kRename: doRename = true; break;
             case NOverwriteAnswer::kAutoRename: _overwriteMode = NExtract::NOverwriteMode::kRename; break;
             default:
               return E_FAIL;
           }
         }
       }
-      if (_overwriteMode == NExtract::NOverwriteMode::kRename)
+      if (doRename || (_overwriteMode == NExtract::NOverwriteMode::kRename))
       {
         if (!AutoRenamePath(fullProcessedPath))
         {

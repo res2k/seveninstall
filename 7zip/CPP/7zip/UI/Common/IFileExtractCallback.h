@@ -19,6 +19,7 @@ namespace NOverwriteAnswer
     kNo,
     kNoToAll,
     kAutoRename,
+    kRename,
     kCancel
   };
 }
