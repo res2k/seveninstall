@@ -133,7 +133,7 @@ public:
 
 #endif
 
-#ifdef SUPPORT_ALT_STREAMS
+//#ifdef SUPPORT_ALT_STREAMS
 
 struct CIndexToPathPair
 {
@@ -149,7 +149,7 @@ struct CIndexToPathPair
   }
 };
 
-#endif
+//#endif
 
 
 
@@ -347,9 +347,9 @@ public:
   #endif
 
 
-  #ifdef SUPPORT_ALT_STREAMS
+  //#ifdef SUPPORT_ALT_STREAMS
   CObjectVector<CIndexToPathPair> _renamedFiles;
-  #endif
+  //#endif
 
   // call it after Init()
 

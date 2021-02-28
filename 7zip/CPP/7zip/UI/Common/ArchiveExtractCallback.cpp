@@ -213,9 +213,9 @@ void CArchiveExtractCallback::Init(
   _hardLinks.Clear();
   #endif
 
-  #ifdef SUPPORT_ALT_STREAMS
+  //#ifdef SUPPORT_ALT_STREAMS
   _renamedFiles.Clear();
-  #endif
+  //#endif
 
   _ntOptions = ntOptions;
   _wildcardCensor = wildcardCensor;
@@ -1401,8 +1401,8 @@ if (askExtractMode == NArchive::NExtract::NAskMode::kExtract && !_testMode)
             }
           }
 
-          #ifdef SUPPORT_ALT_STREAMS
-          if (isRenamed && !_item.IsAltStream)
+          //#ifdef SUPPORT_ALT_STREAMS
+          if (isRenamed /*&& !_item.IsAltStream*/)
           {
             CIndexToPathPair pair(index, fullProcessedPath);
             unsigned oldSize = _renamedFiles.Size();
@@ -1410,7 +1410,7 @@ if (askExtractMode == NArchive::NExtract::NAskMode::kExtract && !_testMode)
             if (oldSize == _renamedFiles.Size())
               _renamedFiles[insertIndex].Path = fullProcessedPath;
           }
-          #endif
+          //#endif
 
           if (_isSplit)
           {
