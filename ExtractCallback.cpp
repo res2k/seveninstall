@@ -94,10 +94,10 @@ static const char * const k_ErrorFlagsMessages[] =
   , "CRC Error"
 };
 
-CExtractCallback::CExtractCallback (ProgressReporter& progress,
+CExtractCallback::CExtractCallback (ProgressReporter& progress, DeletionHelper& delHelper,
                                     std::vector<MyUString>& extractedFiles,
                                     const UString& outputDir)
-  : progress (progress), extractedFiles (extractedFiles), outputDir (outputDir)
+  : progress(progress), delHelper(delHelper), extractedFiles(extractedFiles), outputDir(outputDir)
 {
   NName::NormalizeDirPathPrefix (this->outputDir);
 }
@@ -159,7 +159,7 @@ STDMETHODIMP CExtractCallback::AskOverwrite(
     }
     else
     {
-      deleteResult = FileDelete(fileAttr, existName);
+      deleteResult = delHelper.FileDelete(fileAttr, existName);
     }
     if(deleteResult == ERROR_SUCCESS_REBOOT_REQUIRED) {
       // MoveFileEx() was invoked. Let extract to an alternative filename,

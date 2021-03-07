@@ -239,7 +239,7 @@ static void ExtractOneArchive (
   CHECK_HR (result);
 }
 
-void Extract (ProgressReporter& progress,
+void Extract (ProgressReporter& progress, DeletionHelper& delHelper,
               const std::vector<const wchar_t*>& archives,
               const wchar_t* targetDir,
               std::vector<MyUString>& extractedFiles)
@@ -256,7 +256,7 @@ void Extract (ProgressReporter& progress,
 
   CObjectVector<COpenType> types;
 
-  CExtractCallback* ecs = new CExtractCallback (progress, extractedFiles, outputDir);
+  CExtractCallback* ecs = new CExtractCallback (progress, delHelper, extractedFiles, outputDir);
   CMyComPtr<IFolderArchiveExtractCallback> extractCallback = ecs;
 
   COpenCallback openCallback;

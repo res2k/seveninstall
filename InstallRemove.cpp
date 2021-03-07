@@ -32,6 +32,7 @@
 
 #include "ArgsHelper.hpp"
 #include "CommonArgs.hpp"
+#include "DeletionHelper.hpp"
 #include "Error.hpp"
 #include "ExitCode.hpp"
 #include "Extract.hpp"
@@ -474,6 +475,7 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
   }
 
   auto progressOutput = GetDefaultProgress (pipe);
+  auto delHelper = DeletionHelper(args);
 
   ProgressReporterMultiStep actionProgress (*progressOutput);
   auto progPhaseRegistryDelete = actionProgress.AddPhase (doRemove ? 1 : 0);
@@ -567,7 +569,8 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
     {
       try
       {
-        Extract (actionProgress.GetPhase (progPhaseExtract), archives, outDirArg ? outDirArg : outputDir.Ptr(), extractedFiles);
+        Extract(actionProgress.GetPhase(progPhaseExtract), delHelper, archives, outDirArg ? outDirArg : outputDir.Ptr(),
+                extractedFiles);
       }
       catch(const HRESULTException& e)
       {

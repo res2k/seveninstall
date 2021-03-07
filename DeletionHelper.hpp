@@ -38,22 +38,30 @@
 
 #include <Windows.h>
 
-/// Parse deletion options (file in use handling)
-void ParseDeletionOptions(const ArgsHelper& args);
+class DeletionHelper
+{
+public:
+  /// Init helper. Parses deletion options (file in use handling)
+  DeletionHelper(const ArgsHelper& args);
 
-/**
- * Delete a file.
- * In addition to various error codes it may return ERROR_SUCCESS_REBOOT_REQUIRED,
- * indicating that MoveFileEx() with MOVEFILE_DELAY_UNTIL_REBOOT was
- * employed.
- */
-DWORD FileDelete(const wchar_t* file);
-/**
- * Delete a file. Takes attributes of file (useful if they're already known).
- * In addition to various error codes it may return ERROR_SUCCESS_REBOOT_REQUIRED,
- * indicating that MoveFileEx() with MOVEFILE_DELAY_UNTIL_REBOOT was
- * employed.
- */
-DWORD FileDelete(DWORD fileAttr, const wchar_t* file);
+  /**
+   * Delete a file.
+   * In addition to various error codes it may return ERROR_SUCCESS_REBOOT_REQUIRED,
+   * indicating that MoveFileEx() with MOVEFILE_DELAY_UNTIL_REBOOT was
+   * employed.
+   */
+  DWORD FileDelete(const wchar_t* file);
+  /**
+   * Delete a file. Takes attributes of file (useful if they're already known).
+   * In addition to various error codes it may return ERROR_SUCCESS_REBOOT_REQUIRED,
+   * indicating that MoveFileEx() with MOVEFILE_DELAY_UNTIL_REBOOT was
+   * employed.
+   */
+  DWORD FileDelete(DWORD fileAttr, const wchar_t* file);
+
+private:
+  bool useMoveFileEx = false;
+
+};
 
 #endif // DELETIONHELPER_HPP_

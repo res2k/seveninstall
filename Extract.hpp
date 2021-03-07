@@ -43,10 +43,12 @@
 
 extern const char extractCopyright[];
 
+class DeletionHelper;
 struct ProgressReporter;
 
 /// Helper to extract 7-zip archives
 void Extract (ProgressReporter& progress,
+              DeletionHelper& delHelper,
               const std::vector<const wchar_t*>& archives,
               const wchar_t* targetDir,
               std::vector<MyUString>& extractedFiles);

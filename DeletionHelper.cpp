@@ -30,9 +30,7 @@
 
 #include "DeletionHelper.hpp"
 
-static bool useMoveFileEx = false;
-
-void ParseDeletionOptions(const ArgsHelper& args)
+DeletionHelper::DeletionHelper(const ArgsHelper& args)
 {
   const wchar_t* inuseOptions = nullptr;
   if (args.GetOption(L"-i", inuseOptions)) {
@@ -48,7 +46,7 @@ void ParseDeletionOptions(const ArgsHelper& args)
   }
 }
 
-DWORD FileDelete(const wchar_t* file)
+DWORD DeletionHelper::FileDelete(const wchar_t* file)
 {
   DWORD fileAttr(GetFileAttributesW(file));
   if (fileAttr == INVALID_FILE_ATTRIBUTES) {
@@ -61,7 +59,7 @@ DWORD FileDelete(const wchar_t* file)
   }
 }
 
-DWORD FileDelete(DWORD fileAttr, const wchar_t* file)
+DWORD DeletionHelper::FileDelete(DWORD fileAttr, const wchar_t* file)
 {
   if ((fileAttr & FILE_ATTRIBUTE_READONLY) != 0) {
     SetFileAttributesW(file, fileAttr & ~FILE_ATTRIBUTE_READONLY);

@@ -16,6 +16,7 @@
 
 #include <vector>
 
+class DeletionHelper;
 struct IArchiveCallback;
 struct ProgressReporter;
 
@@ -29,7 +30,7 @@ public:
   MY_QUERYINTERFACE_END
   MY_ADDREF_RELEASE
 
-  CExtractCallback (ProgressReporter& progress, std::vector<MyUString>& extractedFiles, const UString& outputDir);
+  CExtractCallback (ProgressReporter& progress, DeletionHelper& delHelper, std::vector<MyUString>& extractedFiles, const UString& outputDir);
 
   STDMETHOD(SetTotal)(UInt64 total) override;
   STDMETHOD(SetCompleted)(const UInt64 *completeValue) override;
@@ -46,6 +47,7 @@ public:
   unsigned LogLevel = 1;
 
   ProgressReporter& progress;
+  DeletionHelper& delHelper;
   std::vector<MyUString>& extractedFiles;
   // map from item name to desired full path
   std::unordered_map<MyUString, MyUString> renamesRequested;
