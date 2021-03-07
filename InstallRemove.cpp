@@ -70,7 +70,9 @@ static void UpdateHR (HRESULT& hr, HRESULT newHr)
 
 class RemoveHelper
 {
+  DeletionHelper& delHelper;
   HRESULT hr = S_OK;
+  bool rebootRequired = false;
   size_t notFoundCounter = 0;
   struct Dir
   {
@@ -80,9 +82,11 @@ class RemoveHelper
   std::vector<Dir> directories;
   std::unordered_set<MyUString> reallyDeleted;
 public:
+  RemoveHelper(DeletionHelper& delHelper) : delHelper(delHelper) {}
   ~RemoveHelper();
 
-  HRESULT GetHR() const { return hr; }
+  bool IsRebootRequired() const { return rebootRequired; }
+  HRESULT GetHR() const { return IsRebootRequired() ? HRESULT_FROM_WIN32(ERROR_SUCCESS_REBOOT_REQUIRED) : hr; }
   const std::unordered_set<MyUString>& GetReallyDeleted() const { return reallyDeleted; }
 
   void ScheduleRemove (const wchar_t* path);
@@ -90,39 +94,6 @@ public:
 };
 
 #include "Shlwapi.h"
-
-static DWORD TryDelete (DWORD fileAttr, const wchar_t* file)
-{
-  if ((fileAttr & FILE_ATTRIBUTE_READONLY) != 0)
-  {
-    SetFileAttributesW (file, fileAttr & ~FILE_ATTRIBUTE_READONLY);
-    // Ignore errors, assume DeleteFile() will fail anyway
-  }
-  if (!DeleteFileW (file))
-  {
-    DWORD result (GetLastError());
-    fprintf (stderr, "Error deleting %ls: %ls\n", file,
-             GetErrorString (result).Ptr());
-    return result;
-  }
-  return ERROR_SUCCESS;
-}
-
-static DWORD TryDelete (const wchar_t* file)
-{
-  DWORD fileAttr (GetFileAttributesW (file));
-  if (fileAttr == INVALID_FILE_ATTRIBUTES)
-  {
-    // Weird.
-    DWORD result (GetLastError());
-    return result;
-  }
-  else
-  {
-    // Remove it
-    return TryDelete (fileAttr, file);
-  }
-}
 
 static DWORD TryDeleteDir (const wchar_t* path)
 {
@@ -134,7 +105,7 @@ static DWORD TryDeleteDir (const wchar_t* path)
   return ERROR_SUCCESS;
 }
 
-static DWORD TryDeleteDirRecursive (const wchar_t* path)
+static DWORD TryDeleteDirRecursive (DeletionHelper& delHelper, const wchar_t* path)
 {
   typedef std::pair<MyUString, DWORD> deleteQueueEntry;
   std::deque<deleteQueueEntry> deleteQueue;
@@ -145,6 +116,7 @@ static DWORD TryDeleteDirRecursive (const wchar_t* path)
     return GetLastError ();
   }
 
+  bool needReboot = false;
   deleteQueue.push_back (std::make_pair(path, fileAttr));
   while (!deleteQueue.empty ())
   {
@@ -185,7 +157,11 @@ static DWORD TryDeleteDirRecursive (const wchar_t* path)
     }
     else
     {
-      deleteResult = TryDelete (currentEntry.first);
+      deleteResult = delHelper.FileDelete(currentEntry.first);
+      if (deleteResult == ERROR_SUCCESS_REBOOT_REQUIRED) {
+        needReboot = true;
+        deleteResult = ERROR_SUCCESS;
+      }
     }
 
     if ((deleteResult != ERROR_SUCCESS) && (deleteResult != ERROR_FILE_NOT_FOUND))
@@ -195,7 +171,7 @@ static DWORD TryDeleteDirRecursive (const wchar_t* path)
     }
   }
 
-  return ERROR_SUCCESS;
+  return needReboot ? ERROR_SUCCESS_REBOOT_REQUIRED : ERROR_SUCCESS;
 }
 
 RemoveHelper::~RemoveHelper()
@@ -244,11 +220,15 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   else
   {
     // Remove it
-    auto result = TryDelete (fileAttr, path);
+    auto result = delHelper.FileDelete (fileAttr, path);
     if (result == ERROR_FILE_NOT_FOUND)
     {
       ++notFoundCounter;
       reallyDeleted.insert (path);
+    } else if (result == ERROR_SUCCESS_REBOOT_REQUIRED) {
+      rebootRequired = true;
+      reallyDeleted.insert(path);
+      fprintf(stderr, "Deleting file needs reboot: %ls\n", path);
     }
     else if (result != ERROR_SUCCESS)
     {
@@ -280,13 +260,15 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
   size_t count = 0;
   for (const auto& dir : directories)
   {
-    auto result = dir.recursive ? TryDeleteDirRecursive(dir.path.Ptr()) : TryDeleteDir (dir.path.Ptr());
+    auto result = dir.recursive ? TryDeleteDirRecursive(delHelper, dir.path.Ptr()) : TryDeleteDir (dir.path.Ptr());
     if (result == ERROR_FILE_NOT_FOUND)
     {
       ++notFoundCounter;
       reallyDeleted.insert (dir.path);
-    }
-    else if (result != ERROR_SUCCESS)
+    } else if (result == ERROR_SUCCESS_REBOOT_REQUIRED) {
+      rebootRequired = true;
+      reallyDeleted.insert(dir.path);
+    } else if (result != ERROR_SUCCESS)
     {
       // Print the error, but don't let it cause an overall failure
       fprintf (stderr, "Error deleting %ls: %ls\n", dir.path.Ptr (),
@@ -590,7 +572,7 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
       }
 
       progRemoveFiles.SetTotal (previousFiles.size());
-      RemoveHelper removeHelper;
+      auto removeHelper = RemoveHelper(delHelper);
       size_t n = 0;
       for (const auto& removeFile : previousFiles)
       {
@@ -620,7 +602,8 @@ int DoInstallRemove (const ArgsHelper& args, BurnPipe& pipe, Action action)
         previousFiles.erase (deleted_file);
       }
       // Remove previous list file
-      if (!listFilePath.IsEmpty()) TryDelete (listFilePath.Ptr());
+      if (!listFilePath.IsEmpty())
+        delHelper.FileDelete(listFilePath.Ptr());
       progRemoveCleanup.SetCompleted (1);
 
       // Remove registry entry
