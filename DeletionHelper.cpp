@@ -69,11 +69,52 @@ DWORD DeletionHelper::FileDelete(DWORD fileAttr, const wchar_t* file)
     DWORD result = GetLastError();
     if((result == ERROR_ACCESS_DENIED) && useMoveFileEx) {
       // Try to remove file via MoveFileEx()
-      if(MoveFileExW(file, nullptr, MOVEFILE_DELAY_UNTIL_REBOOT))
+      if(DoDelayedDelete(file))
         return ERROR_SUCCESS_REBOOT_REQUIRED;
       // else: probably no admin permissions
     }
     return result;
   }
   return ERROR_SUCCESS;
+}
+
+DWORD DeletionHelper::DirDelete(const wchar_t* path)
+{
+  DWORD result = ERROR_SUCCESS;
+  bool needDelay = false;
+  if (delayDirs.find(path) != delayDirs.end()) {
+    needDelay = true;
+    result = ERROR_DIR_NOT_EMPTY;
+  } else {
+    if (RemoveDirectoryW(path))
+      return ERROR_SUCCESS;
+
+    result = GetLastError();
+    if ((result == ERROR_ACCESS_DENIED) && useMoveFileEx) {
+      // Try to remove file via MoveFileEx()
+      needDelay = true;
+      // else: probably no admin permissions
+    } else
+      return result;
+  }
+  if (needDelay) {
+    if (DoDelayedDelete(path))
+      result = ERROR_SUCCESS_REBOOT_REQUIRED;
+  }
+  return result;
+}
+
+bool DeletionHelper::DoDelayedDelete(const wchar_t* path)
+{
+  if(MoveFileExW(path, nullptr, MOVEFILE_DELAY_UNTIL_REBOOT)) {
+    auto parentPath = MyUString(path);
+    auto path_sep = parentPath.ReverseFind_PathSepar();
+    if(path_sep != -1) {
+      parentPath.DeleteFrom(path_sep);
+      delayDirs.insert(parentPath);
+    }
+    return true;
+  }
+
+  return false;
 }

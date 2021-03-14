@@ -36,6 +36,8 @@
 
 #include "ArgsHelper.hpp"
 
+#include <unordered_set>
+
 #include <Windows.h>
 
 class DeletionHelper
@@ -59,9 +61,20 @@ public:
    */
   DWORD FileDelete(DWORD fileAttr, const wchar_t* file);
 
+  /**
+   * Delete a directory.
+   * In addition to various error codes it may return ERROR_SUCCESS_REBOOT_REQUIRED,
+   * indicating that MoveFileEx() with MOVEFILE_DELAY_UNTIL_REBOOT was
+   * employed.
+   */
+  DWORD DirDelete(const wchar_t* file);
+
 private:
   bool useMoveFileEx = false;
+  // Directories containing delay-deleted files
+  std::unordered_set<MyUString> delayDirs;
 
+  bool DoDelayedDelete(const wchar_t* path);
 };
 
 #endif // DELETIONHELPER_HPP_
