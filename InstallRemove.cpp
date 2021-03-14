@@ -95,16 +95,6 @@ public:
 
 #include "Shlwapi.h"
 
-static DWORD TryDeleteDir (const wchar_t* path)
-{
-  if (!RemoveDirectoryW (path))
-  {
-    DWORD result (GetLastError());
-    return result;
-  }
-  return ERROR_SUCCESS;
-}
-
 static DWORD TryDeleteDirRecursive (DeletionHelper& delHelper, const wchar_t* path)
 {
   typedef std::pair<MyUString, DWORD> deleteQueueEntry;
@@ -151,19 +141,19 @@ static DWORD TryDeleteDirRecursive (DeletionHelper& delHelper, const wchar_t* pa
         }
         else
         {
-          deleteResult = TryDeleteDir (currentEntry.first);
+          deleteResult = delHelper.DirDelete(currentEntry.first);
         }
       }
     }
     else
     {
       deleteResult = delHelper.FileDelete(currentEntry.first);
-      if (deleteResult == ERROR_SUCCESS_REBOOT_REQUIRED) {
-        needReboot = true;
-        deleteResult = ERROR_SUCCESS;
-      }
     }
 
+    if (deleteResult == ERROR_SUCCESS_REBOOT_REQUIRED) {
+      needReboot = true;
+      deleteResult = ERROR_SUCCESS;
+    }
     if ((deleteResult != ERROR_SUCCESS) && (deleteResult != ERROR_FILE_NOT_FOUND))
     {
       fprintf (stderr, "Error deleting %ls: %ls\n", currentEntry.first.Ptr(),
@@ -260,7 +250,8 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
   size_t count = 0;
   for (const auto& dir : directories)
   {
-    auto result = dir.recursive ? TryDeleteDirRecursive(delHelper, dir.path.Ptr()) : TryDeleteDir (dir.path.Ptr());
+    auto result =
+      dir.recursive ? TryDeleteDirRecursive(delHelper, dir.path.Ptr()) : delHelper.DirDelete(dir.path.Ptr());
     if (result == ERROR_FILE_NOT_FOUND)
     {
       ++notFoundCounter;
@@ -268,6 +259,7 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
     } else if (result == ERROR_SUCCESS_REBOOT_REQUIRED) {
       rebootRequired = true;
       reallyDeleted.insert(dir.path);
+      fprintf(stderr, "Deleting directory needs reboot: %ls\n", dir.path.Ptr());
     } else if (result != ERROR_SUCCESS)
     {
       // Print the error, but don't let it cause an overall failure
