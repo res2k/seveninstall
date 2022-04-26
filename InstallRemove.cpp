@@ -68,6 +68,11 @@ static void UpdateHR (HRESULT& hr, HRESULT newHr)
   if (SUCCEEDED(hr)) hr = newHr;
 }
 
+static bool IsErrorFileNotFound(DWORD error)
+{
+  return (error == ERROR_FILE_NOT_FOUND) || (error == ERROR_PATH_NOT_FOUND);
+}
+
 class RemoveHelper
 {
   DeletionHelper& delHelper;
@@ -154,7 +159,7 @@ static DWORD TryDeleteDirRecursive (DeletionHelper& delHelper, const wchar_t* pa
       needReboot = true;
       deleteResult = ERROR_SUCCESS;
     }
-    if ((deleteResult != ERROR_SUCCESS) && (deleteResult != ERROR_FILE_NOT_FOUND))
+    if ((deleteResult != ERROR_SUCCESS) && !IsErrorFileNotFound(deleteResult))
     {
       fprintf (stderr, "Error deleting %ls: %ls\n", currentEntry.first.Ptr(),
         GetErrorString (deleteResult).Ptr ());
@@ -186,7 +191,7 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   {
     // File does not exist (probably)...
     DWORD result (GetLastError());
-    if (result == ERROR_FILE_NOT_FOUND)
+    if (IsErrorFileNotFound(result))
     {
       ++notFoundCounter;
       reallyDeleted.insert (path);
@@ -211,7 +216,7 @@ void RemoveHelper::ScheduleRemove (const wchar_t* path)
   {
     // Remove it
     auto result = delHelper.FileDelete (fileAttr, path);
-    if (result == ERROR_FILE_NOT_FOUND)
+    if (IsErrorFileNotFound(result))
     {
       ++notFoundCounter;
       reallyDeleted.insert (path);
@@ -252,7 +257,7 @@ void RemoveHelper::FlushDelayed (ProgressReporter& progress)
   {
     auto result =
       dir.recursive ? TryDeleteDirRecursive(delHelper, dir.path.Ptr()) : delHelper.DirDelete(dir.path.Ptr());
-    if (result == ERROR_FILE_NOT_FOUND)
+    if (IsErrorFileNotFound(result))
     {
       ++notFoundCounter;
       reallyDeleted.insert (dir.path);
@@ -323,7 +328,8 @@ static size_t HasDependents (InstallScope installScope, const wchar_t* regPath)
   catch (const HRESULTException& e)
   {
     // Path not found means no dependencies
-    if (e.GetHR() != HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+    if ((e.GetHR() != HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+      && (e.GetHR() != HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)))
       throw;
   }
   return 0;

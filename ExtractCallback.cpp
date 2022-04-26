@@ -172,7 +172,8 @@ STDMETHODIMP CExtractCallback::AskOverwrite(
       s += existName;
       printf("%ls\n", s.Ptr());
     } else if ((deleteResult != ERROR_SUCCESS)
-      && (deleteResult != ERROR_FILE_NOT_FOUND))
+      && (deleteResult != ERROR_FILE_NOT_FOUND)
+      && (deleteResult != ERROR_PATH_NOT_FOUND))
     {
       if (SUCCEEDED(extractHR))
       {
